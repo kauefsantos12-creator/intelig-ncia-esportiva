@@ -1,5 +1,5 @@
 begin;
-select plan(38);
+select plan(45);
 
 select ok(to_regclass('public.sports_jobs') is not null, 'sports job queue exists');
 select ok(to_regprocedure('public.enqueue_sports_job(text,text,uuid,jsonb,integer)') is not null, 'enqueue RPC exists');
@@ -10,6 +10,7 @@ select ok(to_regprocedure('public.fail_sports_job(uuid,uuid,text,integer)') is n
 select ok(to_regprocedure('public.dead_sports_job(uuid,uuid,text)') is not null, 'terminal dead RPC exists');
 select ok(to_regprocedure('public.verify_sports_worker_cron_token(text)') is not null, 'worker cron token verifier exists');
 select ok(to_regprocedure('public.kick_sports_job_worker()') is not null, 'worker wake RPC exists');
+select ok(to_regprocedure('public.kick_sports_daily_sync(integer)') is not null, 'daily sports producer wake RPC exists');
 
 select ok(
   exists(select 1 from cron.job where jobname='sports-intelligence-maintenance' and active and schedule='*/15 * * * *'),
@@ -18,6 +19,14 @@ select ok(
 select ok(
   exists(select 1 from cron.job where jobname='sports-job-worker-kick' and active and schedule='*/2 * * * *'),
   'sports worker wake cron is active every 2 minutes'
+);
+select ok(
+  exists(select 1 from cron.job where jobname='sports-daily-sync-yesterday' and active and schedule='20 8 * * *'),
+  'daily producer closes yesterday at 08:20 UTC'
+);
+select ok(
+  exists(select 1 from cron.job where jobname='sports-daily-sync-today' and active and schedule='40 8 * * *'),
+  'daily producer loads today at 08:40 UTC'
 );
 select ok(
   exists(select 1 from cron.job where jobname='elo-daily-finalize' and active and schedule='5 8 * * *'),
@@ -42,6 +51,10 @@ select ok(
   position('net.http_post' in lower(pg_get_functiondef('public.kick_sports_job_worker()'::regprocedure))) > 0,
   'worker wake dispatches through pg_net'
 );
+select ok(
+  position('net.http_post' in lower(pg_get_functiondef('public.kick_sports_daily_sync(integer)'::regprocedure))) > 0,
+  'daily producer dispatches through pg_net'
+);
 select is(
   has_function_privilege('anon','public.verify_sports_worker_cron_token(text)','EXECUTE'),
   false,
@@ -56,6 +69,21 @@ select is(
   has_function_privilege('service_role','public.verify_sports_worker_cron_token(text)','EXECUTE'),
   true,
   'service role can execute worker cron token verifier'
+);
+select is(
+  has_function_privilege('anon','public.kick_sports_daily_sync(integer)','EXECUTE'),
+  false,
+  'anon cannot execute daily producer wake'
+);
+select is(
+  has_function_privilege('authenticated','public.kick_sports_daily_sync(integer)','EXECUTE'),
+  false,
+  'authenticated users cannot execute daily producer wake'
+);
+select is(
+  has_function_privilege('service_role','public.kick_sports_daily_sync(integer)','EXECUTE'),
+  true,
+  'service role can execute daily producer wake'
 );
 
 select lives_ok(

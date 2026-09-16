@@ -6,10 +6,11 @@ Esta parte é a etapa técnica de jobs/orquestração e não deve ser confundida
 
 ## Estado confirmado no runtime
 
-- O Lovable Cloud está reconciliado até `20260916024500_sports_job_terminal_fencing.sql`.
+- O Lovable Cloud está reconciliado até `20260916031000_sports_worker_wake.sql`.
 - `sports_jobs` existe com chave de idempotência única, estados `PENDING/RUNNING/SUCCEEDED/FAILED/DEAD`, tentativas, disponibilidade e lease.
 - `enqueue_sports_job`, `claim_sports_job`, `renew_sports_job_lease`, `complete_sports_job`, `fail_sports_job` e `dead_sports_job` existem no Lovable Cloud.
 - `sports-intelligence-maintenance` está ativo a cada 15 minutos.
+- `sports-job-worker-kick` está ativo a cada 2 minutos.
 - `elo-daily-incremental` permanece ativo no período diário de sincronização do Elo.
 - `elo-daily-finalize` permanece ativo às `08:05 UTC` (`05:05 America/Sao_Paulo` no offset atual).
 - Crons do funil antigo (`analysis-worker-watch`, `scheduled-d2-analysis`, `analysis-run-orphan-reconcile`, `stage9-daily-lab` e `five-dollar-maintenance-daily`) foram retirados.
@@ -23,50 +24,58 @@ Esta parte é a etapa técnica de jobs/orquestração e não deve ser confundida
 4. **Heartbeat explícito.** `renew_sports_job_lease` permite que um worker legítimo prolongue uma execução longa sem abrir uma segunda execução concorrente.
 5. **Concorrência segura.** O claim usa `FOR UPDATE SKIP LOCKED`.
 6. **Terminalização cercada.** Falhas não recuperáveis só chegam a `DEAD` pelo worker que ainda possui lease válido.
-7. **Regressão automatizada.** `supabase/tests/sports_intelligence/job_orchestration.test.sql` cobre idempotência, ownership do lease, retry, lease expirado, limite de tentativas e estados terminais.
+7. **Regressão automatizada.** `supabase/tests/sports_intelligence/job_orchestration.test.sql` cobre idempotência, ownership do lease, retry, lease expirado, limite de tentativas, estados terminais, wake do worker e produtor diário.
 
-## Worker implementado
+## Worker e wake validados em produção
 
 - `sports-job-worker.server.ts` reclama jobs com token único por execução e processa lotes limitados.
 - O worker roteia `API_FOOTBALL_LINK` e `API_FOOTBALL_FIXTURE_DATA` para as integrações canônicas já existentes.
 - O lease é renovado por heartbeat enquanto o job está em execução; resultados são descartados como `STALE` quando o fencing não confirma mais a autoridade do worker.
 - A política de falha diferencia payload/job inválido, ausência temporária no provider, rate limit, falha de configuração e erro transitório, sempre respeitando `max_attempts`.
 - `sports_sync_state` registra tentativa, sucesso e falha para os domínios `fixture_link` e `fixture_data`.
+- `/api/sports-jobs` é uma rota `POST` dedicada e autenticada com token mantido exclusivamente no Vault do Lovable Cloud.
+- `kick_sports_job_worker()` dispara a rota via `pg_net`; `sports-job-worker-kick` executa a cada 2 minutos.
+- Uma chamada manual real do kick recebeu HTTP `200` da produção e retornou `claimed: 0`, `queueEmpty: true` quando a fila estava vazia.
+- O cron automático também foi observado no Lovable Cloud recebendo HTTP `200` sucessivamente a cada 2 minutos, sem timeout ou erro.
+- Um teste controlado de concorrência executado no Lovable Cloud, dentro de transação com rollback, comprovou que apenas o primeiro token reclama o job, token incorreto não finaliza, o proprietário renova o lease e somente o proprietário conclui o job. Nenhum dado de teste foi persistido.
 
-## Wake seguro do worker
+## Produtor diário 5Dollar
 
-A revisão de produção mostrou que o worker existia, mas não havia nenhuma referência operacional a `runSportsJobWorker` fora do próprio módulo. Portanto, a fila não tinha um mecanismo real de wake.
+A inspeção do runtime mostrou uma segunda lacuna: `syncFiveDollarDay()` já persistia fixtures canônicas e enfileirava `API_FOOTBALL_LINK`, mas não possuía chamador operacional. Com isso, o worker podia acordar corretamente e ainda encontrar a fila vazia indefinidamente.
 
-A migration `20260916031000_sports_worker_wake.sql` fecha esse circuito sem versionar segredos:
+O incremento `20260916033000_sports_daily_sync_cron.sql` fecha esse circuito:
 
-- `/api/sports-jobs` é uma rota `POST` dedicada; `GET` responde `405`.
-- A rota valida o Bearer token por `verify_sports_worker_cron_token(text)`, RPC executável somente por `service_role`.
-- O segredo fica no Vault do Lovable Cloud com o nome `sports_worker_cron_secret`; o código não contém o valor.
-- A URL base fica no Vault como `sports_worker_base_url`, evitando acoplamento da migration a uma URL de ambiente.
-- `kick_sports_job_worker()` lê segredo e URL do Vault e dispara a rota por `pg_net`.
-- O cron `sports-job-worker-kick` roda a cada 2 minutos e chama somente o kick; ele não contém segredo no texto de `cron.job`.
-- O kick usa advisory lock para não emitir dois wakes concorrentes pela mesma execução SQL. A fila continua protegida por `SKIP LOCKED` e fencing de lease caso duas requisições cheguem simultaneamente.
+- `/api/sports-daily-sync` é uma rota `POST` protegida pelo mesmo token do worker;
+- a rota exige `date` em `YYYY-MM-DD` e valida em runtime se `FIVE_DOLLAR_FOOTBALL_API_KEY` e `API_FOOTBALL_KEY` estão configuradas antes de produzir jobs;
+- `kick_sports_daily_sync(integer)` calcula o dia no fuso `America/Sao_Paulo`, usa advisory lock por data e dispara a rota por `pg_net` sem versionar segredos;
+- `sports-daily-sync-yesterday` roda às `08:20 UTC` (`05:20 America/Sao_Paulo`) para fechar o dia anterior depois do Elo;
+- `sports-daily-sync-today` roda às `08:40 UTC` (`05:40 America/Sao_Paulo`) para carregar a programação do dia;
+- o produtor reutiliza `sports_worker_cron_secret` e `sports_worker_base_url` já provisionados no Vault;
+- as regressões pgTAP verificam existência da função, permissões, schedules únicos e dispatch por `pg_net`.
 
-## Provisionamento de produção
+Este produtor só deve ser considerado vivo depois de o PR correspondente ficar totalmente verde, ser mergeado, a migration ser reconciliada no Lovable Cloud e uma execução real confirmar o fluxo dos providers.
 
-A migration de wake pode existir sem os segredos: nesse estado `kick_sports_job_worker()` retorna `SKIPPED` com `missing_worker_secret` ou `missing_worker_base_url`. Depois do merge verde, produção deve provisionar no Vault:
+## Estado de provisionamento
 
-- `sports_worker_cron_secret`: token aleatório forte e exclusivo do worker;
-- `sports_worker_base_url`: URL pública publicada do app, sem `/` final.
+Já estão provisionados no Vault do Lovable Cloud:
 
-Somente após esse provisionamento o cron deve ser considerado operacionalmente validado.
+- `sports_worker_cron_secret`: token aleatório forte e exclusivo do worker/orquestrador;
+- `sports_worker_base_url`: URL pública publicada do app.
 
-## Lacunas para encerrar a Parte 4
+Os valores não são expostos em documentação, logs de aplicação ou GitHub.
+
+## Lacunas restantes para encerrar a Parte 4
 
 A Parte 4 só deve ser encerrada depois de:
 
-- merge e aplicação da migration de wake no Lovable Cloud;
-- provisionamento dos dois valores no Vault;
-- confirmação de `sports-job-worker-kick` único e ativo;
-- chamada real da rota via `pg_net` com resposta autorizada;
-- validação de concorrência/lease no runtime real;
-- validação ponta a ponta `5Dollar -> fixture canônica -> API_FOOTBALL_LINK -> API_FOOTBALL_FIXTURE_DATA -> dados normalizados` quando houver fixture elegível e credenciais dos providers disponíveis;
-- confirmação de que `elo-daily-finalize` continua separado e único.
+- todos os gates do PR do produtor diário ficarem verdes;
+- merge do produtor diário e validação da `main` pós-merge;
+- sincronização/publicação do mesmo commit no Lovable;
+- aplicação de `20260916033000_sports_daily_sync_cron.sql` no Lovable Cloud;
+- confirmação de `sports-daily-sync-yesterday` e `sports-daily-sync-today` únicos e ativos;
+- execução real do produtor com credenciais dos providers disponíveis;
+- validação ponta a ponta `5Dollar -> fixture canônica -> API_FOOTBALL_LINK -> API_FOOTBALL_FIXTURE_DATA -> dados normalizados` com pelo menos uma fixture elegível;
+- auditoria final da fila garantindo ausência de idempotency keys duplicadas, `attempts > max_attempts` e leases `RUNNING` expirados.
 
 ## Gate de conclusão da Parte 4
 
