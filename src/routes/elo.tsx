@@ -1,9 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GitCompareArrows, History, ListOrdered, TrendingUp } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { GitCompareArrows, ListOrdered, RefreshCw, Search, TrendingUp } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { EloHistoryPanel } from "@/components/EloHistoryPanel";
+import { FilterBar, FilterChip, SearchField, SegmentedControl, StatusBadge } from "@/components/ProductControls";
 import { MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
-import { EmptyState } from "@/components/SurfaceState";
+import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
+import { getEloDirectory } from "@/lib/elo-explorer.functions";
 
 export const Route = createFileRoute("/elo")({
   head: () => ({
@@ -15,37 +20,246 @@ export const Route = createFileRoute("/elo")({
   component: EloPage,
 });
 
+type EloDirectory = Awaited<ReturnType<typeof getEloDirectory>>;
+type RankingMode = "TEAMS" | "LEAGUES";
+
+const ratingFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+const regionLabels: Record<string, string> = {
+  EUROPE: "Europa",
+  SOUTH_AMERICA: "América do Sul",
+  NORTH_AMERICA: "América do Norte",
+  ASIA: "Ásia",
+  AFRICA: "África",
+  OCEANIA: "Oceania",
+};
+
+function formatRating(value: number | null | undefined) {
+  return typeof value === "number" ? ratingFormatter.format(value) : "—";
+}
+
 function EloPage() {
+  const loadDirectory = useServerFn(getEloDirectory);
+  const [directory, setDirectory] = useState<EloDirectory | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<RankingMode>("TEAMS");
+  const [region, setRegion] = useState("ALL");
+  const [country, setCountry] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setDirectory(await loadDirectory());
+    } catch {
+      setError("Os rankings Elo não puderam ser carregados agora.");
+    } finally {
+      setLoading(false);
+    }
+  }, [loadDirectory]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const regions = useMemo(() => {
+    if (!directory) return [];
+    return Array.from(new Set(directory.leagues.map((league) => league.region).filter((value): value is string => Boolean(value)))).sort();
+  }, [directory]);
+
+  const countries = useMemo(() => {
+    if (!directory) return [];
+    return Array.from(new Set(
+      directory.leagues
+        .filter((league) => region === "ALL" || league.region === region)
+        .map((league) => league.country_code)
+        .filter((value): value is string => Boolean(value)),
+    )).sort();
+  }, [directory, region]);
+
+  useEffect(() => {
+    if (country !== "ALL" && !countries.includes(country)) setCountry("ALL");
+  }, [countries, country]);
+
+  const filteredTeams = useMemo(() => {
+    if (!directory) return [];
+    const term = search.trim().toLocaleLowerCase("pt-BR");
+    return directory.teams.filter((team) => {
+      if (region !== "ALL" && team.region !== region) return false;
+      if (country !== "ALL" && team.countryCode !== country) return false;
+      if (!term) return true;
+      return [team.team_name, team.league_name].some((value) => value?.toLocaleLowerCase("pt-BR").includes(term) ?? false);
+    });
+  }, [country, directory, region, search]);
+
+  const filteredLeagues = useMemo(() => {
+    if (!directory) return [];
+    const term = search.trim().toLocaleLowerCase("pt-BR");
+    return directory.leagues.filter((league) => {
+      if (region !== "ALL" && league.region !== region) return false;
+      if (country !== "ALL" && league.country_code !== country) return false;
+      if (!term) return true;
+      return league.league_name.toLocaleLowerCase("pt-BR").includes(term);
+    });
+  }, [country, directory, region, search]);
+
+  const selectedTeam = directory?.teams.find((team) => team.team_id === selectedTeamId) ?? null;
+  const topTeam = directory?.teams[0] ?? null;
+  const topLeague = directory?.leagues[0] ?? null;
+  const hierarchyConstrained = directory?.leagues.filter((league) => league.hierarchy_constrained).length ?? 0;
+
   return (
     <AppShell stage="elo">
       <div className="space-y-6">
         <ProductPageHeader
           eyebrow="Elo"
           title="Força relativa, com contexto"
-          description="O Elo deixa de ser um número isolado: clube, liga, hierarquia e evolução no tempo aparecem na mesma leitura, com filtros progressivos por continente, país e competição."
+          description="Ranking atual de clubes e ligas calculado pelo backend, com filtros hierárquicos e histórico point-in-time por equipe."
+          meta={directory ? <StatusBadge tone="info">Modelo atual</StatusBadge> : undefined}
+          aside={(
+            <button
+              type="button"
+              onClick={() => void refresh()}
+              disabled={loading}
+              className="touch-target inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/70 bg-secondary/30 px-4 type-meta font-medium text-foreground hover:bg-secondary/55 disabled:opacity-50"
+            >
+              <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} aria-hidden />
+              Atualizar
+            </button>
+          )}
         />
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <MetricPreview label="Clubes" value="Ranking" detail="Elo global e Elo local por competição." />
-          <MetricPreview label="Ligas" value="Hierarquia" detail="Força relativa entre divisões e países." />
-          <MetricPreview label="Histórico" value="60 dias" detail="Movimentos point-in-time sem olhar o futuro." />
-        </div>
+        {loading && !directory ? (
+          <LoadingState label="Carregando rankings Elo" rows={6} />
+        ) : error && !directory ? (
+          <ErrorState description={error} onRetry={() => void refresh()} />
+        ) : directory ? (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <MetricPreview label="Clubes" value={String(directory.teams.length)} detail="Equipes com rating global atual" />
+              <MetricPreview label="Ligas" value={String(directory.leagues.length)} detail="Competições no ranking hierárquico" />
+              <MetricPreview label="Líder global" value={topTeam?.team_name ?? "—"} detail={topTeam ? `Elo ${formatRating(topTeam.global_rating)}` : "Sem rating disponível"} />
+              <MetricPreview label="Liga mais forte" value={topLeague?.league_name ?? "—"} detail={topLeague ? `Rating ${formatRating(topLeague.rating)} · ${hierarchyConstrained} ligas com restrição hierárquica` : "Sem rating disponível"} />
+            </div>
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
-          <SurfaceCard icon={ListOrdered} title="Ranking de clubes" description="Continente → país → liga → clube.">
-            <EmptyState
-              icon={ListOrdered}
-              title="O ranking de clubes aparecerá aqui"
-              description="A lista reunirá posição, Elo, variação recente e competição dentro do contexto selecionado."
-            />
-          </SurfaceCard>
+            <SurfaceCard
+              icon={mode === "TEAMS" ? ListOrdered : GitCompareArrows}
+              title={mode === "TEAMS" ? "Ranking de clubes" : "Ranking de ligas"}
+              description={mode === "TEAMS" ? "Elo global atual = rating local + ajuste de força da liga." : "Força relativa entre competições, respeitando a hierarquia do modelo."}
+              actions={(
+                <SegmentedControl
+                  label="Tipo de ranking"
+                  value={mode}
+                  options={[{ value: "TEAMS", label: "Clubes" }, { value: "LEAGUES", label: "Ligas" }]}
+                  onChange={setMode}
+                />
+              )}
+            >
+              <div className="space-y-4">
+                <FilterBar
+                  label="Filtrar ranking Elo"
+                  trailing={(
+                    <SearchField
+                      label={mode === "TEAMS" ? "Buscar clube ou competição" : "Buscar competição"}
+                      placeholder={mode === "TEAMS" ? "Buscar clube ou competição" : "Buscar competição"}
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      className="w-full sm:w-72"
+                    />
+                  )}
+                >
+                  <FilterChip active={region === "ALL"} onClick={() => setRegion("ALL")}>Todas as regiões</FilterChip>
+                  {regions.map((value) => (
+                    <FilterChip key={value} active={region === value} onClick={() => setRegion(value)}>{regionLabels[value] ?? value}</FilterChip>
+                  ))}
+                </FilterBar>
 
-          <div className="grid gap-4">
-            <SurfaceCard icon={GitCompareArrows} title="Ranking de ligas" description="Comparação hierárquica entre competições e divisões." tone="subtle" />
-            <SurfaceCard icon={History} title="Histórico" description="Trajetória de até 60 dias para clube ou liga selecionados." tone="subtle" />
-            <SurfaceCard icon={TrendingUp} title="Movimentos relevantes" description="Mudanças de Elo que merecem atenção por magnitude e contexto." tone="subtle" />
-          </div>
-        </div>
+                {countries.length ? (
+                  <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrar por país">
+                    <FilterChip active={country === "ALL"} onClick={() => setCountry("ALL")}>Todos os países</FilterChip>
+                    {countries.map((value) => <FilterChip key={value} active={country === value} onClick={() => setCountry(value)}>{value}</FilterChip>)}
+                  </div>
+                ) : null}
+
+                {mode === "TEAMS" ? (
+                  filteredTeams.length ? (
+                    <div className="overflow-hidden rounded-2xl border border-border/70">
+                      <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] gap-3 bg-secondary/35 px-4 py-2.5 type-caption uppercase tracking-[0.06em] text-muted-foreground sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_5.5rem]">
+                        <span>#</span><span>Clube</span><span className="hidden sm:block">Liga</span><span className="text-right">Elo</span>
+                      </div>
+                      <div className="divide-y divide-border/60">
+                        {filteredTeams.slice(0, 100).map((team, index) => {
+                          const selected = team.team_id === selectedTeamId;
+                          return (
+                            <button
+                              key={`${team.team_model_version}:${team.team_id}`}
+                              type="button"
+                              onClick={() => setSelectedTeamId(team.team_id)}
+                              aria-pressed={selected}
+                              className={`grid w-full grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 text-left transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_5.5rem] ${selected ? "bg-primary/10" : "hover:bg-secondary/25"}`}
+                            >
+                              <span className="type-meta text-muted-foreground">{index + 1}</span>
+                              <div className="min-w-0">
+                                <p className="truncate type-label text-foreground">{team.team_name}</p>
+                                <p className="mt-0.5 truncate type-caption text-muted-foreground sm:hidden">{team.league_name}</p>
+                              </div>
+                              <span className="hidden truncate type-caption text-muted-foreground sm:block">{team.league_name}</span>
+                              <span className="text-right type-metric text-foreground">{formatRating(team.global_rating)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <EmptyState icon={search ? Search : ListOrdered} title="Nenhum clube encontrado" description="Altere região, país ou busca para ampliar o ranking." />
+                  )
+                ) : filteredLeagues.length ? (
+                  <div className="overflow-hidden rounded-2xl border border-border/70">
+                    <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] gap-3 bg-secondary/35 px-4 py-2.5 type-caption uppercase tracking-[0.06em] text-muted-foreground sm:grid-cols-[3.5rem_minmax(0,1fr)_7rem_6rem_5.5rem]">
+                      <span>#</span><span>Liga</span><span className="hidden sm:block">País</span><span className="hidden sm:block">Divisão</span><span className="text-right">Rating</span>
+                    </div>
+                    <div className="divide-y divide-border/60">
+                      {filteredLeagues.slice(0, 100).map((league, index) => (
+                        <div key={`${league.model_version}:${league.league_id}`} className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 sm:grid-cols-[3.5rem_minmax(0,1fr)_7rem_6rem_5.5rem]">
+                          <span className="type-meta text-muted-foreground">{index + 1}</span>
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="truncate type-label text-foreground">{league.league_name}</p>
+                              {league.hierarchy_constrained ? <StatusBadge tone="info">hierarquia</StatusBadge> : null}
+                            </div>
+                            <p className="mt-0.5 type-caption text-muted-foreground sm:hidden">{league.country_code ?? "—"} · divisão {league.division_level ?? "—"}</p>
+                          </div>
+                          <span className="hidden type-caption text-muted-foreground sm:block">{league.country_code ?? "—"}</span>
+                          <span className="hidden type-caption text-muted-foreground sm:block">{league.division_level ?? "—"}</span>
+                          <span className="text-right type-metric text-foreground">{formatRating(league.rating)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <EmptyState icon={search ? Search : GitCompareArrows} title="Nenhuma liga encontrada" description="Altere região, país ou busca para ampliar o ranking." />
+                )}
+
+                {error ? <p className="type-caption text-warning">A atualização mais recente falhou; exibindo a última leitura disponível.</p> : null}
+              </div>
+            </SurfaceCard>
+
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.65fr)]">
+              <EloHistoryPanel teamId={selectedTeamId} teamName={selectedTeam?.team_name ?? null} />
+              <SurfaceCard icon={TrendingUp} title="Como ler" description="O frontend exibe ratings calculados e persistidos pelo backend." tone="subtle">
+                <div className="space-y-3 type-meta text-muted-foreground">
+                  <p><strong className="text-foreground">Elo global atual:</strong> combina rating local do clube com o ajuste da força da liga.</p>
+                  <p><strong className="text-foreground">Histórico:</strong> mostra a escala local point-in-time registrada em cada fixture, sem recalcular o passado com informação futura.</p>
+                  <p><strong className="text-foreground">Ligas:</strong> podem carregar restrições hierárquicas entre divisões quando o modelo assim determina.</p>
+                </div>
+              </SurfaceCard>
+            </div>
+          </>
+        ) : (
+          <EmptyState icon={ListOrdered} title="Sem rankings Elo disponíveis" description="O catálogo ainda não possui ratings processados para exibição." />
+        )}
       </div>
     </AppShell>
   );
