@@ -29,7 +29,7 @@ describe("responsive and browser compatibility contract", () => {
     expect(styles).toContain(".touch-target");
     expect(styles).toContain("min-height: 44px !important");
     expect(button).toContain("touch-target inline-flex");
-    expect(shell).toContain("touch-target flex min-h-9");
+    expect(shell).toContain("touch-target flex min-h-11");
   });
 
   it("keeps metric help touch-safe and inside the viewport", () => {
@@ -55,28 +55,12 @@ describe("responsive and browser compatibility contract", () => {
     expect(styles).toContain("min-width: 0");
   });
 
-  it("uses native date/time inputs for draft corrections", () => {
-    const validation = source("./routes/draft.$draftId.validacao.tsx");
-    expect(validation).toContain('field === "target_date" ? "date"');
-    expect(validation).toContain('field === "horario" ? "time"');
-    expect(validation).toContain('enterKeyHint={isLastField ? "done" : "next"}');
-  });
-
   it("optimizes decimal keyboard completion", () => {
     const input = source("./components/ui/input.tsx");
     expect(input).toContain("resolvedEnterKeyHint");
     expect(input).toContain('inputMode === "decimal"');
     expect(input).toContain('inputMode === "numeric"');
     expect(input).toContain('event.key === "Enter"');
-  });
-
-  it("keeps tablet analytics on cards instead of dense tables", () => {
-    const analytics = source("./routes/analytics.tsx");
-    expect(analytics).toContain('className="hidden overflow-hidden rounded-lg border border-border lg:block"');
-    expect(analytics).toContain('className="grid gap-2 lg:hidden"');
-    expect(analytics).toContain('className="hidden overflow-x-auto lg:block"');
-    expect(analytics).toContain('className="grid gap-3 lg:hidden"');
-    expect(analytics).not.toContain("md:block");
   });
 
   it("defines a browser baseline and CSS color fallbacks", () => {
@@ -94,17 +78,16 @@ describe("responsive and browser compatibility contract", () => {
   it("uses device-neutral notification guidance", () => {
     const push = source("./components/PushNotificationControl.tsx");
     expect(push).toContain("configurações do navegador ou do sistema");
-    expect(push).toContain("iPhone e iPad");
-    expect(push).toContain("Android e computador");
-    expect(push).not.toContain("bloquear o iPhone");
+    expect(push).toContain("Use um navegador atualizado");
+    expect(push).toContain("Tela de Início");
     expect(push).not.toContain("Ajustes → Notificações no iPhone");
   });
 
-  it("reacts to virtual-keyboard viewport changes", () => {
+  it("tracks virtual-keyboard viewport changes without legacy bottom navigation", () => {
     const shell = source("./components/AppShell.tsx");
     expect(shell).toContain("window.visualViewport");
     expect(shell).toContain("coveredHeight > 120");
-    expect(shell).toContain("data-keyboard-open");
-    expect(shell).toContain('keyboardOpen ? "hidden" : "fixed"');
+    expect(shell).toContain('data-keyboard-open={keyboardOpen ? "true" : "false"}');
+    expect(shell).not.toContain('keyboardOpen ? "hidden" : "fixed"');
   });
 });

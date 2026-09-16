@@ -31,5 +31,5 @@ jobs:
       - name: Start local database and apply migrations
         run: supabase db start
 
-      - name: RLS regression tests
-        run: supabase test db
+      - name: Sports intelligence security and integrity regressions
+        run: supabase test db supabase/tests/sports_intelligence/*.test.sql

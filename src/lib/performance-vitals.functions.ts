@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 const vitalSchema = z.object({
   metric: z.enum(["LCP", "CLS", "INP", "TTFB"]),
   value: z.number().finite().min(0).max(1_000_000),
@@ -15,6 +17,7 @@ function normalizedRoute(route: string) {
 }
 
 export const reportPerformanceVital = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => vitalSchema.parse(input))
   .handler(async ({ data, context }) => {
     if (!context.userId) throw new Error("Usuário não autenticado.");

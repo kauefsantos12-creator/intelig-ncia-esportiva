@@ -4,13 +4,7 @@ import { Bell, BellOff, Loader2, Smartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { getPushConfig, savePushSubscription } from "@/lib/push.functions";
-import {
-  arrayBufferToBase64Url,
-  isStandaloneApp,
-  registerBetValueServiceWorker,
-  supportsWebPush,
-  urlBase64ToUint8Array,
-} from "@/lib/push.browser";
+import { arrayBufferToBase64Url, isStandaloneApp, registerSportsServiceWorker, supportsWebPush, urlBase64ToUint8Array } from "@/lib/push.browser";
 
 type PushState = "checking" | "available" | "enabled" | "blocked" | "unsupported" | "error";
 
@@ -25,145 +19,41 @@ export function PushNotificationControl() {
   useEffect(() => {
     let active = true;
     setStandalone(isStandaloneApp());
-
-    if (!supportsWebPush()) {
-      setState("unsupported");
-      return;
-    }
-
+    if (!supportsWebPush()) { setState("unsupported"); return; }
     void (async () => {
       try {
-        const [{ publicKey: key }, registration] = await Promise.all([
-          getConfig(),
-          registerBetValueServiceWorker(),
-        ]);
+        const [{ publicKey: key }, registration] = await Promise.all([getConfig(), registerSportsServiceWorker()]);
         if (!active) return;
         setPublicKey(key);
-
         const existing = await registration?.pushManager.getSubscription();
         if (!active) return;
-        if (existing && Notification.permission === "granted") {
-          setState("enabled");
-        } else if (Notification.permission === "denied") {
-          setState("blocked");
-        } else {
-          setState("available");
-        }
-      } catch {
-        if (active) setState("error");
-      }
+        if (existing && Notification.permission === "granted") setState("enabled");
+        else if (Notification.permission === "denied") setState("blocked");
+        else setState("available");
+      } catch { if (active) setState("error"); }
     })();
-
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [getConfig]);
 
   async function enable() {
-    if (!supportsWebPush()) return;
-    if (!publicKey) {
-      setState("error");
-      return;
-    }
-
+    if (!supportsWebPush() || !publicKey) { setState("error"); return; }
     setBusy(true);
     try {
       const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        setState(permission === "denied" ? "blocked" : "available");
-        return;
-      }
-
-      const registration = await registerBetValueServiceWorker();
+      if (permission !== "granted") { setState(permission === "denied" ? "blocked" : "available"); return; }
+      const registration = await registerSportsServiceWorker();
       if (!registration) throw new Error("Service worker indisponível.");
       const existing = await registration.pushManager.getSubscription();
-      const subscription =
-        existing ??
-        (await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey),
-        }));
-
-      await saveSubscription({
-        data: {
-          endpoint: subscription.endpoint,
-          p256dh: arrayBufferToBase64Url(subscription.getKey("p256dh")),
-          auth: arrayBufferToBase64Url(subscription.getKey("auth")),
-          userAgent: navigator.userAgent,
-        },
-      });
+      const subscription = existing ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
+      await saveSubscription({ data: { endpoint: subscription.endpoint, p256dh: arrayBufferToBase64Url(subscription.getKey("p256dh")), auth: arrayBufferToBase64Url(subscription.getKey("auth")), userAgent: navigator.userAgent } });
       setState("enabled");
-    } catch (error) {
-      console.error("[Web Push] subscription failed", error);
-      setState("error");
-    } finally {
-      setBusy(false);
-    }
+    } catch { setState("error"); } finally { setBusy(false); }
   }
 
-  if (state === "checking") {
-    return (
-      <div className="panel mt-4 flex items-center gap-3 p-4 text-sm text-muted-foreground" role="status" aria-live="polite">
-        <Loader2 className="size-4 animate-spin" aria-hidden />
-        Verificando notificações…
-      </div>
-    );
-  }
+  if (state === "checking") return <div className="panel mt-4 flex items-center gap-3 p-4 text-sm text-muted-foreground" role="status"><Loader2 className="size-4 animate-spin" aria-hidden />Verificando notificações…</div>;
+  if (state === "enabled") return <div className="panel mt-4 flex items-start gap-3 border-success/25 p-4" role="status"><Bell className="mt-0.5 size-5 text-success" aria-hidden /><div><p className="text-sm font-medium">Notificações ativadas</p><p className="mt-1 text-xs text-muted-foreground">Este navegador pode receber atualizações esportivas do sistema.</p></div></div>;
+  if (state === "blocked") return <div className="panel mt-4 flex items-start gap-3 p-4" role="status"><BellOff className="mt-0.5 size-5 text-muted-foreground" aria-hidden /><div><p className="text-sm font-medium">Notificações bloqueadas</p><p className="mt-1 text-xs text-muted-foreground">Libere as notificações nas configurações do navegador ou do sistema para receber avisos.</p></div></div>;
+  if (state === "unsupported") return <div className="panel mt-4 flex items-start gap-3 p-4" role="status"><Smartphone className="mt-0.5 size-5 text-muted-foreground" aria-hidden /><div><p className="text-sm font-medium">Avisos não disponíveis neste navegador ou modo</p><p className="mt-1 text-xs text-muted-foreground">Use um navegador atualizado; em alguns dispositivos o app precisa estar instalado na Tela de Início.</p></div></div>;
 
-  if (state === "enabled") {
-    return (
-      <div className="panel mt-4 flex items-start gap-3 border-success/25 p-4" role="status" aria-live="polite">
-        <Bell className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />
-        <div>
-          <p className="text-sm font-medium">Notificações ativadas</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Você pode sair do Bet Value ou bloquear o aparelho. Avisaremos quando a análise estiver pronta.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (state === "blocked") {
-    return (
-      <div className="panel mt-4 flex items-start gap-3 p-4" role="status" aria-live="polite">
-        <BellOff className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
-        <div>
-          <p className="text-sm font-medium">Notificações bloqueadas</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">A análise continua em segundo plano. Para receber avisos, libere as notificações do Bet Value nas configurações do navegador ou do sistema.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (state === "unsupported") {
-    return (
-      <div className="panel mt-4 flex items-start gap-3 p-4" role="status" aria-live="polite">
-        <Smartphone className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
-        <div>
-          <p className="text-sm font-medium">Avisos não disponíveis neste navegador ou modo</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Use um navegador atualizado. No iPhone e iPad, as notificações web exigem o app adicionado à Tela de Início; em Android e computador, confira a permissão do navegador.</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="panel mt-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between" role={state === "error" ? "alert" : undefined} aria-live={state === "error" ? "assertive" : undefined}>
-      <div className="flex min-w-0 items-start gap-3">
-        <Bell className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
-        <div>
-          <p className="text-sm font-medium">Receber aviso quando terminar</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            {standalone
-              ? "Ative uma vez e pode sair do app enquanto a análise continua no servidor."
-              : "Ative no navegador; se o dispositivo exigir instalação para notificações, adicione o Bet Value à Tela de Início."}
-          </p>
-          {state === "error" && <p className="mt-1 text-xs text-warning">Não foi possível preparar os avisos agora. Tente novamente.</p>}
-        </div>
-      </div>
-      <Button className="min-h-11 shrink-0" onClick={() => void enable()} disabled={busy || !publicKey}>
-        {busy ? <Loader2 className="mr-2 size-4 animate-spin" aria-hidden /> : <Bell className="mr-2 size-4" aria-hidden />}
-        Ativar notificações
-      </Button>
-    </div>
-  );
+  return <div className="panel mt-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between" role={state === "error" ? "alert" : undefined}><div className="flex items-start gap-3"><Bell className="mt-0.5 size-5 text-primary" aria-hidden /><div><p className="text-sm font-medium">Receber atualizações esportivas</p><p className="mt-1 text-xs text-muted-foreground">{standalone ? "Ative uma vez para receber avisos deste app." : "Ative as notificações neste navegador."}</p>{state === "error" && <p className="mt-1 text-xs text-warning">Não foi possível preparar os avisos agora.</p>}</div></div><Button className="min-h-11" onClick={() => void enable()} disabled={busy || !publicKey}>{busy ? <Loader2 className="mr-2 size-4 animate-spin" aria-hidden /> : <Bell className="mr-2 size-4" aria-hidden />}Ativar notificações</Button></div>;
 }

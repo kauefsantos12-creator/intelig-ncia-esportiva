@@ -17,11 +17,15 @@ describe("security hardening contracts", () => {
     expect(middleware).toContain("session_id");
   });
 
-  it("keeps a second Web Push destination check at the server fetch boundary", () => {
+  it("validates Web Push destinations before persistence and keeps signing server-side", () => {
+    const pushFunctions = source("src/lib/push.functions.ts");
     const pushServer = source("src/lib/push.server.ts");
-    expect(pushServer).toContain("isTrustedPushEndpoint(subscription.endpoint)");
-    expect(pushServer).toContain('redirect: "manual"');
-    expect(pushServer).not.toContain('redirect: "error"');
+
+    expect(pushFunctions).toContain("trustedPushEndpointSchema");
+    expect(pushFunctions).toContain('.refine(isTrustedPushEndpoint, "Endpoint Web Push não autorizado.")');
+    expect(pushServer).toContain('process.env["LOVABLE_CRON_SECRET"]');
+    expect(pushServer).toContain("makeVapidAuthorization(endpoint: string)");
+    expect(pushServer).not.toContain("fetch(");
   });
 
   it("keeps a nonce-based CSP without unsafe inline execution", () => {

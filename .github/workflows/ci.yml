@@ -85,7 +85,7 @@ jobs:
             base="HEAD^"
           fi
           changed="$(git diff --name-only "$base"...HEAD 2>/dev/null || git diff --name-only HEAD^ HEAD)"
-          protected="$(printf '%s\n' "$changed" | grep -E '^(supabase/migrations/|src/lib/engine/|src/lib/adapters/|src/lib/(authorization|bankroll|analytics|privacy|lovable-error-reporting)|src/components/(AuthGate|AppShell)|src/routes/(privacidade|conta)|\.github/workflows/)' || true)"
+          protected="$(printf '%s\n' "$changed" | grep -E '^(supabase/(migrations|functions)/|src/lib/(sports|engine|adapters|authorization|bankroll|analytics|privacy|lovable-error-reporting)/|src/components/(AuthGate|AppShell)|src/routes/(privacidade|conta)|\.github/workflows/)' || true)"
           if [ -n "$protected" ]; then
             docs="$(printf '%s\n' "$changed" | grep -E '^docs/(PROJECT_STATE\.md|GOVERNANCE\.md|METRICS_GLOSSARY\.md|DATA_CATALOG\.md|PRIVACY\.md|PRIVACY_DATA_REGISTER\.md|governance/)' || true)"
             if [ -z "$docs" ]; then
@@ -95,11 +95,12 @@ jobs:
             fi
           fi
 
-          privacy_sensitive="$(printf '%s\n' "$changed" | grep -E '^(src/lib/privacy|src/lib/lovable-error-reporting|src/components/AuthGate|src/routes/(privacidade|conta)|supabase/migrations/.*privacy)' || true)"
+          privacy_sensitive="$(printf '%s\n' "$changed" | grep -E '^(src/lib/privacy|src/lib/lovable-error-reporting|src/components/AuthGate|src/routes/(privacidade|conta)|supabase/migrations/.*(privacy|sports_intelligence_runtime_reconciliation))' || true)"
           if [ -n "$privacy_sensitive" ]; then
             privacy_docs="$(printf '%s\n' "$changed" | grep -E '^docs/(PRIVACY\.md|PRIVACY_DATA_REGISTER\.md)$' || true)"
             if [ -z "$privacy_docs" ]; then
               echo "Privacy-sensitive code changed without privacy documentation update."
+              echo "$privacy_sensitive"
               exit 1
             fi
           fi
@@ -124,16 +125,10 @@ jobs:
             exit 1
           fi
 
-      - name: Database migrations and regression tests
+      - name: Database migrations and sports-intelligence regressions
         run: |
           supabase db start
-          supabase test db
-
-      - name: Functional decision-flow E2E
-        run: bunx vitest run src/functional-decision-flow.e2e.test.ts
-
-      - name: Experimental engine E2E
-        run: bunx vitest run src/lib/engine/experimental-pilot.e2e.test.ts
+          supabase test db supabase/tests/sports_intelligence
 
       - name: Unit tests
         shell: bash

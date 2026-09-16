@@ -20,11 +20,9 @@ const files = await walk(root);
 const importPattern = /(?:from\s+|import\s*\(|require\s*\()\s*["']([^"']+)["']/g;
 const explicitAnyPattern = /:\s*any\b|\bas\s+any\b|<\s*any\s*>/;
 const criticalTypedFiles = new Set([
-  "src/lib/analysis.functions.ts",
-  "src/lib/analytics.functions.ts",
-  "src/lib/bankroll.functions.ts",
-  "src/lib/authorization.server.ts",
-  "src/lib/decision-queue.functions.ts",
+  "src/lib/elo-explorer.functions.ts",
+  "src/lib/elo-feature.server.ts",
+  "src/lib/elo-sync.server.ts",
 ]);
 
 for (const absolute of files) {

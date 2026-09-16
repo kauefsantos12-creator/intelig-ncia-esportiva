@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { adminDb } from "./admin-db";
 import { BackendError } from "./backend-contract";
 
@@ -9,62 +10,65 @@ const historyInputSchema = z.object({
   days: z.number().int().min(7).max(180).default(60),
 });
 
-export const getEloDirectory = createServerFn({ method: "GET" }).handler(async ({ context }) => {
-  if (!context.userId) {
-    throw new BackendError("UNAUTHENTICATED", "Faça login para continuar.", 401);
-  }
+export const getEloDirectory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    if (!context.userId) {
+      throw new BackendError("UNAUTHENTICATED", "Faça login para continuar.", 401);
+    }
 
-  const db = await adminDb();
-  const [teamsResult, leaguesResult] = await Promise.all([
-    db
-      .from("elo_global_team_ratings")
-      .select(
-        "team_model_version,league_id,league_key,league_name,team_id,team_name,local_rating,league_rating,global_rating,matches_processed,first_fixture_at,last_fixture_at,updated_at",
-      )
-      .order("global_rating", { ascending: false })
-      .limit(3000),
-    db
-      .from("elo_league_ratings")
-      .select(
-        "model_version,league_id,league_key,league_name,country_code,region,division_level,focus_role,prior_rating,rating,evidence_adjustment,evidence_matches,hierarchy_constrained,updated_at",
-      )
-      .order("rating", { ascending: false })
-      .limit(500),
-  ]);
+    const db = await adminDb();
+    const [teamsResult, leaguesResult] = await Promise.all([
+      db
+        .from("elo_global_team_ratings")
+        .select(
+          "team_model_version,league_id,league_key,league_name,team_id,team_name,local_rating,league_rating,global_rating,matches_processed,first_fixture_at,last_fixture_at,updated_at",
+        )
+        .order("global_rating", { ascending: false })
+        .limit(3000),
+      db
+        .from("elo_league_ratings")
+        .select(
+          "model_version,league_id,league_key,league_name,country_code,region,division_level,focus_role,prior_rating,rating,evidence_adjustment,evidence_matches,hierarchy_constrained,updated_at",
+        )
+        .order("rating", { ascending: false })
+        .limit(500),
+    ]);
 
-  if (teamsResult.error) {
-    throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o ranking Elo de clubes.", 500);
-  }
-  if (leaguesResult.error) {
-    throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o ranking Elo de ligas.", 500);
-  }
+    if (teamsResult.error) {
+      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o ranking Elo de clubes.", 500);
+    }
+    if (leaguesResult.error) {
+      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o ranking Elo de ligas.", 500);
+    }
 
-  const leagueById = new Map(
-    (leaguesResult.data ?? []).map((league) => [league.league_id, league] as const),
-  );
+    const leagueById = new Map(
+      (leaguesResult.data ?? []).map((league) => [league.league_id, league] as const),
+    );
 
-  const teams = (teamsResult.data ?? []).map((team) => {
-    const league = team.league_id === null ? undefined : leagueById.get(team.league_id);
+    const teams = (teamsResult.data ?? []).map((team) => {
+      const league = team.league_id === null ? undefined : leagueById.get(team.league_id);
+      return {
+        ...team,
+        countryCode: league?.country_code ?? null,
+        region: league?.region ?? null,
+        divisionLevel: league?.division_level ?? null,
+      };
+    });
+
     return {
-      ...team,
-      countryCode: league?.country_code ?? null,
-      region: league?.region ?? null,
-      divisionLevel: league?.division_level ?? null,
+      teams,
+      leagues: leaguesResult.data ?? [],
+      generatedAt: new Date().toISOString(),
+      definitions: {
+        currentTeamRating: "global_rating = local_rating + ajuste da força da liga em relação ao baseline do modelo.",
+        historyScope: "O histórico por partida abaixo usa o rating local da equipe registrado em elo_fixture_history.",
+      },
     };
   });
 
-  return {
-    teams,
-    leagues: leaguesResult.data ?? [],
-    generatedAt: new Date().toISOString(),
-    definitions: {
-      currentTeamRating: "global_rating = local_rating + ajuste da força da liga em relação ao baseline do modelo.",
-      historyScope: "O histórico por partida abaixo usa o rating local da equipe registrado em elo_fixture_history.",
-    },
-  };
-});
-
 export const getTeamEloHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => historyInputSchema.parse(input))
   .handler(async ({ data, context }) => {
     if (!context.userId) {

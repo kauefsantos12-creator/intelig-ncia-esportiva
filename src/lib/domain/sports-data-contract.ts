@@ -86,9 +86,9 @@ export function freshnessState(
 export function normalizeFixtureStatus(raw: string | null | undefined): CanonicalFixtureStatus {
   const value = (raw ?? "").trim().toLowerCase();
   if (["finished", "ft", "aet", "pen", "ended", "complete", "completed"].includes(value)) return "FINISHED";
-  if (["live", "1h", "2h", "ht", "et", "inplay", "in_play"].includes(value)) return "LIVE";
-  if (["scheduled", "notstarted", "not_started", "ns", "timed"].includes(value)) return "SCHEDULED";
+  if (["live", "1h", "2h", "ht", "et", "inplay", "in_play", "inprogress", "in_progress"].includes(value)) return "LIVE";
+  if (["scheduled", "notstarted", "not_started", "ns", "timed", "tbd"].includes(value)) return "SCHEDULED";
   if (["postponed", "pst", "suspended", "int"].includes(value)) return "POSTPONED";
-  if (["cancelled", "canceled", "canc", "abd", "awarded", "wo"].includes(value)) return "CANCELLED";
+  if (["cancelled", "canceled", "canc", "abd", "awarded", "awd", "wo"].includes(value)) return "CANCELLED";
   return "UNKNOWN";
 }

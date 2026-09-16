@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isTrustedPushEndpoint } from "./push-endpoint";
 
 const trustedPushEndpointSchema = z
@@ -21,12 +22,15 @@ async function db() {
   return supabaseAdmin as any;
 }
 
-export const getPushConfig = createServerFn({ method: "POST" }).handler(async () => {
-  const { getVapidPublicKey } = await import("./push.server");
-  return { publicKey: getVapidPublicKey() };
-});
+export const getPushConfig = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    const { getVapidPublicKey } = await import("./push.server");
+    return { publicKey: getVapidPublicKey() };
+  });
 
 export const savePushSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => subscriptionSchema.parse(input))
   .handler(async ({ data, context }) => {
     const userId = context.userId;
@@ -61,6 +65,7 @@ export const savePushSubscription = createServerFn({ method: "POST" })
   });
 
 export const removePushSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ endpoint: z.string().url().max(4096) }).parse(input))
   .handler(async ({ data, context }) => {
     const userId = context.userId;

@@ -5,27 +5,13 @@ export function isStandaloneApp() {
 }
 
 export function supportsWebPush() {
-  return (
-    typeof window !== "undefined" &&
-    "serviceWorker" in navigator &&
-    "PushManager" in window &&
-    "Notification" in window
-  );
+  return typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
-export async function registerBetValueServiceWorker() {
+export async function registerSportsServiceWorker() {
   if (!supportsWebPush()) return null;
   await navigator.serviceWorker.register("/sw.js", { scope: "/" });
   return navigator.serviceWorker.ready;
-}
-
-export async function setAnalysisNotificationTarget(runId: string) {
-  const registration = await registerBetValueServiceWorker();
-  const worker = registration?.active ?? registration?.waiting ?? registration?.installing;
-  worker?.postMessage({
-    type: "SET_ANALYSIS_TARGET",
-    url: `/run/${runId}/oportunidades`,
-  });
 }
 
 export function urlBase64ToUint8Array(value: string) {

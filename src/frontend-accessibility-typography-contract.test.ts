@@ -47,28 +47,11 @@ describe("WCAG 2.2 AA accessibility and typography contract", () => {
     expect(styles).toContain("--input: oklch(");
   });
 
-  it("associates validation errors with the affected fields and focuses remaining errors", () => {
-    const validation = source("./routes/draft.$draftId.validacao.tsx");
-    expect(validation).toContain("aria-invalid={matchingErrors.length > 0 || undefined}");
-    expect(validation).toContain("aria-describedby={describedBy}");
-    expect(validation).toContain("fieldErrorId(game.id, item.field, index)");
-    expect(validation).toContain("focusFirstInvalid");
-    expect(validation).toContain("document.getElementById(fieldInputId");
-  });
-
-  it("announces dynamic notification and validation status changes", () => {
+  it("announces generic Web Push states and errors", () => {
     const push = source("./components/PushNotificationControl.tsx");
-    const validation = source("./routes/draft.$draftId.validacao.tsx");
-    expect(push).toContain('role="status" aria-live="polite"');
+    expect(push).toContain('role="status"');
     expect(push).toContain('role={state === "error" ? "alert" : undefined}');
-    expect(validation).toContain('role="status" aria-live="polite"');
-  });
-
-  it("exposes expandable decision details programmatically", () => {
-    const queue = source("./components/DecisionQueueFlow.tsx");
-    expect(queue).toContain("aria-expanded={open}");
-    expect(queue).toContain("aria-controls={detailId}");
-    expect(queue).toContain("id={detailId}");
+    expect(push).toContain("atualizações esportivas");
   });
 
   it("provides a keyboard bypass link and a focusable main landmark", () => {

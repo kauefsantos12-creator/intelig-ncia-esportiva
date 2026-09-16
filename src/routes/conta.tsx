@@ -11,7 +11,7 @@ import { deleteMyAccount, disableMyPushNotifications } from "@/lib/privacy.funct
 export const Route = createFileRoute("/conta")({
   head: () => ({
     meta: [
-      { title: "Conta e privacidade · Bet Value Engine" },
+      { title: "Conta e privacidade · Inteligência Esportiva" },
       { name: "description", content: "Controles de privacidade, notificações e exclusão da conta." },
     ],
   }),
@@ -48,11 +48,7 @@ function AccountPrivacyPage() {
     setMessage(null);
     try {
       await removeAccount({ data: { confirmation: "EXCLUIR MINHA CONTA" } });
-      try {
-        await supabase.auth.signOut({ scope: "local" });
-      } catch {
-        // The server has already deleted the Auth user; local cleanup is best effort.
-      }
+      try { await supabase.auth.signOut({ scope: "local" }); } catch { /* best effort */ }
       window.location.assign("/");
     } catch {
       setMessage("A exclusão não foi concluída. Nenhuma confirmação de sucesso foi emitida; tente novamente.");
@@ -69,12 +65,8 @@ function AccountPrivacyPage() {
             <div>
               <p className="label-eyebrow">Privacidade</p>
               <h1 className="mt-1 text-2xl font-semibold tracking-tight">Conta e privacidade</h1>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Consulte como os dados são tratados, desative notificações ou exclua integralmente a conta e os dados vinculados.
-              </p>
-              <a href="/privacidade" className="mt-4 inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">
-                Ler o Aviso de Privacidade
-              </a>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Consulte como os dados são tratados, desative notificações ou exclua integralmente a conta e os dados pessoais vinculados.</p>
+              <a href="/privacidade" className="mt-4 inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline">Ler o Aviso de Privacidade</a>
             </div>
           </div>
         </section>
@@ -84,12 +76,8 @@ function AccountPrivacyPage() {
             <BellOff className="mt-0.5 size-5 text-muted-foreground" aria-hidden />
             <div className="flex-1">
               <h2 className="text-lg font-semibold">Notificações</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Desativar remove a assinatura Web Push deste navegador e todas as assinaturas vinculadas à sua conta no servidor.
-              </p>
-              <Button variant="outline" className="mt-4" onClick={() => void disableNotifications()} disabled={pushBusy}>
-                {pushBusy ? "Desativando…" : "Desativar notificações"}
-              </Button>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Desativar remove a assinatura Web Push deste navegador e todas as assinaturas vinculadas à sua conta no servidor.</p>
+              <Button variant="outline" className="mt-4" onClick={() => void disableNotifications()} disabled={pushBusy}>{pushBusy ? "Desativando…" : "Desativar notificações"}</Button>
             </div>
           </div>
         </section>
@@ -99,27 +87,10 @@ function AccountPrivacyPage() {
             <Trash2 className="mt-0.5 size-5 text-destructive" aria-hidden />
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-destructive">Excluir conta e dados</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Esta ação remove análises, jobs, histórico de apostas vinculado, configuração pessoal de banca, assinaturas push e a identidade de autenticação. A trilha de governança segue a retenção limitada descrita no Aviso de Privacidade.
-              </p>
-              <label className="mt-4 block text-sm font-medium" htmlFor="delete-confirmation">
-                Digite <span className="font-mono">EXCLUIR MINHA CONTA</span> para confirmar
-              </label>
-              <input
-                id="delete-confirmation"
-                value={confirmation}
-                onChange={(event) => setConfirmation(event.target.value)}
-                autoComplete="off"
-                className="mt-2 min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-              />
-              <Button
-                variant="destructive"
-                className="mt-4"
-                onClick={() => void deleteAccount()}
-                disabled={deleteBusy || confirmation !== "EXCLUIR MINHA CONTA"}
-              >
-                {deleteBusy ? "Excluindo…" : "Excluir definitivamente"}
-              </Button>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">Esta ação remove anotações e avaliações pessoais de partidas, assinaturas push e a identidade de autenticação. A trilha de governança segue a retenção limitada descrita no Aviso de Privacidade.</p>
+              <label className="mt-4 block text-sm font-medium" htmlFor="delete-confirmation">Digite <span className="font-mono">EXCLUIR MINHA CONTA</span> para confirmar</label>
+              <input id="delete-confirmation" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="off" className="mt-2 min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
+              <Button variant="destructive" className="mt-4" onClick={() => void deleteAccount()} disabled={deleteBusy || confirmation !== "EXCLUIR MINHA CONTA"}>{deleteBusy ? "Excluindo…" : "Excluir definitivamente"}</Button>
             </div>
           </div>
         </section>
