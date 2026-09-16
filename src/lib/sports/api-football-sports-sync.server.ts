@@ -9,6 +9,7 @@ import {
   type ApiFootballFixtureLineup,
   type ApiFootballFixturePlayerStatistics,
 } from "@/lib/adapters/api_football.players.server";
+import { nullableProviderNumber } from "@/lib/domain/provider-value";
 import { classifyPlayerParticipation } from "@/lib/domain/sports-intelligence-policy";
 import { sportsJobIdempotencyKey } from "@/lib/domain/sports-data-contract";
 
@@ -25,11 +26,6 @@ function record(value: unknown): Row | null {
 
 function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-function numberValue(value: unknown): number | null {
-  const n = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(n) ? n : null;
 }
 
 function nearbyIsoDates(iso: string): string[] {
@@ -72,7 +68,7 @@ export interface ApiFootballLinkResult {
 
 export async function linkApiFootballFixture(sportsFixtureId: string): Promise<ApiFootballLinkResult> {
   const context = await readFixtureContext(sportsFixtureId);
-  const existing = numberValue(context.fixture["api_football_fixture_id"]);
+  const existing = nullableProviderNumber(context.fixture["api_football_fixture_id"]);
   if (existing !== null) {
     return { fixtureId: sportsFixtureId, status: "ALREADY_LINKED", apiFixtureId: existing, confidence: 1, detail: "Vínculo já persistido." };
   }
@@ -100,7 +96,7 @@ export async function linkApiFootballFixture(sportsFixtureId: string): Promise<A
     if (raw.status === "OK" && raw.payload) {
       const root = record(raw.payload);
       const response = Array.isArray(root?.["response"]) ? root?.["response"] as unknown[] : [];
-      apiLeagueId = numberValue(record(record(response[0])?.["league"])?.["id"]);
+      apiLeagueId = nullableProviderNumber(record(record(response[0])?.["league"])?.["id"]);
     }
 
     const updateFixture = await context.db.from("sports_fixtures")
@@ -135,7 +131,7 @@ export async function linkApiFootballFixture(sportsFixtureId: string): Promise<A
 }
 
 async function upsertApiPlayer(db: Awaited<ReturnType<typeof sportsDb>>, player: Row) {
-  const id = numberValue(player["id"]);
+  const id = nullableProviderNumber(player["id"]);
   const name = text(player["name"]);
   if (id === null || !name) return null;
   const { data, error } = await db.from("sports_players").upsert({
@@ -151,8 +147,8 @@ async function upsertApiPlayer(db: Awaited<ReturnType<typeof sportsDb>>, player:
 
 function teamByApiId(context: Awaited<ReturnType<typeof readFixtureContext>>, apiTeamId: number | null) {
   if (apiTeamId === null) return null;
-  if (numberValue(context.home["api_football_team_id"]) === apiTeamId) return context.home;
-  if (numberValue(context.away["api_football_team_id"]) === apiTeamId) return context.away;
+  if (nullableProviderNumber(context.home["api_football_team_id"]) === apiTeamId) return context.home;
+  if (nullableProviderNumber(context.away["api_football_team_id"]) === apiTeamId) return context.away;
   return null;
 }
 
@@ -173,7 +169,7 @@ export interface ApiFootballFixtureSyncResult {
 
 export async function syncApiFootballFixtureData(sportsFixtureId: string): Promise<ApiFootballFixtureSyncResult> {
   const context = await readFixtureContext(sportsFixtureId);
-  const apiFixtureId = numberValue(context.fixture["api_football_fixture_id"]);
+  const apiFixtureId = nullableProviderNumber(context.fixture["api_football_fixture_id"]);
   if (apiFixtureId === null) throw new Error("Fixture ainda não possui vínculo API-Football.");
   const matchFinished = String(context.fixture["status"]) === "FINISHED";
 
@@ -184,7 +180,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
   let lineupCount = 0;
 
   for (const lineup of lineups) {
-    const localTeam = teamByApiId(context, numberValue(lineup.team?.id));
+    const localTeam = teamByApiId(context, nullableProviderNumber(lineup.team?.id));
     if (!localTeam) continue;
     const teamId = String(localTeam["id"]);
     for (const [entries, isStarting] of [[lineup.startXI ?? [], true], [lineup.substitutes ?? [], false]] as const) {
@@ -203,7 +199,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
           is_substitute: !isStarting,
           position: text(rawPlayer["pos"]),
           grid_position: text(rawPlayer["grid"]),
-          jersey_number: numberValue(rawPlayer["number"]),
+          jersey_number: nullableProviderNumber(rawPlayer["number"]),
           formation: lineup.formation ?? null,
           fetched_at: lineupsFetch.fetchedAt,
           metadata: {},
@@ -219,7 +215,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
   const teamBlocks = extractApiFootballResponse<ApiFootballFixturePlayerStatistics>(playersFetch);
   let playerStatsCount = 0;
   for (const block of teamBlocks) {
-    const localTeam = teamByApiId(context, numberValue(block.team?.id));
+    const localTeam = teamByApiId(context, nullableProviderNumber(block.team?.id));
     if (!localTeam) continue;
     for (const entry of block.players ?? []) {
       const rawPlayer = record(entry.player);
@@ -228,7 +224,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
       const stat = record(entry.statistics?.[0]);
       if (!player || !stat) continue;
       const games = record(stat["games"]);
-      const minutes = numberValue(games?.["minutes"]);
+      const minutes = nullableProviderNumber(games?.["minutes"]);
       const participation = classifyPlayerParticipation({
         minutes,
         inStartingXI: starterApiIds.has(player.apiPlayerId),
@@ -242,7 +238,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
         provider: "api_football",
         participation_state: participation,
         minutes,
-        provider_rating: numberValue(games?.["rating"]),
+        provider_rating: nullableProviderNumber(games?.["rating"]),
         stats: statPayload(stat),
         fetched_at: playersFetch.fetchedAt,
       }, { onConflict: "fixture_id,player_id,provider" });
@@ -253,7 +249,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
 
   let squadPlayers = 0;
   for (const localTeam of [context.home, context.away]) {
-    const apiTeamId = numberValue(localTeam["api_football_team_id"]);
+    const apiTeamId = nullableProviderNumber(localTeam["api_football_team_id"]);
     if (apiTeamId === null) continue;
     const squadFetch = await apiFootballTeamSquad(apiTeamId);
     if (squadFetch.status !== "OK") continue;
@@ -271,7 +267,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
           player_id: player.sportsPlayerId,
           season: SEASON,
           provider: "api_football",
-          jersey_number: numberValue(member["number"]),
+          jersey_number: nullableProviderNumber(member["number"]),
           position: text(member["position"]),
           active: true,
           fetched_at: squadFetch.fetchedAt,
@@ -293,7 +289,7 @@ export async function syncApiFootballFixtureData(sportsFixtureId: string): Promi
       if (!injury || !rawPlayer) continue;
       const player = await upsertApiPlayer(context.db, rawPlayer);
       if (!player) continue;
-      const localTeam = teamByApiId(context, numberValue(rawTeam?.["id"]));
+      const localTeam = teamByApiId(context, nullableProviderNumber(rawTeam?.["id"]));
       const result = await context.db.from("sports_injuries").insert({
         fixture_id: sportsFixtureId,
         team_id: localTeam ? String(localTeam["id"]) : null,
@@ -325,9 +321,9 @@ export async function syncApiFootballPlayerSeason(
   const player = playerResult.data as Row | null;
   const team = teamResult.data as Row | null;
   const competition = competitionResult.data as Row | null;
-  const apiPlayerId = numberValue(player?.["api_football_player_id"]);
-  const apiTeamId = numberValue(team?.["api_football_team_id"]);
-  const apiLeagueId = numberValue(competition?.["api_football_league_id"]);
+  const apiPlayerId = nullableProviderNumber(player?.["api_football_player_id"]);
+  const apiTeamId = nullableProviderNumber(team?.["api_football_team_id"]);
+  const apiLeagueId = nullableProviderNumber(competition?.["api_football_league_id"]);
   if (apiPlayerId === null || apiTeamId === null || apiLeagueId === null) throw new Error("Mapeamento API-Football incompleto para player season.");
 
   const response = await apiFootballPlayerSeason(apiPlayerId, apiLeagueId, API_FOOTBALL_SEASON);
@@ -336,7 +332,7 @@ export async function syncApiFootballPlayerSeason(
   const list = Array.isArray(root?.["response"]) ? root?.["response"] as unknown[] : [];
   const item = record(list[0]);
   const statistics = Array.isArray(item?.["statistics"]) ? item?.["statistics"] as unknown[] : [];
-  const matching = statistics.map(record).find((stat) => numberValue(record(stat?.["team"])?.["id"]) === apiTeamId) ?? record(statistics[0]);
+  const matching = statistics.map(record).find((stat) => nullableProviderNumber(record(stat?.["team"])?.["id"]) === apiTeamId) ?? record(statistics[0]);
   if (!matching) return { persisted: false, reason: "Sem estatísticas de temporada para a combinação solicitada." };
   const games = record(matching["games"]);
   const substitutes = record(matching["substitutes"]);
@@ -346,10 +342,10 @@ export async function syncApiFootballPlayerSeason(
     competition_id: sportsCompetitionId,
     season: SEASON,
     provider: "api_football",
-    appearances: numberValue(games?.["appearences"] ?? games?.["appearances"]),
-    starts: numberValue(games?.["lineups"]),
-    minutes: numberValue(games?.["minutes"]),
-    provider_rating: numberValue(games?.["rating"]),
+    appearances: nullableProviderNumber(games?.["appearences"] ?? games?.["appearances"]),
+    starts: nullableProviderNumber(games?.["lineups"]),
+    minutes: nullableProviderNumber(games?.["minutes"]),
+    provider_rating: nullableProviderNumber(games?.["rating"]),
     stats: { ...matching, substitutes },
     fetched_at: response.fetchedAt,
   }, { onConflict: "player_id,team_id,competition_id,season,provider" });

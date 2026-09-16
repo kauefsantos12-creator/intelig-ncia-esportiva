@@ -4,6 +4,7 @@ import {
   teamRelativeStats,
   type FiveDollarFixture,
 } from "@/lib/adapters/five_dollar.parse";
+import { nullableProviderNumber } from "@/lib/domain/provider-value";
 import { normalizeFixtureStatus, sportsJobIdempotencyKey } from "@/lib/domain/sports-data-contract";
 import { saoPauloLocalDayUnixWindow } from "@/lib/sao-paulo-time";
 
@@ -20,11 +21,6 @@ function asRecord(value: unknown): Row | null {
 
 function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
-}
-
-function numberValue(value: unknown): number | null {
-  const valueNumber = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(valueNumber) ? valueNumber : null;
 }
 
 function hasMore(payload: unknown): boolean {
@@ -45,7 +41,7 @@ function inferCompetitionKind(name: string, knownContinental: boolean): "LEAGUE"
 function eventExternalId(fixtureId: number, event: Row, index: number): string {
   const id = event["id"];
   if (typeof id === "string" || typeof id === "number") return String(id);
-  const minute = numberValue(event["minute"]) ?? "na";
+  const minute = nullableProviderNumber(event["minute"]) ?? "na";
   const type = text(event["type"]) ?? "event";
   const team = text(event["team"]) ?? "na";
   const player = text(event["player"]) ?? text(event["player_in"]) ?? "na";
@@ -68,7 +64,7 @@ async function leagueContext(db: Awaited<ReturnType<typeof sportsDb>>, leagueId:
   return {
     countryCode: text(targetData?.["country_code"]),
     region: text(targetData?.["region"]) ?? text(crossData?.["region"]),
-    divisionLevel: numberValue(targetData?.["division_level"]),
+    divisionLevel: nullableProviderNumber(targetData?.["division_level"]),
     knownContinental: Boolean(crossData),
   };
 }
@@ -169,8 +165,8 @@ async function persistEvents(db: Awaited<ReturnType<typeof sportsDb>>, fixture: 
       fixture_id: fixtureId,
       provider: "five_dollar",
       external_event_id: eventExternalId(fixture.eventId, event, index),
-      minute: numberValue(event["minute"]),
-      added_minute: numberValue(event["added_minute"]) ?? numberValue(event["extra_minute"]),
+      minute: nullableProviderNumber(event["minute"]),
+      added_minute: nullableProviderNumber(event["added_minute"]) ?? nullableProviderNumber(event["extra_minute"]),
       event_type: text(event["type"]) ?? "unknown",
       detail: text(event["detail"]) ?? text(event["reason"]),
       team_id: teamSide === "home" ? homeTeamId : teamSide === "away" ? awayTeamId : null,
@@ -193,7 +189,7 @@ async function persistFixture(db: Awaited<ReturnType<typeof sportsDb>>, fixture:
   const status = normalizeFixtureStatus(fixture.statusType);
   const kickoffAt = fixture.kickoffIso ?? (fixture.startTimestamp ? new Date(fixture.startTimestamp * 1000).toISOString() : null);
   if (!kickoffAt) throw new Error(`Fixture ${fixture.eventId} sem kickoff.`);
-  const canonicalKey = `five_dollar:${fixture.eventId}`;
+  const canonicalKey = `five-dollar:${fixture.eventId}`;
   const { data, error } = await db.from("sports_fixtures")
     .upsert({
       canonical_key: canonicalKey,
@@ -331,6 +327,7 @@ export async function syncFiveDollarDay(isoDate: string): Promise<FiveDollarDayS
     }
   }
 
+  const failedIds = failed.slice(0, 10).map((item) => item.fixtureId).join(", ");
   await db.from("sports_sync_state").upsert({
     provider: "five_dollar",
     domain: "fixtures_daily",
@@ -338,8 +335,16 @@ export async function syncFiveDollarDay(isoDate: string): Promise<FiveDollarDayS
     cursor_value: isoDate,
     last_attempt_at: new Date().toISOString(),
     last_success_at: failed.length === 0 ? new Date().toISOString() : null,
-    last_error: failed.length === 0 ? null : `${failed.length} fixture(s) falharam.`,
-    metadata: { fixtures: fixtures.size, persisted, failed: failed.length, fetches },
+    last_error: failed.length === 0
+      ? null
+      : `${failed.length} fixture(s) falharam${failedIds ? `: ${failedIds}` : ""}.`,
+    metadata: {
+      fixtures: fixtures.size,
+      persisted,
+      failed: failed.length,
+      failures: failed.slice(0, 20),
+      fetches,
+    },
   }, { onConflict: "provider,domain,season" });
 
   return { date: isoDate, fixtures: fixtures.size, persisted, stats, events, failed, fetches, fetchedAt: latestFetchedAt };
