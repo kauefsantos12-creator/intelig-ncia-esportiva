@@ -4,7 +4,9 @@ Data: 16/09/2026
 
 Branch inicial: `feat/today-surface-v1`
 
-Estado deste documento: **implementado na branch e aguardando validação de CI/PR; não mergeado nem publicado até os gates concluírem.**
+Refino de Frontend/UX: `feat/frontend-ux-today-v1`
+
+Estado deste documento: **a superfície base já está no produto; o refino de Frontend/UX descrito abaixo está implementado na branch e aguarda validação de CI/PR antes de qualquer merge/publicação.**
 
 ## Objetivo
 
@@ -65,15 +67,24 @@ A inspeção realizada antes da implementação encontrou:
 
 Consequência: esta versão entrega agenda, forma recente e Elo reais. A transmissão permanece com estado não confirmado enquanto o pipeline de evidências estiver vazio. Jogadores e classificação não são simulados.
 
-## UX
+## UX vigente
 
-- cabeçalho com data local e ação Atualizar;
-- métricas de cobertura do dia;
-- filtros Todos / Com transmissão / Ao vivo;
+A agenda é a tarefa primária da superfície e deve aparecer antes dos indicadores de cobertura.
+
+- cabeçalho com data local, horário da última leitura e ação **Atualizar**;
+- agenda antes das métricas de cobertura, principalmente para reduzir deslocamento no mobile;
+- filtros **Todos / Próximos / Ao vivo / Com transmissão / Encerrados**, com contagem de partidas;
 - busca por clube ou competição;
+- partidas em ordem de horário;
 - uma linha expansível por confronto;
-- detalhe dividido em Momento recente, Elo atual e Onde assistir;
-- loading, erro, retry e estados vazios explícitos.
+- resumo da partida com competição, status, horário de Brasília, logo ou fallback textual dos clubes, nomes das equipes e placar separado por time quando disponível;
+- ausência de transmissão identificada sem inventar canal;
+- detalhe dividido em **Momento recente**, **Elo atual** e **Onde assistir**;
+- métricas de completude agrupadas em **Cobertura do dia**, abaixo da agenda;
+- loading, erro, retry e estados vazios explícitos;
+- alvos de toque e comportamento mobile preservam o contrato global de acessibilidade e responsividade.
+
+O refino visual reutiliza exclusivamente dados já existentes no read-model. Não introduz métricas, partidas, logos, placares ou transmissões fictícias.
 
 ## Segurança e governança
 

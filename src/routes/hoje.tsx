@@ -27,12 +27,27 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   month: "long",
 });
 
+const updateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 function formatLocalDate(value: string) {
   const date = new Date(`${value}T12:00:00-03:00`);
   return Number.isNaN(date.getTime()) ? value : dateFormatter.format(date);
 }
 
-type AgendaFilter = "ALL" | "BROADCAST" | "LIVE";
+function formatUpdateTime(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : updateTimeFormatter.format(date);
+}
+
+function isUpcomingStatus(status: string) {
+  return !["LIVE", "FINISHED", "POSTPONED", "CANCELLED"].includes(status);
+}
+
+type AgendaFilter = "ALL" | "UPCOMING" | "BROADCAST" | "LIVE" | "FINISHED";
 
 function TodayPage() {
   const loadOverview = useServerFn(getTodayOverview);
@@ -58,19 +73,32 @@ function TodayPage() {
     void refresh();
   }, [refresh]);
 
+  const counts = useMemo(() => {
+    const fixtures = overview?.fixtures ?? [];
+    return {
+      all: fixtures.length,
+      upcoming: fixtures.filter((fixture) => isUpcomingStatus(fixture.status)).length,
+      live: fixtures.filter((fixture) => fixture.status === "LIVE").length,
+      finished: fixtures.filter((fixture) => fixture.status === "FINISHED").length,
+      broadcast: fixtures.filter((fixture) => fixture.broadcasts.length > 0).length,
+    };
+  }, [overview]);
+
   const filteredFixtures = useMemo(() => {
     if (!overview) return [];
     const term = search.trim().toLocaleLowerCase("pt-BR");
     return overview.fixtures.filter((fixture) => {
+      if (filter === "UPCOMING" && !isUpcomingStatus(fixture.status)) return false;
       if (filter === "BROADCAST" && !fixture.broadcasts.length) return false;
       if (filter === "LIVE" && fixture.status !== "LIVE") return false;
+      if (filter === "FINISHED" && fixture.status !== "FINISHED") return false;
       if (!term) return true;
       return [fixture.home.name, fixture.away.name, fixture.competition.name]
         .some((value) => value.toLocaleLowerCase("pt-BR").includes(term));
     });
   }, [filter, overview, search]);
 
-  const liveCount = overview?.fixtures.filter((fixture) => fixture.status === "LIVE").length ?? 0;
+  const updatedAt = overview ? formatUpdateTime(overview.observedAt) : null;
 
   return (
     <AppShell stage="today">
@@ -78,18 +106,21 @@ function TodayPage() {
         <ProductPageHeader
           eyebrow="Hoje"
           title="Os jogos do dia, sem ruído"
-          description="Agenda do escopo acompanhado, com horário de Brasília, transmissão quando confirmada e contexto de forma e Elo sob demanda."
+          description="Veja primeiro o que importa: horário, confronto, status e transmissão. Abra a partida para consultar forma recente e Elo."
           meta={overview ? <StatusBadge tone="info">{formatLocalDate(overview.localDate)}</StatusBadge> : undefined}
           aside={(
-            <button
-              type="button"
-              onClick={() => void refresh()}
-              disabled={loading}
-              className="touch-target inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/70 bg-secondary/30 px-4 type-meta font-medium text-foreground hover:bg-secondary/55 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} aria-hidden />
-              Atualizar
-            </button>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {updatedAt ? <span className="type-caption text-muted-foreground">Atualizado às {updatedAt}</span> : null}
+              <button
+                type="button"
+                onClick={() => void refresh()}
+                disabled={loading}
+                className="touch-target inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/70 bg-secondary/30 px-4 type-meta font-medium text-foreground hover:bg-secondary/55 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} aria-hidden />
+                Atualizar
+              </button>
+            </div>
           )}
         />
 
@@ -99,17 +130,10 @@ function TodayPage() {
           <ErrorState title="Não foi possível carregar a agenda" description={error} onRetry={() => void refresh()} />
         ) : overview ? (
           <>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <MetricPreview label="Jogos acompanhados" value={String(overview.coverage.trackedFixtures)} detail="Escopo prioritário do dia" />
-              <MetricPreview label="Ao vivo" value={String(liveCount)} detail="Status atual no catálogo" />
-              <MetricPreview label="Transmissão" value={String(overview.coverage.confirmedBroadcastFixtures)} detail="Jogos com evidência confirmada" />
-              <MetricPreview label="Cobertura Elo" value={`${overview.coverage.eloCoveredTeams}/${overview.coverage.totalTeams}`} detail="Equipes com rating atual" />
-            </div>
-
             <SurfaceCard
               icon={CalendarDays}
               title="Agenda do dia"
-              description="Uma linha por partida. Abra o confronto para ver momento recente, Elo e onde assistir."
+              description="Partidas em ordem de horário. Expanda somente o confronto que quiser analisar."
               actions={error ? <StatusBadge tone="warning">Atualização parcial</StatusBadge> : undefined}
             >
               <div className="space-y-4">
@@ -125,12 +149,20 @@ function TodayPage() {
                     />
                   )}
                 >
-                  <FilterChip active={filter === "ALL"} onClick={() => setFilter("ALL")}>Todos</FilterChip>
-                  <FilterChip active={filter === "BROADCAST"} onClick={() => setFilter("BROADCAST")}>Com transmissão</FilterChip>
-                  <FilterChip active={filter === "LIVE"} onClick={() => setFilter("LIVE")}>Ao vivo</FilterChip>
+                  <FilterChip active={filter === "ALL"} onClick={() => setFilter("ALL")}>Todos · {counts.all}</FilterChip>
+                  <FilterChip active={filter === "UPCOMING"} onClick={() => setFilter("UPCOMING")}>Próximos · {counts.upcoming}</FilterChip>
+                  <FilterChip active={filter === "LIVE"} onClick={() => setFilter("LIVE")}>Ao vivo · {counts.live}</FilterChip>
+                  <FilterChip active={filter === "BROADCAST"} onClick={() => setFilter("BROADCAST")}>Com transmissão · {counts.broadcast}</FilterChip>
+                  <FilterChip active={filter === "FINISHED"} onClick={() => setFilter("FINISHED")}>Encerrados · {counts.finished}</FilterChip>
                 </FilterBar>
 
-                {filteredFixtures.length ? (
+                {!overview.fixtures.length ? (
+                  <EmptyState
+                    icon={CalendarDays}
+                    title="Nenhum jogo acompanhado hoje"
+                    description="Não há partidas no escopo prioritário registradas para a data atual."
+                  />
+                ) : filteredFixtures.length ? (
                   <div className="space-y-2">
                     {filteredFixtures.map((fixture) => <TodayFixtureRow key={fixture.id} fixture={fixture} />)}
                   </div>
@@ -141,6 +173,18 @@ function TodayPage() {
                     description="Altere o filtro ou a busca para voltar a ver os confrontos acompanhados hoje."
                   />
                 )}
+              </div>
+            </SurfaceCard>
+
+            <SurfaceCard
+              title="Cobertura do dia"
+              description="Indicadores de completude da agenda. Eles ficam depois dos jogos para não competir com a tarefa principal."
+            >
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <MetricPreview label="Jogos acompanhados" value={String(overview.coverage.trackedFixtures)} detail="Escopo prioritário do dia" />
+                <MetricPreview label="Ao vivo" value={String(counts.live)} detail="Status atual no catálogo" />
+                <MetricPreview label="Transmissão" value={String(overview.coverage.confirmedBroadcastFixtures)} detail="Jogos com evidência confirmada" />
+                <MetricPreview label="Cobertura Elo" value={`${overview.coverage.eloCoveredTeams}/${overview.coverage.totalTeams}`} detail="Equipes com rating atual" />
               </div>
             </SurfaceCard>
           </>

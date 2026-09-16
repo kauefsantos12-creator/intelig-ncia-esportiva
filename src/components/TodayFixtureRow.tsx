@@ -18,14 +18,56 @@ function formatTime(value: string) {
 function statusMeta(status: string): { label: string; tone: "neutral" | "live" | "success" | "warning" } {
   if (status === "LIVE") return { label: "Ao vivo", tone: "live" };
   if (status === "FINISHED") return { label: "Encerrado", tone: "success" };
-  if (status === "POSTPONED" || status === "CANCELLED") return { label: "Alterado", tone: "warning" };
+  if (status === "POSTPONED") return { label: "Adiado", tone: "warning" };
+  if (status === "CANCELLED") return { label: "Cancelado", tone: "warning" };
   return { label: "Agendado", tone: "neutral" };
 }
 
 function scoreLabel(fixture: TodayFixture) {
   if (fixture.status !== "LIVE" && fixture.status !== "FINISHED") return null;
   if (fixture.homeGoals === null || fixture.awayGoals === null) return null;
-  return `${fixture.homeGoals}–${fixture.awayGoals}`;
+  return { home: fixture.homeGoals, away: fixture.awayGoals };
+}
+
+function TeamLogo({ team }: { team: TodayTeam }) {
+  if (team.logoUrl) {
+    return (
+      <img
+        src={team.logoUrl}
+        alt=""
+        className="size-7 shrink-0 object-contain"
+        loading="lazy"
+        aria-hidden
+      />
+    );
+  }
+
+  const initials = team.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toLocaleUpperCase("pt-BR");
+
+  return (
+    <span
+      className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-secondary/35 type-caption font-semibold text-muted-foreground"
+      aria-hidden
+    >
+      {initials || "•"}
+    </span>
+  );
+}
+
+function MatchTeam({ team, goals }: { team: TodayTeam; goals: number | null }) {
+  return (
+    <div className="grid min-w-0 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2.5">
+      <TeamLogo team={team} />
+      <p className="truncate type-label text-foreground">{team.name}</p>
+      {goals !== null ? <span className="type-metric min-w-6 text-right text-foreground">{goals}</span> : null}
+    </div>
+  );
 }
 
 function FormSequence({ form }: { form: RecentForm }) {
@@ -45,8 +87,11 @@ function TeamForm({ team }: { team: TodayTeam }) {
   const form = team.recentForm;
   return (
     <div className="rounded-xl border border-border/55 bg-secondary/22 p-3">
-      <p className="truncate type-label text-foreground">{team.name}</p>
-      <div className="mt-2"><FormSequence form={form} /></div>
+      <div className="flex min-w-0 items-center gap-2.5">
+        <TeamLogo team={team} />
+        <p className="truncate type-label text-foreground">{team.name}</p>
+      </div>
+      <div className="mt-3"><FormSequence form={form} /></div>
       {form.matches ? (
         <p className="mt-2 type-caption text-muted-foreground">
           {form.wins}V · {form.draws}E · {form.losses}D · {form.goalsFor}–{form.goalsAgainst} em gols
@@ -66,8 +111,11 @@ function EloBlock({ home, away }: { home: TodayTeam; away: TodayTeam }) {
       <div className="grid gap-2 sm:grid-cols-2">
         {[home, away].map((team) => (
           <div key={team.id} className="rounded-xl border border-border/55 bg-secondary/22 p-3">
-            <p className="truncate type-caption text-muted-foreground">{team.name}</p>
-            <p className="mt-1 type-metric text-foreground">{team.elo ? team.elo.globalRating.toFixed(1) : "—"}</p>
+            <div className="flex min-w-0 items-center gap-2.5">
+              <TeamLogo team={team} />
+              <p className="truncate type-caption text-muted-foreground">{team.name}</p>
+            </div>
+            <p className="mt-2 type-metric text-foreground">{team.elo ? team.elo.globalRating.toFixed(1) : "—"}</p>
             <p className="mt-1 type-caption text-muted-foreground">Elo global</p>
           </div>
         ))}
@@ -104,31 +152,48 @@ function BroadcastList({ broadcasts }: { broadcasts: BroadcastEvidence[] }) {
 export function TodayFixtureRow({ fixture }: { fixture: TodayFixture }) {
   const status = statusMeta(fixture.status);
   const score = scoreLabel(fixture);
+  const hasBroadcast = fixture.broadcasts.length > 0;
+
   return (
-    <details className="group rounded-2xl border border-border/60 bg-secondary/18 open:bg-secondary/24">
-      <summary className="cursor-pointer list-none px-4 py-4 marker:hidden sm:px-5">
-        <div className="grid min-w-0 gap-3 sm:grid-cols-[72px_minmax(0,1fr)_auto_auto] sm:items-center">
-          <div className="flex items-center justify-between gap-3 sm:block">
-            <p className="type-metric text-foreground">{formatTime(fixture.kickoffAt)}</p>
-            <span className="sm:hidden"><StatusBadge tone={status.tone}>{status.label}</StatusBadge></span>
-          </div>
-          <div className="min-w-0">
-            <p className="truncate type-caption text-muted-foreground">{fixture.competition.name}</p>
-            <div className="mt-1 flex min-w-0 items-center gap-2">
-              <p className="truncate type-label text-foreground">{fixture.home.name}</p>
-              <span className="shrink-0 type-caption text-muted-foreground">×</span>
-              <p className="truncate type-label text-foreground">{fixture.away.name}</p>
-              {score ? <span className="shrink-0 type-metric text-foreground">{score}</span> : null}
+    <details className="group overflow-hidden rounded-2xl border border-border/60 bg-secondary/18 transition-colors open:bg-secondary/24">
+      <summary className="touch-target cursor-pointer list-none px-4 py-4 marker:hidden sm:px-5">
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <p className="max-w-full truncate type-caption text-muted-foreground">{fixture.competition.name}</p>
+              <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
+              {hasBroadcast ? (
+                <StatusBadge tone="info"><Tv className="mr-1 size-3.5" aria-hidden /> Transmissão</StatusBadge>
+              ) : null}
             </div>
+
+            <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-[76px_minmax(0,1fr)] sm:items-center">
+              <div className="flex items-baseline gap-2 sm:block">
+                <p className="type-metric text-foreground">{formatTime(fixture.kickoffAt)}</p>
+                <p className="type-caption text-muted-foreground sm:mt-1">Brasília</p>
+              </div>
+
+              <div className="min-w-0 space-y-2">
+                <MatchTeam team={fixture.home} goals={score?.home ?? null} />
+                <MatchTeam team={fixture.away} goals={score?.away ?? null} />
+              </div>
+            </div>
+
+            {!hasBroadcast ? (
+              <p className="mt-3 type-caption text-muted-foreground sm:ml-[88px]">Transmissão ainda não confirmada</p>
+            ) : null}
           </div>
-          <div className="hidden sm:block"><StatusBadge tone={status.tone}>{status.label}</StatusBadge></div>
-          <div className="flex items-center justify-between gap-2 sm:justify-end">
-            {fixture.broadcasts.length ? <StatusBadge tone="info"><Tv className="mr-1 size-3.5" aria-hidden /> Transmissão</StatusBadge> : <span className="type-caption text-muted-foreground">Sem canal confirmado</span>}
-            <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
+
+          <div className="flex min-h-11 shrink-0 items-center">
+            <ChevronDown className="size-5 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
           </div>
         </div>
       </summary>
+
       <div className="border-t border-border/55 px-4 py-4 sm:px-5">
+        <div className="mb-3">
+          <p className="type-caption text-muted-foreground">Detalhes do confronto</p>
+        </div>
         <div className="grid gap-3 xl:grid-cols-3">
           <section aria-label="Forma recente" className="rounded-2xl border border-border/55 bg-background/20 p-4">
             <div className="flex items-center gap-2"><Activity className="size-4 text-primary" aria-hidden /><h3 className="type-label text-foreground">Momento recente</h3></div>

@@ -39,12 +39,36 @@ describe("Hoje sports intelligence contract", () => {
     expect(row).toContain("Transmissão ainda não confirmada");
   });
 
-  it("supports search, agenda filters, refresh, loading and retry", () => {
+  it("keeps the fixture summary scannable with teams, logos, status and split score", () => {
+    const row = source("./components/TodayFixtureRow.tsx");
+    expect(row).toContain("function TeamLogo");
+    expect(row).toContain("team.logoUrl");
+    expect(row).toContain('loading="lazy"');
+    expect(row).toContain("function MatchTeam");
+    expect(row).toContain("score?.home");
+    expect(row).toContain("score?.away");
+    expect(row).toContain('label: "Adiado"');
+    expect(row).toContain('label: "Cancelado"');
+    expect(row).toContain("Brasília");
+    expect(row).toContain('className="touch-target cursor-pointer');
+  });
+
+  it("prioritizes the agenda before coverage metrics", () => {
+    const route = source("./routes/hoje.tsx");
+    expect(route.indexOf('title="Agenda do dia"')).toBeGreaterThan(-1);
+    expect(route.indexOf('title="Cobertura do dia"')).toBeGreaterThan(-1);
+    expect(route.indexOf('title="Agenda do dia"')).toBeLessThan(route.indexOf('title="Cobertura do dia"'));
+  });
+
+  it("supports search, useful agenda filters, refresh, loading and retry", () => {
     const route = source("./routes/hoje.tsx");
     expect(route).toContain("useServerFn(getTodayOverview)");
     expect(route).toContain("<SearchField");
-    expect(route).toContain("Com transmissão");
-    expect(route).toContain("Ao vivo");
+    expect(route).toContain("Próximos ·");
+    expect(route).toContain("Com transmissão ·");
+    expect(route).toContain("Ao vivo ·");
+    expect(route).toContain("Encerrados ·");
+    expect(route).toContain("Atualizado às");
     expect(route).toContain("<LoadingState");
     expect(route).toContain("<ErrorState");
     expect(route).toContain("Atualizar");
