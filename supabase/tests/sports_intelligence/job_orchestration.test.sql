@@ -1,5 +1,5 @@
 begin;
-select plan(23);
+select plan(31);
 
 select ok(to_regclass('public.sports_jobs') is not null, 'sports job queue exists');
 select ok(to_regprocedure('public.enqueue_sports_job(text,text,uuid,jsonb,integer)') is not null, 'enqueue RPC exists');
@@ -7,6 +7,7 @@ select ok(to_regprocedure('public.claim_sports_job(uuid,integer)') is not null, 
 select ok(to_regprocedure('public.renew_sports_job_lease(uuid,uuid,integer)') is not null, 'lease renewal RPC exists');
 select ok(to_regprocedure('public.complete_sports_job(uuid,uuid)') is not null, 'complete RPC exists');
 select ok(to_regprocedure('public.fail_sports_job(uuid,uuid,text,integer)') is not null, 'fail RPC exists');
+select ok(to_regprocedure('public.dead_sports_job(uuid,uuid,text)') is not null, 'terminal dead RPC exists');
 
 select ok(
   exists(select 1 from cron.job where jobname='sports-intelligence-maintenance' and active and schedule='*/15 * * * *'),
@@ -112,6 +113,63 @@ select is(
   (select status from public.sports_jobs where idempotency_key='part4:test:dedupe'),
   'DEAD',
   'dead job remains terminal'
+);
+
+select lives_ok(
+  $$select public.enqueue_sports_job('part4:test:terminal','TEST_TERMINAL',null,'{}'::jsonb,3)$$,
+  'terminal test job can be enqueued'
+);
+select is(
+  (select status from public.claim_sports_job('00000000-0000-0000-0000-000000000333'::uuid,60)),
+  'RUNNING',
+  'terminal test job is claimed'
+);
+select is(
+  public.dead_sports_job(
+    (select id from public.sports_jobs where idempotency_key='part4:test:terminal'),
+    '00000000-0000-0000-0000-000000000999'::uuid,
+    'must not win'
+  ),
+  false,
+  'worker with the wrong token cannot terminalize a job'
+);
+
+update public.sports_jobs
+set lease_expires_at=now()-interval '1 second'
+where idempotency_key='part4:test:terminal';
+
+select is(
+  public.dead_sports_job(
+    (select id from public.sports_jobs where idempotency_key='part4:test:terminal'),
+    '00000000-0000-0000-0000-000000000333'::uuid,
+    'expired lease must not win'
+  ),
+  false,
+  'expired lease cannot terminalize a job'
+);
+
+update public.sports_jobs
+set lease_expires_at=now()+interval '60 seconds'
+where idempotency_key='part4:test:terminal';
+
+select is(
+  public.dead_sports_job(
+    (select id from public.sports_jobs where idempotency_key='part4:test:terminal'),
+    '00000000-0000-0000-0000-000000000333'::uuid,
+    'terminal validation'
+  ),
+  true,
+  'lease owner can terminalize an active job'
+);
+select is(
+  (select status from public.sports_jobs where idempotency_key='part4:test:terminal'),
+  'DEAD',
+  'explicit terminalization persists DEAD state'
+);
+select is(
+  (select last_error from public.sports_jobs where idempotency_key='part4:test:terminal'),
+  'terminal validation',
+  'explicit terminalization records the bounded error'
 );
 
 select * from finish();

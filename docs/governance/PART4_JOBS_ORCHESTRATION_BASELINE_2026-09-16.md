@@ -18,10 +18,10 @@ Esta parte é a etapa técnica de jobs/orquestração e não deve ser confundida
 
 1. **Idempotência é identidade, não atualização.** Repetir a mesma chave com o mesmo job devolve o registro já existente; reutilizar a chave para outro tipo, fixture ou payload é colisão e falha explicitamente.
 2. **Tentativas são limitadas.** Um job que já consumiu `max_attempts` não pode ser reclamado novamente após falha ou expiração do lease; ele vai para `DEAD`.
-3. **Lease expirado perde autoridade.** `complete_sports_job` e `fail_sports_job` só aceitam o token proprietário enquanto o lease continua válido.
+3. **Lease expirado perde autoridade.** `complete_sports_job`, `fail_sports_job` e a terminalização explícita `dead_sports_job` só aceitam o token proprietário enquanto o lease continua válido.
 4. **Heartbeat explícito.** `renew_sports_job_lease` permite que um worker legítimo prolongue uma execução longa sem abrir uma segunda execução concorrente.
 5. **Concorrência segura.** O claim continua usando `FOR UPDATE SKIP LOCKED`.
-6. **Regressão automatizada.** O conjunto `supabase/tests/sports_intelligence/job_orchestration.test.sql` cobre cron, retirada do legado, idempotência, ownership do lease, retry e estado terminal.
+6. **Regressão automatizada.** O conjunto `supabase/tests/sports_intelligence/job_orchestration.test.sql` cobre cron, retirada do legado, idempotência, ownership do lease, retry, lease expirado e estados terminais.
 
 ## Implementado nesta etapa da Parte 4
 
@@ -32,12 +32,19 @@ Esta parte é a etapa técnica de jobs/orquestração e não deve ser confundida
 - `sports_sync_state` registra tentativa, sucesso e falha para os domínios `fixture_link` e `fixture_data`.
 - Static diagnostics, Database Security e CI completo passaram no HEAD que introduziu e corrigiu o worker antes desta atualização documental.
 
+### Reconciliação corretiva do contrato terminal
+
+Após o merge do worker, a inspeção read-only do Lovable Cloud confirmou que o runtime continua aplicado somente até a migration `20260916014550`; portanto, a migration de hardening `20260916023000` ainda não está viva no ambiente. A mesma revisão encontrou uma lacuna adicional no código versionado: o worker chamava `dead_sports_job` para falhas não recuperáveis, mas a RPC ainda não existia no schema.
+
+A correção versionada em `20260916024500_sports_job_terminal_fencing.sql` adiciona essa RPC com o mesmo modelo de fencing das demais transições: o job precisa estar `RUNNING`, o token precisa ser o proprietário e o lease não pode estar expirado. A RPC limpa o lease, registra erro limitado, define `completed_at` e persiste `DEAD`. O pgTAP correspondente cobre token incorreto, lease expirado e terminalização válida. Esta correção só deve ser considerada viva após o PR corretivo ficar verde, ser mergeado e as migrations pendentes serem aplicadas e verificadas no Lovable Cloud.
+
 ## Lacunas que ainda impedem encerrar a Parte 4
 
 A fila já possui produtores — por exemplo, a sincronização 5Dollar cria `API_FOOTBALL_LINK` e o vínculo da API-Football cria `API_FOOTBALL_FIXTURE_DATA` — e agora existe um consumidor implementado no código. Ainda falta fechar o consumidor operacional no Lovable Cloud como um fluxo único, acordável e auditável.
 
 A Parte 4 ainda deve:
 
+- reconciliar no Lovable Cloud as migrations pendentes de orquestração antes de publicar o worker;
 - instalar e validar o mecanismo que acorda o worker sem produzir processamento duplicado;
 - validar concorrência real com dois workers e recuperação de execução abandonada;
 - validar ponta a ponta `5Dollar -> fixture canônica -> job API-Football -> dados de jogadores/partida`;
