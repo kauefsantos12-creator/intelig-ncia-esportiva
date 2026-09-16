@@ -24,9 +24,16 @@ describe("sports job failure policy", () => {
   it("backs off provider rate limits", () => {
     const first = sportsJobFailureDecision({ attempts: 1, maxAttempts: 5, code: "UPSTREAM_UNAVAILABLE", message: "HTTP 429 rate limit" });
     const second = sportsJobFailureDecision({ attempts: 2, maxAttempts: 5, code: "UPSTREAM_UNAVAILABLE", message: "cota da API-Football" });
+    const envelope = sportsJobFailureDecision({
+      attempts: 1,
+      maxAttempts: 5,
+      code: "EXECUTION_ERROR",
+      message: "Too many requests. You have exceeded the limit of requests per minute of your subscription.",
+    });
     expect(first.action).toBe("RETRY");
     expect(first.retryAfterSeconds).toBe(300);
     expect(second.retryAfterSeconds).toBe(600);
+    expect(envelope).toEqual({ action: "RETRY", retryAfterSeconds: 300, reason: "provider_rate_limited" });
   });
 
   it("keeps configuration failures recoverable with slow retries", () => {

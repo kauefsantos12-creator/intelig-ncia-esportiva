@@ -19,6 +19,7 @@ const TIMEOUT_MS = 10000;
 const MAX_ATTEMPTS = 3;
 const MIN_INTERVAL_MS = 1200;
 const CACHE_TTL_MS = 10 * 60 * 1000;
+const DEFAULT_DISTRIBUTED_LIMIT_PER_MINUTE = 9;
 
 export type ApiFootballFetchStatus = "OK" | "UNAVAILABLE" | "NOT_CONFIGURED";
 
@@ -43,7 +44,9 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>();
 let lastCallAt = 0;
 const PROVIDER = "api_football";
-const DISTRIBUTED_LIMIT_PER_MINUTE = Math.max(1, Math.floor(60_000 / MIN_INTERVAL_MS));
+let distributedLimitPerMinute = DEFAULT_DISTRIBUTED_LIMIT_PER_MINUTE;
+let providerMinuteLimit: number | null = null;
+let providerMinuteRemaining: number | null = null;
 
 export function apiFootballSource(): string {
   return API_FOOTBALL_SOURCE;
@@ -51,6 +54,14 @@ export function apiFootballSource(): string {
 
 export function apiFootballDefinitionVersion(): string {
   return API_FOOTBALL_DEFINITION_VERSION;
+}
+
+export function apiFootballRateLimitState() {
+  return {
+    distributedLimitPerMinute,
+    providerMinuteLimit,
+    providerMinuteRemaining,
+  };
 }
 
 function baseUrl(): string {
@@ -64,6 +75,23 @@ function apiKey(): string | null {
 
 export function apiFootballConfigured(): boolean {
   return apiKey() !== null;
+}
+
+function headerNumber(value: string | null): number | null {
+  if (value === null || value.trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function readProviderRateHeaders(res: Response) {
+  const minuteLimit = headerNumber(res.headers.get("x-ratelimit-limit"));
+  const minuteRemaining = headerNumber(res.headers.get("x-ratelimit-remaining"));
+  providerMinuteLimit = minuteLimit;
+  providerMinuteRemaining = minuteRemaining;
+  if (minuteLimit !== null && minuteLimit > 1) {
+    // Keep one request of headroom so maintenance/status calls are not starved.
+    distributedLimitPerMinute = Math.max(1, Math.floor(minuteLimit) - 1);
+  }
 }
 
 async function serviceDb(): Promise<any | null> {
@@ -115,7 +143,7 @@ async function acquireDistributedSlot() {
   try {
     const { data, error } = await db.rpc("acquire_external_api_slot", {
       p_provider: PROVIDER,
-      p_limit: DISTRIBUTED_LIMIT_PER_MINUTE,
+      p_limit: distributedLimitPerMinute,
       p_window_seconds: 60,
     });
     if (error) return null;
@@ -127,7 +155,8 @@ async function acquireDistributedSlot() {
 }
 
 async function globalThrottle() {
-  // Keep the historic 1.2s per-process spacing and add a shared 50/min ceiling.
+  // Cold starts begin at a free-plan-safe 9/min. Successful provider responses
+  // update the shared ceiling from X-RateLimit-Limit for paid plans.
   await throttle();
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const slot = await acquireDistributedSlot();
@@ -149,6 +178,21 @@ async function markDistributedRateLimit(seconds: number) {
   } catch {
     // Best effort; local request pacing still applies.
   }
+}
+
+function providerErrorText(errors: unknown): string[] {
+  if (!errors || typeof errors !== "object") return [];
+  return Object.values(errors as Record<string, unknown>)
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .filter((value) => value !== null && value !== undefined && String(value).trim() !== "")
+    .map((value) => String(value));
+}
+
+function isRateLimitMessage(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes("too many requests")
+    || normalized.includes("rate limit")
+    || normalized.includes("requests per minute");
 }
 
 export async function apiFootballGet<T = unknown>(path: string): Promise<ApiFootballFetch<T>> {
@@ -180,6 +224,7 @@ export async function apiFootballGet<T = unknown>(path: string): Promise<ApiFoot
     try {
       const res = await fetch(endpoint, { method: "GET", signal: controller.signal, headers: { Accept: "application/json", "x-apisports-key": key } });
       lastStatus = res.status;
+      readProviderRateHeaders(res);
 
       if (res.status === 401 || res.status === 403) {
         return { status: "UNAVAILABLE", endpoint, path, payload: null, httpStatus: res.status, errorMessage: `Credencial rejeitada pela API-Football (HTTP ${res.status}).`, fetchedAt: now(), fromCache: false };
@@ -200,10 +245,23 @@ export async function apiFootballGet<T = unknown>(path: string): Promise<ApiFoot
       }
 
       const payload = (await res.json()) as T;
-      const errors = (payload as { errors?: unknown })?.errors;
-      const errorList = errors && typeof errors === "object" ? Object.values(errors as object).filter(Boolean) : [];
+      const errorList = providerErrorText((payload as { errors?: unknown })?.errors);
       if (errorList.length > 0) {
-        return { status: "UNAVAILABLE", endpoint, path, payload: null, httpStatus: res.status, errorMessage: `Erro reportado pela API-Football: ${errorList.join(" | ")}`, fetchedAt: now(), fromCache: false };
+        const providerMessage = errorList.join(" | ");
+        if (isRateLimitMessage(providerMessage)) {
+          await markDistributedRateLimit(60);
+          return {
+            status: "UNAVAILABLE",
+            endpoint,
+            path,
+            payload: null,
+            httpStatus: res.status,
+            errorMessage: `Rate limit da API-Football: ${providerMessage}`,
+            fetchedAt: now(),
+            fromCache: false,
+          };
+        }
+        return { status: "UNAVAILABLE", endpoint, path, payload: null, httpStatus: res.status, errorMessage: `Erro reportado pela API-Football: ${providerMessage}`, fetchedAt: now(), fromCache: false };
       }
       const fetchedAt = now();
       const entry = { payload, httpStatus: res.status, fetchedAt, expiresAt: Date.now() + CACHE_TTL_MS };
@@ -237,6 +295,9 @@ export async function apiFootballResolveMatch(
   isoDate: string,
 ): Promise<ApiFootballResolution> {
   const res = await apiFootballGet(`/fixtures?date=${isoDate}`);
+  if (res.status === "UNAVAILABLE") {
+    throw new Error(res.errorMessage ?? "API-Football indisponível.");
+  }
   if (res.status !== "OK" || res.payload === null) {
     return { resolution: null, fetch: res, events: [] };
   }

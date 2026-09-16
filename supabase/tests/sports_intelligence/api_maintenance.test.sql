@@ -39,13 +39,13 @@ select ok(
 );
 
 select ok(
-  exists(select 1 from cron.job where jobname='sports-api-maintenance' and active and schedule='12 * * * *'),
-  'API maintenance cron is active hourly'
+  exists(select 1 from cron.job where jobname='sports-api-maintenance' and active and schedule='12 */6 * * *'),
+  'API maintenance cron is active every 6 hours to preserve provider quota'
 );
 
 select ok(
-  exists(select 1 from cron.job where jobname='sports-job-worker-kick' and active and schedule='*/2 * * * *'),
-  'sports worker is re-enabled only with the final API fix migration'
+  exists(select 1 from cron.job where jobname='sports-job-worker-kick' and active and schedule='* * * * *'),
+  'sports worker is active once per minute under the quota-aware scheduler'
 );
 
 select ok(

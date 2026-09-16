@@ -14,7 +14,7 @@ import {
 const SEASON = "2026/27";
 const LEASE_SECONDS = 240;
 const HEARTBEAT_MS = 45_000;
-const DEFAULT_BATCH_SIZE = 5;
+const DEFAULT_BATCH_SIZE = 1;
 
 type Row = Record<string, unknown>;
 

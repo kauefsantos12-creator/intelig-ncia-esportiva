@@ -65,6 +65,8 @@ export function sportsJobFailureDecision(input: {
     normalized.includes("rate limit")
     || normalized.includes("http 429")
     || normalized.includes("cota da api-football")
+    || normalized.includes("too many requests")
+    || normalized.includes("requests per minute")
   ) {
     return {
       action: "RETRY",

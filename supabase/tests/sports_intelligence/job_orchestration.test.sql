@@ -17,8 +17,8 @@ select ok(
   'sports maintenance cron is active every 15 minutes'
 );
 select ok(
-  exists(select 1 from cron.job where jobname='sports-job-worker-kick' and active and schedule='*/2 * * * *'),
-  'sports worker wake cron is active every 2 minutes'
+  exists(select 1 from cron.job where jobname='sports-job-worker-kick' and active and schedule='* * * * *'),
+  'sports worker wake cron is active once per minute'
 );
 select ok(
   exists(select 1 from cron.job where jobname='sports-daily-sync-yesterday' and active and schedule='20 8 * * *'),
