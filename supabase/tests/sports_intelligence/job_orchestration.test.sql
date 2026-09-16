@@ -1,5 +1,5 @@
 begin;
-select plan(31);
+select plan(38);
 
 select ok(to_regclass('public.sports_jobs') is not null, 'sports job queue exists');
 select ok(to_regprocedure('public.enqueue_sports_job(text,text,uuid,jsonb,integer)') is not null, 'enqueue RPC exists');
@@ -8,10 +8,16 @@ select ok(to_regprocedure('public.renew_sports_job_lease(uuid,uuid,integer)') is
 select ok(to_regprocedure('public.complete_sports_job(uuid,uuid)') is not null, 'complete RPC exists');
 select ok(to_regprocedure('public.fail_sports_job(uuid,uuid,text,integer)') is not null, 'fail RPC exists');
 select ok(to_regprocedure('public.dead_sports_job(uuid,uuid,text)') is not null, 'terminal dead RPC exists');
+select ok(to_regprocedure('public.verify_sports_worker_cron_token(text)') is not null, 'worker cron token verifier exists');
+select ok(to_regprocedure('public.kick_sports_job_worker()') is not null, 'worker wake RPC exists');
 
 select ok(
   exists(select 1 from cron.job where jobname='sports-intelligence-maintenance' and active and schedule='*/15 * * * *'),
   'sports maintenance cron is active every 15 minutes'
+);
+select ok(
+  exists(select 1 from cron.job where jobname='sports-job-worker-kick' and active and schedule='*/2 * * * *'),
+  'sports worker wake cron is active every 2 minutes'
 );
 select ok(
   exists(select 1 from cron.job where jobname='elo-daily-finalize' and active and schedule='5 8 * * *'),
@@ -31,6 +37,25 @@ select ok(
 select ok(
   position('idempotency key collision' in lower(pg_get_functiondef('public.enqueue_sports_job(text,text,uuid,jsonb,integer)'::regprocedure))) > 0,
   'enqueue rejects semantic collisions on one idempotency key'
+);
+select ok(
+  position('net.http_post' in lower(pg_get_functiondef('public.kick_sports_job_worker()'::regprocedure))) > 0,
+  'worker wake dispatches through pg_net'
+);
+select is(
+  has_function_privilege('anon','public.verify_sports_worker_cron_token(text)','EXECUTE'),
+  false,
+  'anon cannot execute worker cron token verifier'
+);
+select is(
+  has_function_privilege('authenticated','public.verify_sports_worker_cron_token(text)','EXECUTE'),
+  false,
+  'authenticated users cannot execute worker cron token verifier'
+);
+select is(
+  has_function_privilege('service_role','public.verify_sports_worker_cron_token(text)','EXECUTE'),
+  true,
+  'service role can execute worker cron token verifier'
 );
 
 select lives_ok(
