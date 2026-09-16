@@ -1,43 +1,393 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, CalendarRange, Layers3, UsersRound } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { BarChart3, CalendarDays, RefreshCw, Search, ShieldCheck, UsersRound } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
-import { ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
-import { EmptyState } from "@/components/SurfaceState";
+import { FilterBar, FilterChip, SearchField, StatusBadge } from "@/components/ProductControls";
+import { MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
+import {
+  getAnalyticsDirectory,
+  getAnalyticsTeamDetail,
+  type AnalyticsStanding,
+  type AnalyticsTeamDetail,
+} from "@/lib/analytics-overview.functions";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
       { title: "Analytics · Motor de Inteligência Esportiva" },
-      { name: "description", content: "Análises por competição, time, temporada, elenco e calendário." },
+      { name: "description", content: "Analytics 26/27 por competição, time, elenco, jogadores e calendário." },
     ],
   }),
   component: AnalyticsPage,
 });
 
+type AnalyticsDirectory = Awaited<ReturnType<typeof getAnalyticsDirectory>>;
+
+const regionLabels: Record<string, string> = {
+  EUROPE: "Europa",
+  SOUTH_AMERICA: "América do Sul",
+  NORTH_AMERICA: "América do Norte",
+  ASIA: "Ásia",
+  AFRICA: "África",
+  OCEANIA: "Oceania",
+};
+
+const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "short",
+});
+const decimalFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+
+function formatNumber(value: number | null) {
+  return value === null ? "—" : decimalFormatter.format(value);
+}
+
+function goalDifference(row: AnalyticsStanding) {
+  if (row.goalsFor === null || row.goalsAgainst === null) return null;
+  return row.goalsFor - row.goalsAgainst;
+}
+
+function formTokens(form: string | null) {
+  if (!form) return [];
+  return form
+    .toUpperCase()
+    .replace(/[^WDLVDE]/g, "")
+    .split("")
+    .slice(-5);
+}
+
 function AnalyticsPage() {
+  const loadDirectory = useServerFn(getAnalyticsDirectory);
+  const loadTeamDetail = useServerFn(getAnalyticsTeamDetail);
+  const [directory, setDirectory] = useState<AnalyticsDirectory | null>(null);
+  const [detail, setDetail] = useState<AnalyticsTeamDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [region, setRegion] = useState("ALL");
+  const [country, setCountry] = useState("ALL");
+  const [competitionId, setCompetitionId] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setDirectory(await loadDirectory());
+    } catch {
+      setError("Os dados de Analytics não puderam ser carregados agora.");
+    } finally {
+      setLoading(false);
+    }
+  }, [loadDirectory]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const regions = useMemo(() => {
+    if (!directory) return [];
+    return Array.from(new Set(directory.competitions.map((item) => item.region).filter((value): value is string => Boolean(value)))).sort();
+  }, [directory]);
+
+  const countries = useMemo(() => {
+    if (!directory) return [];
+    return Array.from(
+      new Set(
+        directory.competitions
+          .filter((item) => region === "ALL" || item.region === region)
+          .map((item) => item.countryCode)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    ).sort();
+  }, [directory, region]);
+
+  const competitions = useMemo(() => {
+    if (!directory) return [];
+    return directory.competitions.filter(
+      (item) =>
+        (region === "ALL" || item.region === region) &&
+        (country === "ALL" || item.countryCode === country),
+    );
+  }, [country, directory, region]);
+
+  useEffect(() => {
+    if (country !== "ALL" && !countries.includes(country)) setCountry("ALL");
+  }, [countries, country]);
+
+  useEffect(() => {
+    if (competitionId && !competitions.some((item) => item.id === competitionId)) {
+      setCompetitionId(null);
+      setTeamId(null);
+      setDetail(null);
+    }
+  }, [competitionId, competitions]);
+
+  const selectedCompetition = directory?.competitions.find((item) => item.id === competitionId) ?? null;
+  const standings = useMemo(() => {
+    if (!directory || !competitionId) return [];
+    const term = search.trim().toLocaleLowerCase("pt-BR");
+    return directory.standings
+      .filter((row) => row.competitionId === competitionId)
+      .filter((row) => !term || row.teamName.toLocaleLowerCase("pt-BR").includes(term));
+  }, [competitionId, directory, search]);
+
+  const selectedStanding = directory?.standings.find(
+    (row) => row.competitionId === competitionId && row.teamId === teamId,
+  ) ?? null;
+
+  const selectTeam = useCallback(
+    async (row: AnalyticsStanding) => {
+      if (!directory) return;
+      setTeamId(row.teamId);
+      setDetail(null);
+      setDetailLoading(true);
+      setDetailError(null);
+      try {
+        setDetail(
+          await loadTeamDetail({
+            data: { competitionId: row.competitionId, teamId: row.teamId, season: directory.season },
+          }),
+        );
+      } catch {
+        setDetailError("O detalhamento da equipe não pôde ser carregado agora.");
+      } finally {
+        setDetailLoading(false);
+      }
+    },
+    [directory, loadTeamDetail],
+  );
+
+  const completedFixtures = detail?.fixtures.filter((fixture) => fixture.status === "FINISHED") ?? [];
+  const nextFixtures = detail?.fixtures
+    .filter((fixture) => fixture.status === "SCHEDULED")
+    .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt))
+    .slice(0, 5) ?? [];
+
+  const averageRating = useMemo(() => {
+    const ratings = detail?.players.map((player) => player.providerRating).filter((value): value is number => value !== null) ?? [];
+    return ratings.length ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : null;
+  }, [detail]);
+
   return (
     <AppShell stage="analytics">
       <div className="space-y-6">
         <ProductPageHeader
-          eyebrow="Analytics"
-          title="Do campeonato ao jogador"
-          description="Explore a temporada de cima para baixo: continente, país, competição e time. Depois aprofunde desempenho, calendário, elenco e jogadores sem perder o contexto da competição."
+          eyebrow="Analytics 26/27"
+          title="Da competição ao jogador"
+          description="Explore a temporada por região, país e competição; abra uma equipe para combinar classificação, desempenho, elenco, jogadores e calendário."
+          meta={<StatusBadge tone="info">Temporada 2026/27</StatusBadge>}
+          aside={(
+            <button
+              type="button"
+              onClick={() => void refresh()}
+              disabled={loading}
+              className="touch-target inline-flex min-h-11 items-center gap-2 rounded-xl border border-border/70 bg-secondary/30 px-4 type-meta font-medium text-foreground hover:bg-secondary/55 disabled:opacity-50"
+            >
+              <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} aria-hidden />
+              Atualizar
+            </button>
+          )}
         />
 
-        <SurfaceCard icon={Layers3} title="Navegação analítica" description="Continente → país → competição → time.">
-          <EmptyState
-            icon={Layers3}
-            title="Escolha do contexto analítico"
-            description="Os filtros progressivos desta área vão orientar a análise sem sobrecarregar a tela com listas extensas."
-          />
-        </SurfaceCard>
+        {loading && !directory ? (
+          <LoadingState label="Carregando Analytics 26/27" rows={6} />
+        ) : error && !directory ? (
+          <ErrorState description={error} onRetry={() => void refresh()} />
+        ) : directory ? (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <MetricPreview label="Competições" value={String(directory.competitions.length)} detail="Com classificação carregada" />
+              <MetricPreview label="Equipes" value={String(new Set(directory.standings.map((row) => row.teamId)).size)} detail="Presentes no recorte 26/27" />
+              <MetricPreview label="Linhas de classificação" value={String(directory.standings.length)} detail="Último snapshot por equipe e competição" />
+              <MetricPreview label="Atualizado" value={new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(directory.generatedAt))} detail="Catálogo lido no servidor" />
+            </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <SurfaceCard icon={BarChart3} title="Desempenho" description="Resultados, produção ofensiva/defensiva, forma e contexto de força." tone="subtle" />
-          <SurfaceCard icon={UsersRound} title="Elenco e jogadores" description="Participação, minutagem e estatísticas disponíveis por temporada." tone="subtle" />
-          <SurfaceCard icon={CalendarRange} title="Calendário" description="Sequência de jogos, adversários e dificuldade relativa do período." tone="subtle" />
-        </div>
+            <SurfaceCard
+              icon={BarChart3}
+              title="Contexto analítico"
+              description="Os filtros são progressivos: região e país reduzem as competições disponíveis; a equipe abre o detalhamento da temporada."
+            >
+              <div className="space-y-4">
+                <FilterBar label="Filtrar Analytics">
+                  <FilterChip active={region === "ALL"} onClick={() => setRegion("ALL")}>Todas as regiões</FilterChip>
+                  {regions.map((value) => (
+                    <FilterChip key={value} active={region === value} onClick={() => setRegion(value)}>{regionLabels[value] ?? value}</FilterChip>
+                  ))}
+                </FilterBar>
+
+                {countries.length ? (
+                  <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrar por país">
+                    <FilterChip active={country === "ALL"} onClick={() => setCountry("ALL")}>Todos os países</FilterChip>
+                    {countries.map((value) => (
+                      <FilterChip key={value} active={country === value} onClick={() => setCountry(value)}>{value}</FilterChip>
+                    ))}
+                  </div>
+                ) : null}
+
+                {competitions.length ? (
+                  <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Escolher competição">
+                    {competitions.map((competition) => (
+                      <FilterChip
+                        key={competition.id}
+                        active={competitionId === competition.id}
+                        onClick={() => {
+                          setCompetitionId(competition.id);
+                          setTeamId(null);
+                          setDetail(null);
+                          setSearch("");
+                        }}
+                      >
+                        {competition.name}
+                      </FilterChip>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState icon={BarChart3} title="Sem competição neste recorte" description="Amplie os filtros para localizar competições com dados 26/27 carregados." />
+                )}
+              </div>
+            </SurfaceCard>
+
+            {selectedCompetition ? (
+              <SurfaceCard
+                icon={ShieldCheck}
+                title={selectedCompetition.name}
+                description={`${selectedCompetition.countryCode ?? regionLabels[selectedCompetition.region ?? ""] ?? selectedCompetition.region ?? "Escopo internacional"} · ${selectedCompetition.season}`}
+                actions={(
+                  <SearchField
+                    label="Buscar equipe na classificação"
+                    placeholder="Buscar equipe"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    className="w-full sm:w-64"
+                  />
+                )}
+              >
+                {standings.length ? (
+                  <div className="overflow-hidden rounded-2xl border border-border/70">
+                    <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_3rem_3rem] gap-2 bg-secondary/35 px-3 py-2.5 type-caption uppercase tracking-[0.06em] text-muted-foreground sm:grid-cols-[3rem_minmax(0,1fr)_3rem_3rem_3rem_3rem_4rem_4rem]">
+                      <span>#</span><span>Equipe</span><span>J</span><span>Pts</span><span className="hidden sm:block">V</span><span className="hidden sm:block">E</span><span className="hidden sm:block">SG</span><span className="hidden sm:block">Forma</span>
+                    </div>
+                    <div className="divide-y divide-border/60">
+                      {standings.map((row) => (
+                        <button
+                          key={row.teamId}
+                          type="button"
+                          aria-pressed={teamId === row.teamId}
+                          onClick={() => void selectTeam(row)}
+                          className={`grid w-full grid-cols-[2.5rem_minmax(0,1fr)_3rem_3rem] items-center gap-2 px-3 py-3 text-left transition-colors sm:grid-cols-[3rem_minmax(0,1fr)_3rem_3rem_3rem_3rem_4rem_4rem] ${teamId === row.teamId ? "bg-primary/10" : "hover:bg-secondary/25"}`}
+                        >
+                          <span className="type-meta text-muted-foreground">{row.position ?? "—"}</span>
+                          <div className="min-w-0">
+                            <p className="truncate type-label text-foreground">{row.teamName}</p>
+                            <p className="mt-0.5 type-caption text-muted-foreground sm:hidden">{row.wins ?? 0}V · {row.draws ?? 0}E · {row.losses ?? 0}D</p>
+                          </div>
+                          <span className="type-meta text-muted-foreground">{row.played ?? "—"}</span>
+                          <span className="type-metric text-foreground">{row.points ?? "—"}</span>
+                          <span className="hidden type-meta text-muted-foreground sm:block">{row.wins ?? "—"}</span>
+                          <span className="hidden type-meta text-muted-foreground sm:block">{row.draws ?? "—"}</span>
+                          <span className="hidden type-meta text-muted-foreground sm:block">{goalDifference(row) === null ? "—" : `${goalDifference(row)! >= 0 ? "+" : ""}${goalDifference(row)}`}</span>
+                          <span className="hidden type-caption text-muted-foreground sm:block">{formTokens(row.form).join(" ") || "—"}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <EmptyState icon={search ? Search : ShieldCheck} title="Nenhuma equipe encontrada" description="Altere a busca ou escolha outra competição." />
+                )}
+              </SurfaceCard>
+            ) : (
+              <SurfaceCard icon={ShieldCheck} title="Classificação" description="Escolha uma competição para abrir a tabela da temporada." tone="subtle">
+                <EmptyState icon={ShieldCheck} title="Escolha uma competição" description="A classificação aparece apenas quando existe um recorte ativo." />
+              </SurfaceCard>
+            )}
+
+            {selectedStanding ? (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <MetricPreview label="Posição" value={selectedStanding.position ? `${selectedStanding.position}º` : "—"} detail={`${selectedStanding.points ?? "—"} pontos em ${selectedStanding.played ?? "—"} jogos`} />
+                  <MetricPreview label="Campanha" value={`${selectedStanding.wins ?? 0}V · ${selectedStanding.draws ?? 0}E · ${selectedStanding.losses ?? 0}D`} detail="Resultados na competição" />
+                  <MetricPreview label="Gols" value={`${selectedStanding.goalsFor ?? "—"}:${selectedStanding.goalsAgainst ?? "—"}`} detail={`Saldo ${goalDifference(selectedStanding) === null ? "—" : goalDifference(selectedStanding)}`} />
+                  <MetricPreview label="Rating médio" value={formatNumber(averageRating)} detail="Média dos jogadores com rating do provedor" />
+                </div>
+
+                <SurfaceCard icon={UsersRound} title={`Elenco · ${selectedStanding.teamName}`} description="Participação e métricas da temporada na competição selecionada.">
+                  {detailLoading && !detail ? (
+                    <LoadingState label="Carregando elenco e jogadores" rows={5} />
+                  ) : detailError && !detail ? (
+                    <ErrorState description={detailError} onRetry={() => void selectTeam(selectedStanding)} />
+                  ) : detail?.players.length ? (
+                    <div className="overflow-hidden rounded-2xl border border-border/70">
+                      <div className="grid grid-cols-[minmax(0,1fr)_3rem_4rem] gap-3 bg-secondary/35 px-4 py-2.5 type-caption uppercase tracking-[0.06em] text-muted-foreground sm:grid-cols-[minmax(0,1fr)_7rem_4rem_4rem_5rem_4rem]">
+                        <span>Jogador</span><span className="hidden sm:block">Posição</span><span>Jogos</span><span className="hidden sm:block">Tit.</span><span className="hidden sm:block">Minutos</span><span>Rating</span>
+                      </div>
+                      <div className="divide-y divide-border/60">
+                        {detail.players.slice(0, 40).map((player) => (
+                          <div key={player.id} className="grid grid-cols-[minmax(0,1fr)_3rem_4rem] items-center gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_7rem_4rem_4rem_5rem_4rem]">
+                            <div className="min-w-0">
+                              <p className="truncate type-label text-foreground">{player.jerseyNumber !== null ? `${player.jerseyNumber} · ` : ""}{player.name}</p>
+                              <p className="mt-0.5 truncate type-caption text-muted-foreground">{player.nationality ?? player.position ?? "Sem nacionalidade informada"}</p>
+                            </div>
+                            <span className="hidden truncate type-caption text-muted-foreground sm:block">{player.position ?? "—"}</span>
+                            <span className="type-meta text-muted-foreground">{player.appearances ?? "—"}</span>
+                            <span className="hidden type-meta text-muted-foreground sm:block">{player.starts ?? "—"}</span>
+                            <span className="hidden type-meta text-muted-foreground sm:block">{player.minutes ?? "—"}</span>
+                            <span className="type-metric text-foreground">{formatNumber(player.providerRating)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <EmptyState icon={UsersRound} title="Elenco ainda sem estatísticas" description="A equipe está na classificação, mas ainda não há dados de jogadores 26/27 para este recorte." />
+                  )}
+                </SurfaceCard>
+
+                <SurfaceCard icon={CalendarDays} title="Calendário e resultados" description="Partidas da equipe na competição selecionada, sem misturar outros torneios.">
+                  {detailLoading && !detail ? (
+                    <LoadingState label="Carregando calendário" rows={4} />
+                  ) : detail ? (
+                    <div className="grid gap-5 lg:grid-cols-2">
+                      <div>
+                        <p className="mb-3 type-label text-foreground">Próximos jogos</p>
+                        {nextFixtures.length ? (
+                          <div className="space-y-2">
+                            {nextFixtures.map((fixture) => (
+                              <div key={fixture.id} className="rounded-xl border border-border/60 bg-secondary/20 px-3 py-3">
+                                <p className="type-caption text-muted-foreground">{dateFormatter.format(new Date(fixture.kickoffAt))}</p>
+                                <p className="mt-1 type-label text-foreground">{fixture.homeTeamName} × {fixture.awayTeamName}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : <p className="type-meta text-muted-foreground">Nenhum próximo jogo carregado neste recorte.</p>}
+                      </div>
+                      <div>
+                        <p className="mb-3 type-label text-foreground">Resultados recentes</p>
+                        {completedFixtures.length ? (
+                          <div className="space-y-2">
+                            {completedFixtures.slice(0, 5).map((fixture) => (
+                              <div key={fixture.id} className="rounded-xl border border-border/60 bg-secondary/20 px-3 py-3">
+                                <p className="type-caption text-muted-foreground">{dateFormatter.format(new Date(fixture.kickoffAt))}</p>
+                                <p className="mt-1 type-label text-foreground">{fixture.homeTeamName} {fixture.homeGoals ?? "—"}–{fixture.awayGoals ?? "—"} {fixture.awayTeamName}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : <p className="type-meta text-muted-foreground">Nenhum resultado carregado neste recorte.</p>}
+                      </div>
+                    </div>
+                  ) : (
+                    <EmptyState icon={CalendarDays} title="Selecione uma equipe" description="O calendário aparece junto do detalhamento da equipe." />
+                  )}
+                </SurfaceCard>
+              </>
+            ) : null}
+          </>
+        ) : null}
       </div>
     </AppShell>
   );
