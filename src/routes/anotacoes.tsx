@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ClipboardCheck, Goal, NotebookPen, Star } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
-import { FoundationNotice, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { EmptyState } from "@/components/SurfaceState";
 
 export const Route = createFileRoute("/anotacoes")({
   head: () => ({
@@ -25,15 +26,17 @@ function NotesPage() {
         />
 
         <SurfaceCard icon={ClipboardCheck} title="Jogos disponíveis para anotar" description="Somente partidas encerradas entram nesta fila.">
-          <FoundationNotice>
-            A seleção será derivada das fixtures finalizadas. Cada anotação ficará vinculada à partida canônica e ao seu usuário, sem depender de armazenamento local.
-          </FoundationNotice>
+          <EmptyState
+            icon={ClipboardCheck}
+            title="Nenhuma partida disponível para anotar"
+            description="Quando houver jogos encerrados elegíveis, eles aparecerão aqui para iniciar ou continuar seu registro pessoal."
+          />
         </SurfaceCard>
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <SurfaceCard icon={NotebookPen} title="1. Registro" description="Assistiu ou não assistiu, comentário e impressão geral." />
-          <SurfaceCard icon={Star} title="2. Notas pessoais" description="Escala de 0 a 10 em passos de 0,5 para jogadores ou aspectos escolhidos." />
-          <SurfaceCard icon={Goal} title="3. Campinho" description="Marcação visual de participantes e zonas para complementar a leitura do jogo." />
+          <SurfaceCard icon={NotebookPen} title="1. Registro" description="Assistiu ou não assistiu, comentário e impressão geral." tone="subtle" />
+          <SurfaceCard icon={Star} title="2. Notas pessoais" description="Escala de 0 a 10 em passos de 0,5 para jogadores ou aspectos escolhidos." tone="subtle" />
+          <SurfaceCard icon={Goal} title="3. Campinho" description="Marcação visual de participantes e zonas para complementar a leitura do jogo." tone="subtle" />
         </div>
       </div>
     </AppShell>

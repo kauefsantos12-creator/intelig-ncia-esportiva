@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { GitCompareArrows, History, ListOrdered, TrendingUp } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
-import { FoundationNotice, MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { EmptyState } from "@/components/SurfaceState";
 
 export const Route = createFileRoute("/elo")({
   head: () => ({
@@ -32,15 +33,17 @@ function EloPage() {
 
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
           <SurfaceCard icon={ListOrdered} title="Ranking de clubes" description="Continente → país → liga → clube.">
-            <FoundationNotice>
-              A tabela final vai consumir as leituras server-side do Elo já preservadas no backend e mostrar posição, rating, variação e competição em um único contexto esportivo.
-            </FoundationNotice>
+            <EmptyState
+              icon={ListOrdered}
+              title="O ranking de clubes aparecerá aqui"
+              description="A lista reunirá posição, Elo, variação recente e competição dentro do contexto selecionado."
+            />
           </SurfaceCard>
 
           <div className="grid gap-4">
-            <SurfaceCard icon={GitCompareArrows} title="Ranking de ligas" description="Comparação hierárquica entre competições e divisões." />
-            <SurfaceCard icon={History} title="Histórico" description="Trajetória de até 60 dias para clube ou liga selecionados." />
-            <SurfaceCard icon={TrendingUp} title="Movimentos relevantes" description="Mudanças de Elo que merecem atenção por magnitude e contexto." />
+            <SurfaceCard icon={GitCompareArrows} title="Ranking de ligas" description="Comparação hierárquica entre competições e divisões." tone="subtle" />
+            <SurfaceCard icon={History} title="Histórico" description="Trajetória de até 60 dias para clube ou liga selecionados." tone="subtle" />
+            <SurfaceCard icon={TrendingUp} title="Movimentos relevantes" description="Mudanças de Elo que merecem atenção por magnitude e contexto." tone="subtle" />
           </div>
         </div>
       </div>

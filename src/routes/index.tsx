@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Newspaper, Sparkles, TrendingUp } from "lucide-react";
+import { Newspaper, TrendingUp } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
-import { FoundationNotice, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { EmptyState } from "@/components/SurfaceState";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,22 +32,11 @@ function NewsPage() {
             description="Resultados, contexto de jogo, destaques individuais e fatos relevantes em uma leitura contínua."
             className="min-h-[22rem]"
           >
-            <FoundationNotice>
-              Esta superfície está preparada para receber a resenha factual combinando dados estruturados do runtime esportivo com contexto editorial e estatísticas da partida.
-            </FoundationNotice>
-            <div className="mt-5 space-y-3" aria-label="Estrutura da resenha">
-              {[
-                "Panorama do dia e partidas de maior relevância",
-                "Resumo por jogo com fatos e melhores momentos",
-                "Destaques individuais sustentados por dados da partida",
-                "Competições menores agrupadas para reduzir ruído",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3 rounded-xl bg-secondary/35 px-4 py-3">
-                  <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                  <p className="type-meta text-foreground/90">{item}</p>
-                </div>
-              ))}
-            </div>
+            <EmptyState
+              icon={Newspaper}
+              title="A resenha do período aparecerá aqui"
+              description="Quando houver conteúdo disponível, esta área reunirá os principais jogos, acontecimentos e destaques em uma leitura única."
+            />
           </SurfaceCard>
 
           <SurfaceCard
@@ -55,19 +45,11 @@ function NewsPage() {
             description="Mudanças significativas ficam separadas do noticiário para leitura rápida."
             className="min-h-[22rem]"
           >
-            <FoundationNotice>
-              A próxima conexão desta área usará o histórico point-in-time já preservado no backend para destacar variações relevantes de clubes e ligas.
-            </FoundationNotice>
-            <div className="mt-5 grid gap-3">
-              <div className="metric-tile p-4">
-                <p className="type-label text-foreground">Clube</p>
-                <p className="mt-1 type-caption text-muted-foreground">Variação recente, posição e contexto da mudança.</p>
-              </div>
-              <div className="metric-tile p-4">
-                <p className="type-label text-foreground">Liga</p>
-                <p className="mt-1 type-caption text-muted-foreground">Movimento hierárquico e diferença para ligas relacionadas.</p>
-              </div>
-            </div>
+            <EmptyState
+              icon={TrendingUp}
+              title="Sem movimentos relevantes para exibir"
+              description="Alterações significativas de clubes e ligas aparecerão aqui com variação e contexto."
+            />
           </SurfaceCard>
         </div>
       </div>

@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, CalendarRange, Layers3, UsersRound } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
-import { FoundationNotice, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { EmptyState } from "@/components/SurfaceState";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -25,15 +26,17 @@ function AnalyticsPage() {
         />
 
         <SurfaceCard icon={Layers3} title="Navegação analítica" description="Continente → país → competição → time.">
-          <FoundationNotice>
-            Os filtros serão progressivos para evitar listas enormes no celular. A seleção de uma competição define o contexto dos indicadores exibidos abaixo.
-          </FoundationNotice>
+          <EmptyState
+            icon={Layers3}
+            title="Escolha do contexto analítico"
+            description="Os filtros progressivos desta área vão orientar a análise sem sobrecarregar a tela com listas extensas."
+          />
         </SurfaceCard>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <SurfaceCard icon={BarChart3} title="Desempenho" description="Resultados, produção ofensiva/defensiva, forma e contexto de força." />
-          <SurfaceCard icon={UsersRound} title="Elenco e jogadores" description="Participação, minutagem e estatísticas disponíveis por temporada." />
-          <SurfaceCard icon={CalendarRange} title="Calendário" description="Sequência de jogos, adversários e dificuldade relativa do período." />
+          <SurfaceCard icon={BarChart3} title="Desempenho" description="Resultados, produção ofensiva/defensiva, forma e contexto de força." tone="subtle" />
+          <SurfaceCard icon={UsersRound} title="Elenco e jogadores" description="Participação, minutagem e estatísticas disponíveis por temporada." tone="subtle" />
+          <SurfaceCard icon={CalendarRange} title="Calendário" description="Sequência de jogos, adversários e dificuldade relativa do período." tone="subtle" />
         </div>
       </div>
     </AppShell>
