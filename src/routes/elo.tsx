@@ -33,7 +33,7 @@ function EloPage() {
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
           <SurfaceCard icon={ListOrdered} title="Ranking de clubes" description="Continente → país → liga → clube.">
             <FoundationNotice>
-              A tabela final vai consumir as leituras server-side do Elo já preservadas no backend. O ranking deve mostrar posição, Elo, variação e liga sem misturar métricas de apostas.
+              A tabela final vai consumir as leituras server-side do Elo já preservadas no backend e mostrar posição, rating, variação e competição em um único contexto esportivo.
             </FoundationNotice>
           </SurfaceCard>
 

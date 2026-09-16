@@ -19,7 +19,7 @@ A aplicação adota WCAG 2.2 nível AA como referência para os critérios aplic
 ## Tipografia
 
 - Família principal: IBM Plex Sans.
-- Família monoespaçada: IBM Plex Mono, restrita principalmente a números, odds, valores e dados tabulares.
+- Família monoespaçada: IBM Plex Mono, restrita principalmente a ratings, estatísticas, horários, números e dados tabulares.
 - Corpo padrão mantém 16 px do navegador com line-height base 1.5.
 - Texto secundário funcional deve preferir 14 px ou mais.
 - `text-xs` é elevado para 13 px/18 px de line-height.

@@ -1,11 +1,11 @@
 import { Info } from "lucide-react";
 
 const HELP: Record<string, string> = {
-  EV: "EV esperado estima a vantagem matemática da aposta com base na chance calculada e na odd disponível. Não é lucro garantido.",
-  "Odd de referência": "Odd que representa o preço de equilíbrio estimado pelo modelo para esta opção.",
-  Vantagem: "Diferença entre a chance calculada pelo modelo e a chance implícita na odd da casa.",
-  CLV: "Compara a odd registrada com a odd mais próxima do início do jogo. Serve para acompanhar a qualidade do preço obtido.",
-  ROI: "Retorno realizado sobre o total efetivamente apostado nas apostas já encerradas.",
+  Elo: "Rating de força relativa atualizado a partir dos resultados, levando em conta o nível dos adversários e o contexto competitivo.",
+  Forma: "Resumo do desempenho recente do time, usado como contexto e não como substituto da força de longo prazo.",
+  Ataque: "Leitura agregada da produção ofensiva disponível para o período e competição selecionados.",
+  Defesa: "Leitura agregada da capacidade defensiva disponível para o período e competição selecionados.",
+  "Força de calendário": "Contextualiza a sequência de partidas pela qualidade relativa dos adversários enfrentados e previstos.",
 };
 
 export function MetricHelp({ term }: { term: keyof typeof HELP }) {

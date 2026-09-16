@@ -2,17 +2,17 @@
 
 Data: 16/09/2026
 
-Branch: `feat/sports-intelligence-frontend-shell`
+Branch original: `feat/sports-intelligence-frontend-shell`
 
-Estado: **implementado na branch e aguardando CI/PR; não mergeado nem publicado**.
+Estado: **mergeado, sincronizado e publicado**.
 
 ## Objetivo
 
-Substituir a superfície transitória remanescente por uma arquitetura de informação coerente com o novo produto, sem reintroduzir o frontend legado de apostas.
+Estabelecer uma arquitetura de informação única para o Motor de Inteligência Esportiva, orientada exclusivamente a futebol, dados esportivos, Elo, analytics e registros pessoais de partidas.
 
 ## Navegação canônica
 
-A experiência principal passa a ser organizada em cinco superfícies:
+A experiência principal é organizada em cinco superfícies:
 
 1. **Noticiário** — resenha esportiva factual e movimentos relevantes de Elo;
 2. **Hoje** — agenda de jogos, transmissão e contexto esportivo expansível;
@@ -30,26 +30,26 @@ A experiência principal passa a ser organizada em cinco superfícies:
 - touch targets mínimos de 44 px;
 - bottom navigation some quando o teclado virtual ocupa a viewport;
 - progressive disclosure para jogos e detalhes analíticos;
-- nenhuma superfície deve exibir odds, picks, banca, stake ou outras abstrações do produto antigo;
-- estados vazios devem explicar a ausência de dados sem simular conteúdo;
+- todas as superfícies usam somente conceitos do domínio atual de inteligência esportiva;
+- estados vazios explicam a ausência de dados sem simular conteúdo;
 - autenticação, privacidade e RLS existentes permanecem obrigatórios.
 
-## Escopo desta primeira fatia
+## Fundação implementada
 
-Esta PR estabelece a arquitetura de informação e o shell visual final:
+A primeira fatia estabeleceu a arquitetura de informação e o shell visual:
 
-- atualiza `AppShell` para as cinco superfícies canônicas;
-- transforma `/` em Noticiário;
-- adiciona `/hoje`, `/elo`, `/analytics` e `/anotacoes`;
-- registra as novas rotas no route tree versionado;
-- alinha metadados/PWA com a identidade do Motor de Inteligência Esportiva;
-- adiciona componentes reutilizáveis de cabeçalho, cards e estados de fundação.
+- `AppShell` com as cinco superfícies canônicas;
+- `/` como Noticiário;
+- `/hoje`, `/elo`, `/analytics` e `/anotacoes`;
+- route tree versionado;
+- metadados/PWA alinhados à identidade do Motor de Inteligência Esportiva;
+- componentes reutilizáveis de cabeçalho, cards, métricas e estados de fundação.
 
-A conexão de cada superfície com consultas server-side reais será feita em fatias posteriores, mantendo o mesmo shell e sem dados mock em produção.
+A conexão de cada superfície com consultas server-side reais é feita em fatias incrementais, mantendo o mesmo shell e sem dados simulados em produção.
 
 ## Guardrails preservados
 
-Esta mudança não altera:
+A camada de experiência não altera:
 
 - migrations ou schema do Lovable Cloud;
 - Elo ou fórmulas de rating;

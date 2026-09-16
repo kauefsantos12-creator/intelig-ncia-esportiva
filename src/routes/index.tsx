@@ -32,7 +32,7 @@ function NewsPage() {
             className="min-h-[22rem]"
           >
             <FoundationNotice>
-              Esta superfície já está preparada para receber a resenha factual combinando dados estruturados do runtime esportivo com contexto editorial. Nenhum dado de apostas será exibido aqui.
+              Esta superfície está preparada para receber a resenha factual combinando dados estruturados do runtime esportivo com contexto editorial e estatísticas da partida.
             </FoundationNotice>
             <div className="mt-5 space-y-3" aria-label="Estrutura da resenha">
               {[

@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Bet Value Engine — Emerald Night interface system.
+ * Motor de Inteligência Esportiva — interface system.
  * Near-black green foundations, restrained emerald actions and quiet translucent surfaces.
  */
 
@@ -284,14 +284,6 @@
   font-weight: 600;
 }
 
-@utility type-odds {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 600;
-}
-
 @utility metric-tile {
   background-color: var(--color-secondary);
   background-color: color-mix(in oklab, var(--color-secondary) 52%, transparent);
@@ -369,12 +361,6 @@
   select,
   textarea {
     font-size: 1rem;
-  }
-
-  /* The manual Bet365 quote field is intentionally compact on desktop, but
-   * it should use the available row width on phones for easier one-hand input. */
-  input.w-28 {
-    width: 100%;
   }
 
   button,

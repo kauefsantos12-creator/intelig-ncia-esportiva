@@ -17,11 +17,9 @@ Este documento é a fonte técnica canônica do Aviso de Privacidade exibido em 
 
 O login Google é iniciado pelo **broker OAuth gerenciado pelo Lovable**. As credenciais OAuth do Google não ficam embutidas no cliente da aplicação. Após a conclusão do fluxo gerenciado, os tokens retornados são usados para estabelecer a sessão de autenticação no **Lovable Cloud**.
 
-A allowlist do usuário aprovado, a validação server-side e o prazo absoluto de sessão de 30 dias continuam preservados no reescopo para inteligência esportiva.
+A allowlist do usuário aprovado, a validação server-side e o prazo absoluto de sessão de 30 dias permanecem obrigatórios para o Motor de Inteligência Esportiva.
 
-### Atualização visual de 16/09/2026
-
-A tela de autenticação foi realinhada à identidade **Motor de Inteligência Esportiva**, removendo a referência visual remanescente a `Bet Value Engine`. A mudança é exclusivamente de UX/copy: o broker OAuth, provider Google obrigatório, allowlist, política de sessão de 30 dias, validação server-side e link público para o Aviso de Privacidade permanecem inalterados.
+A tela de autenticação apresenta apenas a identidade atual do produto e as superfícies esportivas disponíveis ao usuário autorizado. Essa camada visual não altera o broker OAuth, provider Google obrigatório, allowlist, política de sessão, validação server-side ou o acesso público ao Aviso de Privacidade.
 
 ## Compartilhamento
 
@@ -42,7 +40,7 @@ A tela de autenticação foi realinhada à identidade **Motor de Inteligência E
 | Governance change log | 365 dias |
 | Identity/Auth | enquanto a conta estiver ativa |
 
-`public.run_privacy_retention_cleanup()` executa diariamente via `pg_cron`. A exclusão de conta remove imediatamente os dados pessoais de aplicação vinculados. No novo escopo, `erase_user_application_data(user_id)` remove as Anotações/notas pessoais do usuário e suas assinaturas Web Push; os dados esportivos compartilhados não são dados pessoais do titular e permanecem no catálogo esportivo. O histórico de governança segue retenção limitada de 365 dias como evidência de segurança/accountability.
+`public.run_privacy_retention_cleanup()` executa diariamente via `pg_cron`. A exclusão de conta remove imediatamente os dados pessoais de aplicação vinculados. `erase_user_application_data(user_id)` remove as Anotações/notas pessoais do usuário e suas assinaturas Web Push; os dados esportivos compartilhados não são dados pessoais do titular e permanecem no catálogo esportivo. O histórico de governança segue retenção limitada de 365 dias como evidência de segurança/accountability.
 
 ## Direitos e controles
 
@@ -58,11 +56,11 @@ A exclusão chama primeiro `erase_user_application_data(user_id)` e em seguida r
 
 Antes de qualquer envio aos hooks de runtime, `lovable-error-reporting.ts` remove email, tokens Bearer/JWT, endpoints Web Push, UUIDs e campos cujo nome indica segredo, autenticação ou identificador sensível. O banco da aplicação não mantém uma cópia própria dessa telemetria.
 
-## Reescopo de 15/09/2026
+## Domínio pessoal atual
 
-A retirada do motor de apostas elimina do domínio ativo dados de banca, stake, CLV, odds, decisões e histórico pessoal de apostas. O novo domínio pessoal é restrito principalmente a autenticação, Web Push e à aba **Anotações**: indicação de jogo assistido/não assistido, comentário opcional e notas pessoais de jogadores.
+O domínio pessoal da aplicação é restrito principalmente a autenticação, Web Push e à aba **Anotações**: indicação de jogo assistido/não assistido, comentário opcional e notas pessoais de jogadores.
 
-A migration de reconciliação de runtime atualiza `erase_user_application_data` para não depender das tabelas removidas do produto anterior. As notas dos jogadores são apagadas por cascade quando a Anotação correspondente é removida.
+As notas dos jogadores são apagadas por cascade quando a Anotação correspondente é removida. Dados esportivos compartilhados, ratings Elo, fixtures, estatísticas e informações de transmissão pertencem ao catálogo esportivo e não identificam o titular por desenho da aplicação.
 
 ## Pontos externos que continuam sujeitos a evidência do fornecedor
 
