@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,21 +125,37 @@ export function AuthGate({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 pt-[calc(2.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.18)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.18)_1px,transparent_1px)] bg-[size:55px_55px]" />
-      <main className="panel relative z-10 w-full max-w-md p-6 sm:p-8">
-        <img
-          src="/icons/icon-192.png"
-          alt=""
-          className="size-14 rounded-2xl border border-primary/20 shadow-lg shadow-primary/10"
-          aria-hidden
-        />
-        <p className="label-eyebrow mt-6">Acesso privado</p>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,color-mix(in_oklab,var(--color-primary)_14%,transparent),transparent_32rem)]" />
+      <main className="panel relative z-10 w-full max-w-md overflow-hidden p-6 sm:p-8">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" aria-hidden />
+
+        <div className="flex items-center justify-between gap-4">
+          <img
+            src="/icons/icon-192.png"
+            alt=""
+            className="size-14 rounded-2xl border border-primary/20 shadow-lg shadow-primary/10"
+            aria-hidden
+          />
+          <div className="flex items-center gap-2 rounded-full border border-border/70 bg-secondary/35 px-3 py-1.5 text-xs text-muted-foreground">
+            <ShieldCheck className="size-3.5 text-primary" aria-hidden />
+            Acesso privado
+          </div>
+        </div>
+
+        <p className="label-eyebrow mt-6">Motor de Inteligência Esportiva</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Bet Value Engine
+          Seu painel de futebol, Elo e análise
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Entre com a conta Google autorizada. A sessão tem prazo máximo de 30 dias, validado pelo servidor antes de operações com os dados.
+          Entre com a conta Google autorizada para acessar Noticiário, jogos de hoje, rankings Elo, Analytics e suas Anotações.
         </p>
+
+        <div className="mt-5 flex items-start gap-3 rounded-xl border border-border/70 bg-secondary/30 p-3.5">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            A sessão tem prazo máximo de 30 dias e continua sendo validada no servidor antes de operações com os dados.
+          </p>
+        </div>
 
         {message && (
           <div className="mt-5 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning" role="alert">
@@ -151,10 +167,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
           {signingIn ? <Loader2 className="mr-2 size-4 animate-spin" aria-hidden /> : null}
           Entrar com Google
         </Button>
-        <p className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground">
-          A sessão continua sendo validada no servidor antes de qualquer operação com os dados.
-        </p>
-        <p className="mt-3 text-center text-[11px] leading-relaxed text-muted-foreground">
+
+        <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
           Ao entrar, consulte como os dados são tratados no <a href="/privacidade" className="font-medium text-primary underline underline-offset-4">Aviso de Privacidade</a>.
         </p>
       </main>

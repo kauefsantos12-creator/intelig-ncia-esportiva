@@ -1,6 +1,6 @@
 # Privacidade e tratamento de dados pessoais
 
-Versão operacional: 15/09/2026.
+Versão operacional: 16/09/2026.
 
 Este documento é a fonte técnica canônica do Aviso de Privacidade exibido em `/privacidade`. O projeto continua sendo um ambiente privado, single-user e single-maintainer. Antes de disponibilização a terceiros, a identidade formal do controlador, canal externo para titulares, contratos/DPA e transferências internacionais devem ser revistos.
 
@@ -18,6 +18,10 @@ Este documento é a fonte técnica canônica do Aviso de Privacidade exibido em 
 O login Google é iniciado pelo **broker OAuth gerenciado pelo Lovable**. As credenciais OAuth do Google não ficam embutidas no cliente da aplicação. Após a conclusão do fluxo gerenciado, os tokens retornados são usados para estabelecer a sessão de autenticação no **Lovable Cloud**.
 
 A allowlist do usuário aprovado, a validação server-side e o prazo absoluto de sessão de 30 dias continuam preservados no reescopo para inteligência esportiva.
+
+### Atualização visual de 16/09/2026
+
+A tela de autenticação foi realinhada à identidade **Motor de Inteligência Esportiva**, removendo a referência visual remanescente a `Bet Value Engine`. A mudança é exclusivamente de UX/copy: o broker OAuth, provider Google obrigatório, allowlist, política de sessão de 30 dias, validação server-side e link público para o Aviso de Privacidade permanecem inalterados.
 
 ## Compartilhamento
 
