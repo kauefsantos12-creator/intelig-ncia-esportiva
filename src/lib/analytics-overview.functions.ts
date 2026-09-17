@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { buildAnalyticsMemberships } from "./analytics-directory";
 import { adminDb } from "./admin-db";
 import { BackendError } from "./backend-contract";
 
@@ -38,6 +39,7 @@ export type AnalyticsStanding = {
   teamName: string;
   shortName: string | null;
   logoUrl: string | null;
+  hasStanding: boolean;
   position: number | null;
   played: number | null;
   wins: number | null;
@@ -47,8 +49,8 @@ export type AnalyticsStanding = {
   goalsAgainst: number | null;
   points: number | null;
   form: string | null;
-  provider: string;
-  fetchedAt: string;
+  provider: string | null;
+  fetchedAt: string | null;
 };
 
 export type AnalyticsDirectory = {
@@ -56,6 +58,11 @@ export type AnalyticsDirectory = {
   generatedAt: string;
   competitions: AnalyticsCompetition[];
   standings: AnalyticsStanding[];
+  coverage: {
+    teams: number;
+    teamsWithStanding: number;
+    competitionsWithStanding: number;
+  };
 };
 
 export type AnalyticsPlayer = {
@@ -89,6 +96,11 @@ export type AnalyticsTeamDetail = {
   season: string;
   players: AnalyticsPlayer[];
   fixtures: AnalyticsFixture[];
+  availability: {
+    squad: boolean;
+    seasonStats: boolean;
+    fixtures: boolean;
+  };
 };
 
 const teamDetailInput = z.object({
@@ -131,39 +143,6 @@ function parseCompetition(row: Record<string, unknown>): AnalyticsCompetition | 
   };
 }
 
-function parseStanding(
-  row: Record<string, unknown>,
-  teams: Map<string, Record<string, unknown>>,
-): AnalyticsStanding | null {
-  const competitionId = text(row["competition_id"]);
-  const season = text(row["season"]);
-  const teamId = text(row["team_id"]);
-  const provider = text(row["provider"]);
-  const fetchedAt = text(row["fetched_at"]);
-  const team = teamId ? teams.get(teamId) : undefined;
-  const teamName = team ? text(team["name"]) : null;
-  if (!competitionId || !season || !teamId || !provider || !fetchedAt || !teamName) return null;
-  return {
-    competitionId,
-    season,
-    teamId,
-    teamName,
-    shortName: team ? text(team["short_name"]) : null,
-    logoUrl: team ? text(team["logo_url"]) : null,
-    position: numeric(row["position"]),
-    played: numeric(row["played"]),
-    wins: numeric(row["wins"]),
-    draws: numeric(row["draws"]),
-    losses: numeric(row["losses"]),
-    goalsFor: numeric(row["goals_for"]),
-    goalsAgainst: numeric(row["goals_against"]),
-    points: numeric(row["points"]),
-    form: text(row["form"]),
-    provider,
-    fetchedAt,
-  };
-}
-
 function parseFixture(row: Record<string, unknown>, teamNames: Map<string, string>): AnalyticsFixture | null {
   const id = text(row["id"]);
   const kickoffAt = text(row["kickoff_at"]);
@@ -193,20 +172,29 @@ export const getAnalyticsDirectory = createServerFn({ method: "GET" })
 
     const db = (await adminDb()) as unknown as AnalyticsDb;
     const season = "2026/27";
-    const standingsResult = await db
-      .from("sports_standings")
-      .select("competition_id,season,team_id,provider,position,played,wins,draws,losses,goals_for,goals_against,points,form,fetched_at")
-      .eq("season", season)
-      .order("fetched_at", { ascending: false })
-      .limit(5000);
+    const [fixturesResult, standingsResult] = await Promise.all([
+      db
+        .from("sports_fixtures")
+        .select("competition_id,home_team_id,away_team_id")
+        .eq("season", season)
+        .limit(5000),
+      db
+        .from("sports_standings")
+        .select("competition_id,season,team_id,provider,position,played,wins,draws,losses,goals_for,goals_against,points,form,fetched_at")
+        .eq("season", season)
+        .order("fetched_at", { ascending: false })
+        .limit(5000),
+    ]);
 
-    if (standingsResult.error) {
-      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar os dados de temporada do Analytics.", 500);
+    if (fixturesResult.error) {
+      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o catálogo de partidas do Analytics.", 500);
     }
 
-    const standingRows = records(standingsResult.data);
-    const competitionIds = Array.from(new Set(standingRows.map((row) => text(row["competition_id"])).filter((id): id is string => Boolean(id))));
-    const teamIds = Array.from(new Set(standingRows.map((row) => text(row["team_id"])).filter((id): id is string => Boolean(id))));
+    const fixtureRows = records(fixturesResult.data);
+    const standingRows = standingsResult.error ? [] : records(standingsResult.data);
+    const memberships = buildAnalyticsMemberships(fixtureRows, standingRows);
+    const competitionIds = [...new Set(memberships.map((row) => row.competitionId))];
+    const teamIds = [...new Set(memberships.map((row) => row.teamId))];
 
     const competitionsPromise = competitionIds.length
       ? db
@@ -214,7 +202,7 @@ export const getAnalyticsDirectory = createServerFn({ method: "GET" })
           .select("id,name,country_code,region,competition_kind,division_level,season")
           .in("id", competitionIds)
           .eq("active", true)
-          .limit(500)
+          .limit(1000)
       : Promise.resolve({ data: [], error: null } satisfies DbResponse);
     const teamsPromise = teamIds.length
       ? db.from("sports_teams").select("id,name,short_name,logo_url").in("id", teamIds).limit(5000)
@@ -226,26 +214,68 @@ export const getAnalyticsDirectory = createServerFn({ method: "GET" })
     }
 
     const teams = new Map(records(teamsResult.data).map((row) => [text(row["id"]) ?? "", row] as const));
-    const seen = new Set<string>();
-    const standings = standingRows
-      .map((row) => parseStanding(row, teams))
-      .filter((row): row is AnalyticsStanding => row !== null)
-      .filter((row) => {
-        const key = `${row.competitionId}:${row.teamId}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
+    const latestStanding = new Map<string, Record<string, unknown>>();
+    for (const row of standingRows) {
+      const competitionId = text(row["competition_id"]);
+      const teamId = text(row["team_id"]);
+      if (!competitionId || !teamId) continue;
+      const key = `${competitionId}:${teamId}`;
+      if (!latestStanding.has(key)) latestStanding.set(key, row);
+    }
+
+    const standings = memberships
+      .map((membership): AnalyticsStanding | null => {
+        const team = teams.get(membership.teamId);
+        const teamName = team ? text(team["name"]) : null;
+        if (!teamName) return null;
+        const standing = latestStanding.get(`${membership.competitionId}:${membership.teamId}`);
+        return {
+          competitionId: membership.competitionId,
+          season,
+          teamId: membership.teamId,
+          teamName,
+          shortName: team ? text(team["short_name"]) : null,
+          logoUrl: team ? text(team["logo_url"]) : null,
+          hasStanding: Boolean(standing),
+          position: standing ? numeric(standing["position"]) : null,
+          played: standing ? numeric(standing["played"]) : null,
+          wins: standing ? numeric(standing["wins"]) : null,
+          draws: standing ? numeric(standing["draws"]) : null,
+          losses: standing ? numeric(standing["losses"]) : null,
+          goalsFor: standing ? numeric(standing["goals_for"]) : null,
+          goalsAgainst: standing ? numeric(standing["goals_against"]) : null,
+          points: standing ? numeric(standing["points"]) : null,
+          form: standing ? text(standing["form"]) : null,
+          provider: standing ? text(standing["provider"]) : null,
+          fetchedAt: standing ? text(standing["fetched_at"]) : null,
+        };
       })
-      .sort((a, b) => (a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER));
+      .filter((row): row is AnalyticsStanding => row !== null)
+      .sort(
+        (a, b) =>
+          a.competitionId.localeCompare(b.competitionId) ||
+          Number(b.hasStanding) - Number(a.hasStanding) ||
+          (a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER) ||
+          a.teamName.localeCompare(b.teamName, "pt-BR"),
+      );
+
+    const competitions = records(competitionsResult.data)
+      .map(parseCompetition)
+      .filter((row): row is AnalyticsCompetition => row !== null)
+      .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+    const teamsWithStanding = new Set(standings.filter((row) => row.hasStanding).map((row) => row.teamId));
+    const competitionsWithStanding = new Set(standings.filter((row) => row.hasStanding).map((row) => row.competitionId));
 
     return {
       season,
       generatedAt: new Date().toISOString(),
-      competitions: records(competitionsResult.data)
-        .map(parseCompetition)
-        .filter((row): row is AnalyticsCompetition => row !== null)
-        .sort((a, b) => a.name.localeCompare(b.name, "pt-BR")),
+      competitions,
       standings,
+      coverage: {
+        teams: new Set(standings.map((row) => row.teamId)).size,
+        teamsWithStanding: teamsWithStanding.size,
+        competitionsWithStanding: competitionsWithStanding.size,
+      },
     };
   });
 
@@ -285,13 +315,9 @@ export const getAnalyticsTeamDetail = createServerFn({ method: "GET" })
         .limit(80),
     ]);
 
-    if (squadResult.error || statsResult.error || fixturesResult.error) {
-      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o detalhamento analítico da equipe.", 500);
-    }
-
-    const squadRows = records(squadResult.data);
-    const statRows = records(statsResult.data);
-    const fixtureRows = records(fixturesResult.data);
+    const squadRows = squadResult.error ? [] : records(squadResult.data);
+    const statRows = statsResult.error ? [] : records(statsResult.data);
+    const fixtureRows = fixturesResult.error ? [] : records(fixturesResult.data);
     const playerIds = Array.from(new Set([...squadRows, ...statRows].map((row) => text(row["player_id"])).filter((id): id is string => Boolean(id))));
     const fixtureTeamIds = Array.from(new Set(fixtureRows.flatMap((row) => [text(row["home_team_id"]), text(row["away_team_id"])]).filter((id): id is string => Boolean(id))));
 
@@ -303,11 +329,7 @@ export const getAnalyticsTeamDetail = createServerFn({ method: "GET" })
       : Promise.resolve({ data: [], error: null } satisfies DbResponse);
     const [playersResult, teamsResult] = await Promise.all([playersPromise, teamsPromise]);
 
-    if (playersResult.error || teamsResult.error) {
-      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar nomes e elenco da equipe.", 500);
-    }
-
-    const playersById = new Map(records(playersResult.data).map((row) => [text(row["id"]) ?? "", row] as const));
+    const playersById = new Map(records(playersResult.error ? [] : playersResult.data).map((row) => [text(row["id"]) ?? "", row] as const));
     const latestSquad = new Map<string, Record<string, unknown>>();
     for (const row of squadRows) {
       const playerId = text(row["player_id"]);
@@ -343,7 +365,7 @@ export const getAnalyticsTeamDetail = createServerFn({ method: "GET" })
       .sort((a, b) => (b.minutes ?? -1) - (a.minutes ?? -1) || a.name.localeCompare(b.name, "pt-BR"));
 
     const teamNames = new Map(
-      records(teamsResult.data)
+      records(teamsResult.error ? [] : teamsResult.data)
         .map((row) => [text(row["id"]), text(row["name"])] as const)
         .filter((entry): entry is readonly [string, string] => Boolean(entry[0] && entry[1])),
     );
@@ -354,5 +376,10 @@ export const getAnalyticsTeamDetail = createServerFn({ method: "GET" })
       season: data.season,
       players,
       fixtures: fixtureRows.map((row) => parseFixture(row, teamNames)).filter((row): row is AnalyticsFixture => row !== null),
+      availability: {
+        squad: !squadResult.error,
+        seasonStats: !statsResult.error,
+        fixtures: !fixturesResult.error,
+      },
     };
   });
