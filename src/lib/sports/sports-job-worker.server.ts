@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto";
 
-import { linkApiFootballFixture } from "./api-football-sports-sync.server";
 import { syncApiFootballFixtureDataQuotaAware } from "./api-football-quota-sync.server";
+import {
+  syncNationalLeagueTeams,
+  syncNationalTeamSquad,
+} from "./api-football-national-squads.server";
+import { linkApiFootballFixture } from "./api-football-sports-sync.server";
 import { syncFutNaTvBroadcasts } from "./futnatv-broadcast-sync.server";
 import { sportsDb } from "./sports-db.server";
 import {
@@ -69,6 +73,25 @@ function fixtureIdFor(job: SportsJobRow): string {
   throw new SportsJobExecutionError("INVALID_PAYLOAD", `Job ${job.id} sem fixtureId.`);
 }
 
+function teamPayloadFor(job: SportsJobRow) {
+  const payload = asRecord(job.payload);
+  const teamId = payload?.["teamId"];
+  const apiTeamId = Number(payload?.["apiTeamId"]);
+  if (typeof teamId !== "string" || !teamId.trim() || !Number.isInteger(apiTeamId) || apiTeamId <= 0) {
+    throw new SportsJobExecutionError("INVALID_PAYLOAD", `Job ${job.id} sem teamId/apiTeamId válidos.`);
+  }
+  return { teamId, apiTeamId };
+}
+
+function leagueIdFor(job: SportsJobRow): number {
+  const payload = asRecord(job.payload);
+  const leagueId = Number(payload?.["leagueId"]);
+  if (!Number.isInteger(leagueId) || leagueId <= 0) {
+    throw new SportsJobExecutionError("INVALID_PAYLOAD", `Job ${job.id} sem leagueId válido.`);
+  }
+  return leagueId;
+}
+
 function broadcastDateFor(job: SportsJobRow): string {
   const payload = asRecord(job.payload);
   const date = payload?.["date"];
@@ -79,6 +102,12 @@ function broadcastDateFor(job: SportsJobRow): string {
 function syncDescriptor(job: SportsJobRow) {
   if (job.job_type === "BROADCAST_SYNC") {
     return { provider: "futnatv", domain: "broadcasts", cursor: broadcastDateFor(job) };
+  }
+  if (job.job_type === "API_FOOTBALL_LEAGUE_TEAMS") {
+    return { provider: "api_football", domain: "league_teams", cursor: String(leagueIdFor(job)) };
+  }
+  if (job.job_type === "API_FOOTBALL_TEAM_SQUAD") {
+    return { provider: "api_football", domain: "team_squad", cursor: teamPayloadFor(job).teamId };
   }
   return {
     provider: "api_football",
@@ -168,6 +197,35 @@ async function executeJob(job: SportsJobRow) {
     };
   }
 
+  if (job.job_type === "API_FOOTBALL_LEAGUE_TEAMS") {
+    const result = await syncNationalLeagueTeams(leagueIdFor(job));
+    await markSyncSuccess(job, {
+      leagueId: result.leagueId,
+      competitionId: result.competitionId,
+      teams: result.teams,
+      squadJobs: result.squadJobs,
+    });
+    return {
+      fixtureId: null,
+      detail: `API_FOOTBALL_LEAGUE_TEAMS: ${result.leagueName}, ${result.teams} clubes, ${result.squadJobs} elencos enfileirados.`,
+    };
+  }
+
+  if (job.job_type === "API_FOOTBALL_TEAM_SQUAD") {
+    const payload = teamPayloadFor(job);
+    const result = await syncNationalTeamSquad(payload.teamId, payload.apiTeamId);
+    await markSyncSuccess(job, {
+      teamId: result.teamId,
+      apiTeamId: payload.apiTeamId,
+      squadStatus: result.status,
+      players: result.players,
+    });
+    return {
+      fixtureId: null,
+      detail: `API_FOOTBALL_TEAM_SQUAD: ${result.status}, ${result.players} jogadores persistidos.`,
+    };
+  }
+
   const fixtureId = fixtureIdFor(job);
 
   if (job.job_type === "API_FOOTBALL_LINK") {
@@ -201,6 +259,11 @@ async function executeJob(job: SportsJobRow) {
   throw new SportsJobExecutionError("INVALID_JOB", `Job type não suportado: ${job.job_type}`);
 }
 
+function fixtureIdForResult(job: SportsJobRow): string | null {
+  if (["BROADCAST_SYNC", "API_FOOTBALL_LEAGUE_TEAMS", "API_FOOTBALL_TEAM_SQUAD"].includes(job.job_type)) return null;
+  try { return fixtureIdFor(job); } catch { return job.fixture_id; }
+}
+
 async function processClaimedJob(job: SportsJobRow, workerToken: string): Promise<SportsJobWorkerItemResult> {
   const db = await sportsDb();
   let leaseLost = false;
@@ -232,11 +295,7 @@ async function processClaimedJob(job: SportsJobRow, workerToken: string): Promis
   } catch (error) {
     const message = failureMessage(error);
     const code = failureCode(error);
-    const fixtureId = job.job_type === "BROADCAST_SYNC"
-      ? null
-      : (() => {
-          try { return fixtureIdFor(job); } catch { return job.fixture_id; }
-        })();
+    const fixtureId = fixtureIdForResult(job);
     const decision = sportsJobFailureDecision({ attempts: job.attempts, maxAttempts: job.max_attempts, code, message });
 
     await markSyncFailure(job, message, { failureCode: code, decision: decision.action, reason: decision.reason });
