@@ -33,13 +33,14 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Architecture and static quality gates
+        id: architecture_check
         shell: bash
         run: |
           set -o pipefail
           bun run check 2>&1 | tee architecture-check.log
 
       - name: Preserve static quality diagnostics
-        if: failure()
+        if: failure() && steps.architecture_check.outcome == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: architecture-check-diagnostics
@@ -131,13 +132,14 @@ jobs:
           supabase test db supabase/tests/sports_intelligence
 
       - name: Unit tests
+        id: unit_tests
         shell: bash
         run: |
           set -o pipefail
           bunx vitest run 2>&1 | tee unit-tests.log
 
       - name: Preserve unit test diagnostics
-        if: failure()
+        if: failure() && steps.unit_tests.outcome == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: unit-test-diagnostics
