@@ -1,9 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import {
-  linkApiFootballFixture,
-  syncApiFootballFixtureData,
-} from "./api-football-sports-sync.server";
+import { linkApiFootballFixture } from "./api-football-sports-sync.server";
+import { syncApiFootballFixtureDataQuotaAware } from "./api-football-quota-sync.server";
 import { sportsDb } from "./sports-db.server";
 import {
   SportsJobExecutionError,
@@ -143,17 +141,18 @@ async function executeJob(job: SportsJobRow) {
   }
 
   if (job.job_type === "API_FOOTBALL_FIXTURE_DATA") {
-    const result = await syncApiFootballFixtureData(fixtureId);
+    const result = await syncApiFootballFixtureDataQuotaAware(fixtureId);
     await markSyncSuccess(job, fixtureId, {
       apiFixtureId: result.apiFixtureId,
       lineups: result.lineups,
       playerStats: result.playerStats,
       squadPlayers: result.squadPlayers,
       injuries: result.injuries,
+      enrichmentMode: result.enrichmentMode,
     });
     return {
       fixtureId,
-      detail: `API_FOOTBALL_FIXTURE_DATA: ${result.lineups} lineups, ${result.playerStats} player stats, ${result.squadPlayers} squad rows, ${result.injuries} injuries.`,
+      detail: `API_FOOTBALL_FIXTURE_DATA (${result.enrichmentMode}): ${result.lineups} lineups, ${result.playerStats} player stats, ${result.squadPlayers} squad rows, ${result.injuries} injuries.`,
     };
   }
 
