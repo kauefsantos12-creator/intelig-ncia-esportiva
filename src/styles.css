@@ -51,6 +51,7 @@
   --color-pastel-rose: var(--pastel-rose);
 }
 
+/* Browser-safe fallbacks. Modern browsers override these inside @supports. */
 :root {
   --radius: 1rem;
   --background: #f7f8f5;
@@ -76,7 +77,7 @@
   --warning: #a56b13;
   --warning-foreground: #ffffff;
   --border: #dce4df;
-  --input: #cbd6cf;
+  --input: #87928b;
   --ring: #43866f;
   --grid: #e9eeea;
   --pastel-mint: #e3f3eb;
@@ -91,6 +92,43 @@
   --stage-soft: #e3f3eb;
   --stage-soft-strong: #cfeadd;
   --stage-glow: rgba(90, 170, 138, 0.18);
+}
+
+@supports (color: oklch(0.5 0.1 250)) {
+  :root {
+    --background: oklch(0.9775 0.0041 121.6);
+    --foreground: oklch(0.2741 0.0221 166.5);
+    --surface: oklch(1 0 0);
+    --surface-foreground: oklch(0.2741 0.0221 166.5);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.2741 0.0221 166.5);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.2741 0.0221 166.5);
+    --primary: oklch(0.5139 0.0805 168.8);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.9562 0.0075 151.9);
+    --secondary-foreground: oklch(0.3194 0.0255 167.4);
+    --muted: oklch(0.9434 0.0083 157.1);
+    --muted-foreground: oklch(0.5398 0.0228 164);
+    --accent: oklch(0.9423 0.0225 164.5);
+    --accent-foreground: oklch(0.4380 0.0679 169.8);
+    --destructive: oklch(0.5558 0.1389 17.2);
+    --destructive-foreground: oklch(1 0 0);
+    --success: oklch(0.5139 0.0805 168.8);
+    --success-foreground: oklch(1 0 0);
+    --warning: oklch(0.5765 0.1187 70.3);
+    --warning-foreground: oklch(1 0 0);
+    --border: oklch(0.9114 0.0109 158.8);
+    --input: oklch(0.6489 0.0163 158);
+    --ring: oklch(0.5690 0.0780 168.9);
+    --grid: oklch(0.9442 0.0075 151.9);
+    --pastel-mint: oklch(0.9500 0.0199 164.6);
+    --pastel-blue: oklch(0.9475 0.0172 248);
+    --pastel-lilac: oklch(0.9403 0.0223 302.9);
+    --pastel-peach: oklch(0.9440 0.0220 54.3);
+    --pastel-yellow: oklch(0.9632 0.0440 88.5);
+    --pastel-rose: oklch(0.9380 0.0211 6.6);
+  }
 }
 
 @layer base {
@@ -487,7 +525,7 @@
 }
 
 .search-field {
-  border: 1px solid rgba(195, 208, 200, 0.95);
+  border: 1px solid var(--color-input);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 3px 12px rgba(45, 62, 53, 0.035);
 }
