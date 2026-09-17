@@ -83,6 +83,20 @@ function EloPage() {
     if (country !== "ALL" && !countries.includes(country)) setCountry("ALL");
   }, [countries, country]);
 
+  const teamRankById = useMemo(() => {
+    const ranks = new Map<number, number>();
+    directory?.teams.forEach((team, index) => {
+      if (team.team_id !== null) ranks.set(team.team_id, index + 1);
+    });
+    return ranks;
+  }, [directory]);
+
+  const leagueRankById = useMemo(() => {
+    const ranks = new Map<number, number>();
+    directory?.leagues.forEach((league, index) => ranks.set(league.league_id, index + 1));
+    return ranks;
+  }, [directory]);
+
   const filteredTeams = useMemo(() => {
     if (!directory) return [];
     const term = search.trim().toLocaleLowerCase("pt-BR");
@@ -105,10 +119,17 @@ function EloPage() {
     });
   }, [country, directory, region, search]);
 
-  const selectedTeam = directory?.teams.find((team) => team.team_id === selectedTeamId) ?? null;
+  const selectedTeam = selectedTeamId === null
+    ? null
+    : directory?.teams.find((team) => team.team_id === selectedTeamId) ?? null;
+  const selectedTeamRank = selectedTeam?.team_id !== null && selectedTeam?.team_id !== undefined
+    ? teamRankById.get(selectedTeam.team_id) ?? null
+    : null;
   const topTeam = directory?.teams[0] ?? null;
   const topLeague = directory?.leagues[0] ?? null;
   const hierarchyConstrained = directory?.leagues.filter((league) => league.hierarchy_constrained).length ?? 0;
+  const visibleCount = mode === "TEAMS" ? filteredTeams.length : filteredLeagues.length;
+  const totalCount = mode === "TEAMS" ? directory?.teams.length ?? 0 : directory?.leagues.length ?? 0;
 
   return (
     <AppShell stage="elo">
@@ -116,7 +137,7 @@ function EloPage() {
         <ProductPageHeader
           eyebrow="Elo"
           title="Força relativa, com contexto"
-          description="Ranking atual de clubes e ligas calculado pelo backend, com filtros hierárquicos e histórico point-in-time por equipe."
+          description="Compare o ranking atual, refine por região ou país e abra o histórico point-in-time de cada clube sem recalcular o modelo no navegador."
           meta={directory ? <StatusBadge tone="info">Modelo atual</StatusBadge> : undefined}
           aside={(
             <button
@@ -137,24 +158,20 @@ function EloPage() {
           <ErrorState description={error} onRetry={() => void refresh()} />
         ) : directory ? (
           <>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <MetricPreview label="Clubes" value={String(directory.teams.length)} detail="Equipes com rating global atual" />
-              <MetricPreview label="Ligas" value={String(directory.leagues.length)} detail="Competições no ranking hierárquico" />
-              <MetricPreview label="Líder global" value={topTeam?.team_name ?? "—"} detail={topTeam ? `Elo ${formatRating(topTeam.global_rating)}` : "Sem rating disponível"} />
-              <MetricPreview label="Liga mais forte" value={topLeague?.league_name ?? "—"} detail={topLeague ? `Rating ${formatRating(topLeague.rating)} · ${hierarchyConstrained} ligas com restrição hierárquica` : "Sem rating disponível"} />
-            </div>
-
             <SurfaceCard
               icon={mode === "TEAMS" ? ListOrdered : GitCompareArrows}
               title={mode === "TEAMS" ? "Ranking de clubes" : "Ranking de ligas"}
               description={mode === "TEAMS" ? "Elo global atual = rating local + ajuste de força da liga." : "Força relativa entre competições, respeitando a hierarquia do modelo."}
               actions={(
-                <SegmentedControl
-                  label="Tipo de ranking"
-                  value={mode}
-                  options={[{ value: "TEAMS", label: "Clubes" }, { value: "LEAGUES", label: "Ligas" }]}
-                  onChange={setMode}
-                />
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <StatusBadge tone="neutral">{visibleCount} de {totalCount}</StatusBadge>
+                  <SegmentedControl
+                    label="Tipo de ranking"
+                    value={mode}
+                    options={[{ value: "TEAMS", label: "Clubes" }, { value: "LEAGUES", label: "Ligas" }]}
+                    onChange={setMode}
+                  />
+                </div>
               )}
             >
               <div className="space-y-4">
@@ -183,6 +200,40 @@ function EloPage() {
                   </div>
                 ) : null}
 
+                <div className="flex flex-wrap items-center justify-between gap-2 type-caption text-muted-foreground">
+                  <span>Exibindo {visibleCount} {mode === "TEAMS" ? "clubes" : "ligas"} na ordem do ranking global.</span>
+                  {(region !== "ALL" || country !== "ALL" || search) ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRegion("ALL");
+                        setCountry("ALL");
+                        setSearch("");
+                      }}
+                      className="touch-target inline-flex min-h-11 items-center rounded-xl px-3 type-meta font-medium text-primary hover:bg-primary/8"
+                    >
+                      Limpar filtros
+                    </button>
+                  ) : null}
+                </div>
+
+                {mode === "TEAMS" && selectedTeam ? (
+                  <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="type-caption uppercase tracking-[0.06em] text-muted-foreground">Clube selecionado</p>
+                      <p className="mt-1 truncate type-label text-foreground">
+                        {selectedTeamRank ? `#${selectedTeamRank} · ` : ""}{selectedTeam.team_name} · Elo {formatRating(selectedTeam.global_rating)}
+                      </p>
+                    </div>
+                    <a
+                      href="#elo-history"
+                      className="touch-target inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 px-4 type-meta font-semibold text-primary hover:bg-primary/15"
+                    >
+                      Ver histórico de 60 dias
+                    </a>
+                  </div>
+                ) : null}
+
                 {mode === "TEAMS" ? (
                   filteredTeams.length ? (
                     <div className="overflow-hidden rounded-2xl border border-border/70">
@@ -191,16 +242,23 @@ function EloPage() {
                       </div>
                       <div className="divide-y divide-border/60">
                         {filteredTeams.slice(0, 100).map((team, index) => {
-                          const selected = team.team_id === selectedTeamId;
+                          const teamId = team.team_id;
+                          const selectable = teamId !== null;
+                          const selected = selectable && teamId === selectedTeamId;
+                          const globalRank = selectable ? teamRankById.get(teamId) ?? index + 1 : index + 1;
                           return (
                             <button
                               key={`${team.team_model_version}:${team.team_id}`}
                               type="button"
-                              onClick={() => setSelectedTeamId(team.team_id)}
+                              disabled={!selectable}
+                              onClick={() => {
+                                if (selectable) setSelectedTeamId(teamId);
+                              }}
                               aria-pressed={selected}
-                              className={`grid w-full grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 text-left transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_5.5rem] ${selected ? "bg-primary/10" : "hover:bg-secondary/25"}`}
+                              aria-label={`Selecionar ${team.team_name} para consultar o histórico Elo`}
+                              className={`grid min-h-12 w-full grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 text-left transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_5.5rem] ${selected ? "bg-primary/10" : "hover:bg-secondary/25"} disabled:cursor-not-allowed disabled:opacity-60`}
                             >
-                              <span className="type-meta text-muted-foreground">{index + 1}</span>
+                              <span className="type-meta text-muted-foreground">{globalRank}</span>
                               <div className="min-w-0">
                                 <p className="truncate type-label text-foreground">{team.team_name}</p>
                                 <p className="mt-0.5 truncate type-caption text-muted-foreground sm:hidden">{team.league_name}</p>
@@ -221,21 +279,24 @@ function EloPage() {
                       <span>#</span><span>Liga</span><span className="hidden sm:block">País</span><span className="hidden sm:block">Divisão</span><span className="text-right">Rating</span>
                     </div>
                     <div className="divide-y divide-border/60">
-                      {filteredLeagues.slice(0, 100).map((league, index) => (
-                        <div key={`${league.model_version}:${league.league_id}`} className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 sm:grid-cols-[3.5rem_minmax(0,1fr)_7rem_6rem_5.5rem]">
-                          <span className="type-meta text-muted-foreground">{index + 1}</span>
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="truncate type-label text-foreground">{league.league_name}</p>
-                              {league.hierarchy_constrained ? <StatusBadge tone="info">hierarquia</StatusBadge> : null}
+                      {filteredLeagues.slice(0, 100).map((league, index) => {
+                        const globalRank = leagueRankById.get(league.league_id) ?? index + 1;
+                        return (
+                          <div key={`${league.model_version}:${league.league_id}`} className="grid min-h-12 grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 sm:grid-cols-[3.5rem_minmax(0,1fr)_7rem_6rem_5.5rem]">
+                            <span className="type-meta text-muted-foreground">{globalRank}</span>
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="truncate type-label text-foreground">{league.league_name}</p>
+                                {league.hierarchy_constrained ? <StatusBadge tone="info">hierarquia</StatusBadge> : null}
+                              </div>
+                              <p className="mt-0.5 type-caption text-muted-foreground sm:hidden">{league.country_code ?? "—"} · divisão {league.division_level ?? "—"}</p>
                             </div>
-                            <p className="mt-0.5 type-caption text-muted-foreground sm:hidden">{league.country_code ?? "—"} · divisão {league.division_level ?? "—"}</p>
+                            <span className="hidden type-caption text-muted-foreground sm:block">{league.country_code ?? "—"}</span>
+                            <span className="hidden type-caption text-muted-foreground sm:block">{league.division_level ?? "—"}</span>
+                            <span className="text-right type-metric text-foreground">{formatRating(league.rating)}</span>
                           </div>
-                          <span className="hidden type-caption text-muted-foreground sm:block">{league.country_code ?? "—"}</span>
-                          <span className="hidden type-caption text-muted-foreground sm:block">{league.division_level ?? "—"}</span>
-                          <span className="text-right type-metric text-foreground">{formatRating(league.rating)}</span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ) : (
@@ -246,7 +307,7 @@ function EloPage() {
               </div>
             </SurfaceCard>
 
-            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.65fr)]">
+            <div id="elo-history" className="scroll-mt-24 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(280px,0.65fr)]">
               <EloHistoryPanel teamId={selectedTeamId} teamName={selectedTeam?.team_name ?? null} />
               <SurfaceCard icon={TrendingUp} title="Como ler" description="O frontend exibe ratings calculados e persistidos pelo backend." tone="subtle">
                 <div className="space-y-3 type-meta text-muted-foreground">
@@ -255,6 +316,13 @@ function EloPage() {
                   <p><strong className="text-foreground">Ligas:</strong> podem carregar restrições hierárquicas entre divisões quando o modelo assim determina.</p>
                 </div>
               </SurfaceCard>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo do universo Elo">
+              <MetricPreview label="Clubes" value={String(directory.teams.length)} detail="Equipes com rating global atual" />
+              <MetricPreview label="Ligas" value={String(directory.leagues.length)} detail="Competições no ranking hierárquico" />
+              <MetricPreview label="Líder global" value={topTeam?.team_name ?? "—"} detail={topTeam ? `Elo ${formatRating(topTeam.global_rating)}` : "Sem rating disponível"} />
+              <MetricPreview label="Liga mais forte" value={topLeague?.league_name ?? "—"} detail={topLeague ? `Rating ${formatRating(topLeague.rating)} · ${hierarchyConstrained} ligas com restrição hierárquica` : "Sem rating disponível"} />
             </div>
           </>
         ) : (
