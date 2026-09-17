@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(15);
 
 select ok(
   to_regprocedure('public.requeue_unlinked_api_football_jobs()') is not null,
@@ -69,6 +69,29 @@ select ok(
   position('attempts = 0' in lower(pg_get_functiondef('public.requeue_unlinked_api_football_jobs()'::regprocedure))) > 0
   and position('lease_token = null' in lower(pg_get_functiondef('public.requeue_unlinked_api_football_jobs()'::regprocedure))) > 0,
   'recovery clears attempts and lease state before replay'
+);
+
+select ok(
+  to_regprocedure('public.enqueue_sports_broadcast_sync()') is not null,
+  'broadcast sync enqueue RPC exists'
+);
+
+select ok(
+  not has_function_privilege('anon', 'public.enqueue_sports_broadcast_sync()', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'public.enqueue_sports_broadcast_sync()', 'EXECUTE')
+  and has_function_privilege('service_role', 'public.enqueue_sports_broadcast_sync()', 'EXECUTE'),
+  'broadcast sync enqueue RPC is service-role only'
+);
+
+select ok(
+  position('broadcast_sync' in lower(pg_get_functiondef('public.enqueue_sports_broadcast_sync()'::regprocedure))) > 0
+  and position('futnatv' in lower(pg_get_functiondef('public.enqueue_sports_broadcast_sync()'::regprocedure))) > 0,
+  'broadcast sync RPC enqueues the FutNaTV job through sports_jobs'
+);
+
+select ok(
+  exists(select 1 from cron.job where jobname='sports-broadcast-sync-today' and active and schedule='17 */2 * * *'),
+  'broadcast sync cron is active every two hours'
 );
 
 select * from finish();
