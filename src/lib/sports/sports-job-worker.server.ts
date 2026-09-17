@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { linkApiFootballFixture } from "./api-football-sports-sync.server";
 import { syncApiFootballFixtureDataQuotaAware } from "./api-football-quota-sync.server";
+import { syncFutNaTvBroadcasts } from "./futnatv-broadcast-sync.server";
 import { sportsDb } from "./sports-db.server";
 import {
   SportsJobExecutionError,
@@ -68,6 +69,24 @@ function fixtureIdFor(job: SportsJobRow): string {
   throw new SportsJobExecutionError("INVALID_PAYLOAD", `Job ${job.id} sem fixtureId.`);
 }
 
+function broadcastDateFor(job: SportsJobRow): string {
+  const payload = asRecord(job.payload);
+  const date = payload?.["date"];
+  if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+  throw new SportsJobExecutionError("INVALID_PAYLOAD", `Job ${job.id} sem date válido para BROADCAST_SYNC.`);
+}
+
+function syncDescriptor(job: SportsJobRow) {
+  if (job.job_type === "BROADCAST_SYNC") {
+    return { provider: "futnatv", domain: "broadcasts", cursor: broadcastDateFor(job) };
+  }
+  return {
+    provider: "api_football",
+    domain: job.job_type === "API_FOOTBALL_LINK" ? "fixture_link" : "fixture_data",
+    cursor: fixtureIdFor(job),
+  };
+}
+
 function failureCode(error: unknown): SportsJobFailureCode {
   if (error instanceof SportsJobExecutionError) return error.code;
   return "EXECUTION_ERROR";
@@ -77,14 +96,14 @@ function failureMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 
-async function markSyncAttempt(job: SportsJobRow, fixtureId: string) {
+async function markSyncAttempt(job: SportsJobRow) {
   const db = await sportsDb();
-  const domain = job.job_type === "API_FOOTBALL_LINK" ? "fixture_link" : "fixture_data";
+  const descriptor = syncDescriptor(job);
   const { error } = await db.from("sports_sync_state").upsert({
-    provider: "api_football",
-    domain,
+    provider: descriptor.provider,
+    domain: descriptor.domain,
     season: SEASON,
-    cursor_value: fixtureId,
+    cursor_value: descriptor.cursor,
     last_attempt_at: new Date().toISOString(),
     last_error: null,
     metadata: { jobId: job.id, jobType: job.job_type, attempt: job.attempts },
@@ -92,15 +111,15 @@ async function markSyncAttempt(job: SportsJobRow, fixtureId: string) {
   if (error) console.warn("[sports-job-worker] failed to mark sync attempt", error.message);
 }
 
-async function markSyncSuccess(job: SportsJobRow, fixtureId: string, metadata: Row) {
+async function markSyncSuccess(job: SportsJobRow, metadata: Row) {
   const db = await sportsDb();
-  const domain = job.job_type === "API_FOOTBALL_LINK" ? "fixture_link" : "fixture_data";
+  const descriptor = syncDescriptor(job);
   const now = new Date().toISOString();
   const { error } = await db.from("sports_sync_state").upsert({
-    provider: "api_football",
-    domain,
+    provider: descriptor.provider,
+    domain: descriptor.domain,
     season: SEASON,
-    cursor_value: fixtureId,
+    cursor_value: descriptor.cursor,
     last_attempt_at: now,
     last_success_at: now,
     last_error: null,
@@ -109,14 +128,19 @@ async function markSyncSuccess(job: SportsJobRow, fixtureId: string, metadata: R
   if (error) console.warn("[sports-job-worker] failed to mark sync success", error.message);
 }
 
-async function markSyncFailure(job: SportsJobRow, fixtureId: string | null, errorMessage: string, metadata: Row) {
+async function markSyncFailure(job: SportsJobRow, errorMessage: string, metadata: Row) {
   const db = await sportsDb();
-  const domain = job.job_type === "API_FOOTBALL_LINK" ? "fixture_link" : "fixture_data";
+  let descriptor: { provider: string; domain: string; cursor: string | null };
+  try {
+    descriptor = syncDescriptor(job);
+  } catch {
+    descriptor = { provider: "sports_worker", domain: job.job_type.toLocaleLowerCase("pt-BR"), cursor: job.fixture_id };
+  }
   const { error } = await db.from("sports_sync_state").upsert({
-    provider: "api_football",
-    domain,
+    provider: descriptor.provider,
+    domain: descriptor.domain,
     season: SEASON,
-    cursor_value: fixtureId,
+    cursor_value: descriptor.cursor,
     last_attempt_at: new Date().toISOString(),
     last_error: errorMessage.slice(0, 4000),
     metadata: { jobId: job.id, jobType: job.job_type, attempt: job.attempts, ...metadata },
@@ -125,8 +149,26 @@ async function markSyncFailure(job: SportsJobRow, fixtureId: string | null, erro
 }
 
 async function executeJob(job: SportsJobRow) {
+  await markSyncAttempt(job);
+
+  if (job.job_type === "BROADCAST_SYNC") {
+    const date = broadcastDateFor(job);
+    const result = await syncFutNaTvBroadcasts(date);
+    await markSyncSuccess(job, {
+      parsedListings: result.parsedListings,
+      matchedFixtures: result.matchedFixtures,
+      insertedEvidence: result.insertedEvidence,
+      unmatchedListings: result.unmatchedListings,
+      ambiguousListings: result.ambiguousListings,
+      sourceUrl: result.sourceUrl,
+    });
+    return {
+      fixtureId: null,
+      detail: `BROADCAST_SYNC: ${result.matchedFixtures} fixtures, ${result.insertedEvidence} evidências de ${result.parsedListings} jogos da fonte.`,
+    };
+  }
+
   const fixtureId = fixtureIdFor(job);
-  await markSyncAttempt(job, fixtureId);
 
   if (job.job_type === "API_FOOTBALL_LINK") {
     const result = await linkApiFootballFixture(fixtureId);
@@ -136,13 +178,13 @@ async function executeJob(job: SportsJobRow) {
     if (result.status === "UNAVAILABLE") {
       throw new SportsJobExecutionError("UPSTREAM_UNAVAILABLE", result.detail);
     }
-    await markSyncSuccess(job, fixtureId, { linkStatus: result.status, apiFixtureId: result.apiFixtureId });
+    await markSyncSuccess(job, { linkStatus: result.status, apiFixtureId: result.apiFixtureId });
     return { fixtureId, detail: `${result.status}: ${result.detail}` };
   }
 
   if (job.job_type === "API_FOOTBALL_FIXTURE_DATA") {
     const result = await syncApiFootballFixtureDataQuotaAware(fixtureId);
-    await markSyncSuccess(job, fixtureId, {
+    await markSyncSuccess(job, {
       apiFixtureId: result.apiFixtureId,
       lineups: result.lineups,
       playerStats: result.playerStats,
@@ -190,12 +232,14 @@ async function processClaimedJob(job: SportsJobRow, workerToken: string): Promis
   } catch (error) {
     const message = failureMessage(error);
     const code = failureCode(error);
-    const fixtureId = (() => {
-      try { return fixtureIdFor(job); } catch { return job.fixture_id; }
-    })();
+    const fixtureId = job.job_type === "BROADCAST_SYNC"
+      ? null
+      : (() => {
+          try { return fixtureIdFor(job); } catch { return job.fixture_id; }
+        })();
     const decision = sportsJobFailureDecision({ attempts: job.attempts, maxAttempts: job.max_attempts, code, message });
 
-    await markSyncFailure(job, fixtureId, message, { failureCode: code, decision: decision.action, reason: decision.reason });
+    await markSyncFailure(job, message, { failureCode: code, decision: decision.action, reason: decision.reason });
 
     if (decision.action === "DEAD") {
       const dead = await db.rpc("dead_sports_job", { p_job_id: job.id, p_worker_token: workerToken, p_error: message });
