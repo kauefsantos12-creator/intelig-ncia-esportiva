@@ -64,249 +64,6 @@ export type Database = {
           },
         ]
       }
-      analysis_draft_games: {
-        Row: {
-          campeonato: string
-          draft_id: string
-          editable_fields: string[]
-          horario: string
-          id: string
-          ignored: boolean
-          ordinal: number
-          partida: string
-          resolved_away_team: string | null
-          resolved_competition: string | null
-          resolved_event_id: number | null
-          resolved_home_team: string | null
-          resolved_kickoff: string | null
-          resolver_confidence: number | null
-          suggestions: Json
-          target_date: string | null
-          updated_at: string
-          validation_errors: Json
-          validation_status: string
-        }
-        Insert: {
-          campeonato: string
-          draft_id: string
-          editable_fields?: string[]
-          horario: string
-          id?: string
-          ignored?: boolean
-          ordinal: number
-          partida: string
-          resolved_away_team?: string | null
-          resolved_competition?: string | null
-          resolved_event_id?: number | null
-          resolved_home_team?: string | null
-          resolved_kickoff?: string | null
-          resolver_confidence?: number | null
-          suggestions?: Json
-          target_date?: string | null
-          updated_at?: string
-          validation_errors?: Json
-          validation_status?: string
-        }
-        Update: {
-          campeonato?: string
-          draft_id?: string
-          editable_fields?: string[]
-          horario?: string
-          id?: string
-          ignored?: boolean
-          ordinal?: number
-          partida?: string
-          resolved_away_team?: string | null
-          resolved_competition?: string | null
-          resolved_event_id?: number | null
-          resolved_home_team?: string | null
-          resolved_kickoff?: string | null
-          resolver_confidence?: number | null
-          suggestions?: Json
-          target_date?: string | null
-          updated_at?: string
-          validation_errors?: Json
-          validation_status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "analysis_draft_games_draft_id_fkey"
-            columns: ["draft_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_drafts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      analysis_drafts: {
-        Row: {
-          client_request_id: string
-          created_at: string
-          filename: string
-          final_run_id: string | null
-          headers: string[]
-          id: string
-          invalid_count: number
-          leagues: string[]
-          owner_id: string
-          status: string
-          target_date: string | null
-          updated_at: string
-        }
-        Insert: {
-          client_request_id: string
-          created_at?: string
-          filename: string
-          final_run_id?: string | null
-          headers?: string[]
-          id?: string
-          invalid_count?: number
-          leagues?: string[]
-          owner_id: string
-          status?: string
-          target_date?: string | null
-          updated_at?: string
-        }
-        Update: {
-          client_request_id?: string
-          created_at?: string
-          filename?: string
-          final_run_id?: string | null
-          headers?: string[]
-          id?: string
-          invalid_count?: number
-          leagues?: string[]
-          owner_id?: string
-          status?: string
-          target_date?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "analysis_drafts_final_run_id_fkey"
-            columns: ["final_run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      analysis_jobs: {
-        Row: {
-          attempts: number
-          completed_at: string | null
-          completed_steps: string[]
-          created_at: string
-          current_step: string | null
-          dispatch_token: string
-          last_error: string | null
-          lease_expires_at: string | null
-          lease_token: string | null
-          locked_at: string | null
-          run_id: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          attempts?: number
-          completed_at?: string | null
-          completed_steps?: string[]
-          created_at?: string
-          current_step?: string | null
-          dispatch_token?: string
-          last_error?: string | null
-          lease_expires_at?: string | null
-          lease_token?: string | null
-          locked_at?: string | null
-          run_id: string
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          attempts?: number
-          completed_at?: string | null
-          completed_steps?: string[]
-          created_at?: string
-          current_step?: string | null
-          dispatch_token?: string
-          last_error?: string | null
-          lease_expires_at?: string | null
-          lease_token?: string | null
-          locked_at?: string | null
-          run_id?: string
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "analysis_jobs_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: true
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      analysis_runs: {
-        Row: {
-          candidates_blocked: number
-          candidates_published: number
-          created_at: string
-          current_step: string | null
-          id: string
-          idempotency_key: string | null
-          matches_failed: number
-          matches_resolved: number
-          matches_total: number
-          notes: Json
-          owner_id: string
-          selection_finalized_at: string | null
-          selections_count: number
-          status: string
-          target_date: string | null
-          updated_at: string
-        }
-        Insert: {
-          candidates_blocked?: number
-          candidates_published?: number
-          created_at?: string
-          current_step?: string | null
-          id?: string
-          idempotency_key?: string | null
-          matches_failed?: number
-          matches_resolved?: number
-          matches_total?: number
-          notes?: Json
-          owner_id?: string
-          selection_finalized_at?: string | null
-          selections_count?: number
-          status?: string
-          target_date?: string | null
-          updated_at?: string
-        }
-        Update: {
-          candidates_blocked?: number
-          candidates_published?: number
-          created_at?: string
-          current_step?: string | null
-          id?: string
-          idempotency_key?: string | null
-          matches_failed?: number
-          matches_resolved?: number
-          matches_total?: number
-          notes?: Json
-          owner_id?: string
-          selection_finalized_at?: string | null
-          selections_count?: number
-          status?: string
-          target_date?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       app_schema_releases: {
         Row: {
           applied_at: string
@@ -369,105 +126,6 @@ export type Database = {
           status?: string
         }
         Relationships: []
-      }
-      decision_opportunity_queue: {
-        Row: {
-          batch_no: number | null
-          competition: string | null
-          created_at: string
-          edge: number | null
-          entry_odd: number
-          expected_value: number | null
-          fair_odd: number | null
-          id: string
-          line_canonical: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id: string | null
-          match_label: string
-          min_odd_target: number | null
-          model_probability: number
-          model_status: string
-          model_version: string
-          participant: string | null
-          prediction_id: string
-          queue_state: string
-          rank_global: number
-          run_id: string
-          side: string | null
-          updated_at: string
-        }
-        Insert: {
-          batch_no?: number | null
-          competition?: string | null
-          created_at?: string
-          edge?: number | null
-          entry_odd: number
-          expected_value?: number | null
-          fair_odd?: number | null
-          id?: string
-          line_canonical?: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id?: string | null
-          match_label: string
-          min_odd_target?: number | null
-          model_probability: number
-          model_status: string
-          model_version: string
-          participant?: string | null
-          prediction_id: string
-          queue_state?: string
-          rank_global: number
-          run_id: string
-          side?: string | null
-          updated_at?: string
-        }
-        Update: {
-          batch_no?: number | null
-          competition?: string | null
-          created_at?: string
-          edge?: number | null
-          entry_odd?: number
-          expected_value?: number | null
-          fair_odd?: number | null
-          id?: string
-          line_canonical?: number | null
-          market?: string
-          market_family?: string
-          market_label?: string
-          match_id?: string | null
-          match_label?: string
-          min_odd_target?: number | null
-          model_probability?: number
-          model_status?: string
-          model_version?: string
-          participant?: string | null
-          prediction_id?: string
-          queue_state?: string
-          rank_global?: number
-          run_id?: string
-          side?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "decision_opportunity_queue_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "decision_opportunity_queue_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       elo_audit_runs: {
         Row: {
@@ -829,103 +487,6 @@ export type Database = {
         }
         Relationships: []
       }
-      elo_prediction_context: {
-        Row: {
-          adjusted_lambda_away: number
-          adjusted_lambda_home: number
-          away_global_rating: number | null
-          away_league_id: number | null
-          away_league_rating: number | null
-          away_rating: number
-          away_team_id: number
-          base_lambda_away: number
-          base_lambda_home: number
-          created_at: string
-          elo_delta: number
-          elo_scope: string | null
-          home_global_rating: number | null
-          home_league_id: number | null
-          home_league_rating: number | null
-          home_rating: number
-          home_team_id: number
-          league_id: number
-          match_id: string
-          model_version: string
-          prediction_at: string
-          run_id: string
-        }
-        Insert: {
-          adjusted_lambda_away: number
-          adjusted_lambda_home: number
-          away_global_rating?: number | null
-          away_league_id?: number | null
-          away_league_rating?: number | null
-          away_rating: number
-          away_team_id: number
-          base_lambda_away: number
-          base_lambda_home: number
-          created_at?: string
-          elo_delta: number
-          elo_scope?: string | null
-          home_global_rating?: number | null
-          home_league_id?: number | null
-          home_league_rating?: number | null
-          home_rating: number
-          home_team_id: number
-          league_id: number
-          match_id: string
-          model_version: string
-          prediction_at: string
-          run_id: string
-        }
-        Update: {
-          adjusted_lambda_away?: number
-          adjusted_lambda_home?: number
-          away_global_rating?: number | null
-          away_league_id?: number | null
-          away_league_rating?: number | null
-          away_rating?: number
-          away_team_id?: number
-          base_lambda_away?: number
-          base_lambda_home?: number
-          created_at?: string
-          elo_delta?: number
-          elo_scope?: string | null
-          home_global_rating?: number | null
-          home_league_id?: number | null
-          home_league_rating?: number | null
-          home_rating?: number
-          home_team_id?: number
-          league_id?: number
-          match_id?: string
-          model_version?: string
-          prediction_at?: string
-          run_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "elo_prediction_context_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "elo_prediction_context_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "elo_prediction_context_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: true
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-        ]
-      }
       elo_seed_rebuild_queue: {
         Row: {
           league_id: number
@@ -1088,451 +649,6 @@ export type Database = {
         }
         Relationships: []
       }
-      experimental_analysis_results: {
-        Row: {
-          analyzed_at: string
-          result_payload: Json
-          run_id: string
-          updated_at: string
-        }
-        Insert: {
-          analyzed_at?: string
-          result_payload: Json
-          run_id: string
-          updated_at?: string
-        }
-        Update: {
-          analyzed_at?: string
-          result_payload?: Json
-          run_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "experimental_analysis_results_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: true
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      experimental_bankroll_config: {
-        Row: {
-          created_at: string
-          fractional_kelly: number
-          id: string
-          initial_bankroll: number
-          max_stake_pct: number
-          min_stake_brl: number
-          owner_id: string | null
-          start_date: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          fractional_kelly?: number
-          id?: string
-          initial_bankroll: number
-          max_stake_pct?: number
-          min_stake_brl?: number
-          owner_id?: string | null
-          start_date: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          fractional_kelly?: number
-          id?: string
-          initial_bankroll?: number
-          max_stake_pct?: number
-          min_stake_brl?: number
-          owner_id?: string | null
-          start_date?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      experimental_bet_tracking: {
-        Row: {
-          accepted_at: string | null
-          bet_status: string
-          closing_fetched_at: string | null
-          closing_line: number | null
-          closing_odd: number | null
-          closing_source: string | null
-          closing_stage: string | null
-          clv_attempts: number
-          clv_implied_delta: number | null
-          clv_next_retry_at: string | null
-          clv_pct: number | null
-          clv_status: string | null
-          competition: string | null
-          created_at: string
-          decision_edge: number | null
-          decision_expected_value: number | null
-          decision_odd: number | null
-          decision_policy_version: string
-          decision_quote_captured_at: string | null
-          declined_at: string | null
-          edge: number | null
-          entry_odd: number
-          execution_quote_captured_at: string | null
-          execution_quote_source: string | null
-          expected_value: number | null
-          fair_odd: number | null
-          id: string
-          line_canonical: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id: string | null
-          match_label: string
-          min_odd_target: number | null
-          model_probability: number
-          model_status: string
-          model_version: string
-          notes: string | null
-          opening_line: number | null
-          opening_odd: number | null
-          participant: string | null
-          prediction_id: string
-          profit_brl: number | null
-          profit_units: number | null
-          result: string
-          run_id: string
-          selection_rank: number | null
-          settled_at: string | null
-          side: string | null
-          stake_brl: number | null
-          target_date: string | null
-          updated_at: string
-        }
-        Insert: {
-          accepted_at?: string | null
-          bet_status?: string
-          closing_fetched_at?: string | null
-          closing_line?: number | null
-          closing_odd?: number | null
-          closing_source?: string | null
-          closing_stage?: string | null
-          clv_attempts?: number
-          clv_implied_delta?: number | null
-          clv_next_retry_at?: string | null
-          clv_pct?: number | null
-          clv_status?: string | null
-          competition?: string | null
-          created_at?: string
-          decision_edge?: number | null
-          decision_expected_value?: number | null
-          decision_odd?: number | null
-          decision_policy_version?: string
-          decision_quote_captured_at?: string | null
-          declined_at?: string | null
-          edge?: number | null
-          entry_odd: number
-          execution_quote_captured_at?: string | null
-          execution_quote_source?: string | null
-          expected_value?: number | null
-          fair_odd?: number | null
-          id?: string
-          line_canonical?: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id?: string | null
-          match_label: string
-          min_odd_target?: number | null
-          model_probability: number
-          model_status: string
-          model_version: string
-          notes?: string | null
-          opening_line?: number | null
-          opening_odd?: number | null
-          participant?: string | null
-          prediction_id: string
-          profit_brl?: number | null
-          profit_units?: number | null
-          result?: string
-          run_id: string
-          selection_rank?: number | null
-          settled_at?: string | null
-          side?: string | null
-          stake_brl?: number | null
-          target_date?: string | null
-          updated_at?: string
-        }
-        Update: {
-          accepted_at?: string | null
-          bet_status?: string
-          closing_fetched_at?: string | null
-          closing_line?: number | null
-          closing_odd?: number | null
-          closing_source?: string | null
-          closing_stage?: string | null
-          clv_attempts?: number
-          clv_implied_delta?: number | null
-          clv_next_retry_at?: string | null
-          clv_pct?: number | null
-          clv_status?: string | null
-          competition?: string | null
-          created_at?: string
-          decision_edge?: number | null
-          decision_expected_value?: number | null
-          decision_odd?: number | null
-          decision_policy_version?: string
-          decision_quote_captured_at?: string | null
-          declined_at?: string | null
-          edge?: number | null
-          entry_odd?: number
-          execution_quote_captured_at?: string | null
-          execution_quote_source?: string | null
-          expected_value?: number | null
-          fair_odd?: number | null
-          id?: string
-          line_canonical?: number | null
-          market?: string
-          market_family?: string
-          market_label?: string
-          match_id?: string | null
-          match_label?: string
-          min_odd_target?: number | null
-          model_probability?: number
-          model_status?: string
-          model_version?: string
-          notes?: string | null
-          opening_line?: number | null
-          opening_odd?: number | null
-          participant?: string | null
-          prediction_id?: string
-          profit_brl?: number | null
-          profit_units?: number | null
-          result?: string
-          run_id?: string
-          selection_rank?: number | null
-          settled_at?: string | null
-          side?: string | null
-          stake_brl?: number | null
-          target_date?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "experimental_bet_tracking_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experimental_bet_tracking_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experimental_bet_tracking_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-        ]
-      }
-      experimental_odds_snapshots: {
-        Row: {
-          api_market: string | null
-          bookmaker: string
-          created_at: string
-          fetched_at: string
-          fixture_id: number
-          market: string
-          match_id: string
-          model_line: number | null
-          odd: number | null
-          offered_line: number | null
-          prediction_id: string
-          reason: string
-          run_id: string
-          side: string | null
-          stage: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          api_market?: string | null
-          bookmaker?: string
-          created_at?: string
-          fetched_at: string
-          fixture_id: number
-          market: string
-          match_id: string
-          model_line?: number | null
-          odd?: number | null
-          offered_line?: number | null
-          prediction_id: string
-          reason: string
-          run_id: string
-          side?: string | null
-          stage?: string | null
-          status: string
-          updated_at?: string
-        }
-        Update: {
-          api_market?: string | null
-          bookmaker?: string
-          created_at?: string
-          fetched_at?: string
-          fixture_id?: number
-          market?: string
-          match_id?: string
-          model_line?: number | null
-          odd?: number | null
-          offered_line?: number | null
-          prediction_id?: string
-          reason?: string
-          run_id?: string
-          side?: string | null
-          stage?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "experimental_odds_snapshots_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experimental_odds_snapshots_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experimental_odds_snapshots_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-        ]
-      }
-      experimental_value_evaluations: {
-        Row: {
-          bookmaker: string
-          decision_probability: number | null
-          edge: number | null
-          evaluated_at: string
-          evaluation_fingerprint: string
-          execution_status: string
-          expected_value: number | null
-          fair_odd: number | null
-          id: string
-          line_canonical: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id: string | null
-          min_odd_target: number | null
-          model_probability: number
-          model_status: string
-          model_version: string | null
-          odd: number
-          participant: string | null
-          prediction_id: string
-          price_source: string
-          probability_status: string
-          production_status: string
-          rejection_reason: string | null
-          run_id: string
-          selected: boolean
-          side: string | null
-          value_status: string
-        }
-        Insert: {
-          bookmaker?: string
-          decision_probability?: number | null
-          edge?: number | null
-          evaluated_at?: string
-          evaluation_fingerprint: string
-          execution_status: string
-          expected_value?: number | null
-          fair_odd?: number | null
-          id?: string
-          line_canonical?: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id?: string | null
-          min_odd_target?: number | null
-          model_probability: number
-          model_status: string
-          model_version?: string | null
-          odd: number
-          participant?: string | null
-          prediction_id: string
-          price_source?: string
-          probability_status: string
-          production_status: string
-          rejection_reason?: string | null
-          run_id: string
-          selected?: boolean
-          side?: string | null
-          value_status: string
-        }
-        Update: {
-          bookmaker?: string
-          decision_probability?: number | null
-          edge?: number | null
-          evaluated_at?: string
-          evaluation_fingerprint?: string
-          execution_status?: string
-          expected_value?: number | null
-          fair_odd?: number | null
-          id?: string
-          line_canonical?: number | null
-          market?: string
-          market_family?: string
-          market_label?: string
-          match_id?: string | null
-          min_odd_target?: number | null
-          model_probability?: number
-          model_status?: string
-          model_version?: string | null
-          odd?: number
-          participant?: string | null
-          prediction_id?: string
-          price_source?: string
-          probability_status?: string
-          production_status?: string
-          rejection_reason?: string | null
-          run_id?: string
-          selected?: boolean
-          side?: string | null
-          value_status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "experimental_value_evaluations_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "experimental_value_evaluations_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       external_api_cache: {
         Row: {
           cache_key: string
@@ -1659,118 +775,6 @@ export type Database = {
         }
         Relationships: []
       }
-      final_selections: {
-        Row: {
-          created_at: string
-          evaluation_id: string
-          explanation: string | null
-          id: string
-          rank: number
-          run_id: string
-        }
-        Insert: {
-          created_at?: string
-          evaluation_id: string
-          explanation?: string | null
-          id?: string
-          rank: number
-          run_id: string
-        }
-        Update: {
-          created_at?: string
-          evaluation_id?: string
-          explanation?: string | null
-          id?: string
-          rank?: number
-          run_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "final_selections_evaluation_id_fkey"
-            columns: ["evaluation_id"]
-            isOneToOne: false
-            referencedRelation: "value_evaluations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "final_selections_run_evaluation_fkey"
-            columns: ["run_id", "evaluation_id"]
-            isOneToOne: true
-            referencedRelation: "value_evaluations"
-            referencedColumns: ["run_id", "id"]
-          },
-          {
-            foreignKeyName: "final_selections_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      five_dollar_league_priors: {
-        Row: {
-          average_against: number | null
-          average_for: number | null
-          created_at: string
-          id: string
-          league_id: number
-          played: number | null
-          prior_type: string
-          raw: Json
-          round_label: string | null
-          season: string | null
-          snapshot_at: string
-          snapshot_date: string
-          source_kind: string | null
-          team_id: number
-          team_name: string
-          total_against: number | null
-          total_for: number | null
-          updated_at: string
-        }
-        Insert: {
-          average_against?: number | null
-          average_for?: number | null
-          created_at?: string
-          id?: string
-          league_id: number
-          played?: number | null
-          prior_type: string
-          raw?: Json
-          round_label?: string | null
-          season?: string | null
-          snapshot_at?: string
-          snapshot_date: string
-          source_kind?: string | null
-          team_id: number
-          team_name: string
-          total_against?: number | null
-          total_for?: number | null
-          updated_at?: string
-        }
-        Update: {
-          average_against?: number | null
-          average_for?: number | null
-          created_at?: string
-          id?: string
-          league_id?: number
-          played?: number | null
-          prior_type?: string
-          raw?: Json
-          round_label?: string | null
-          season?: string | null
-          snapshot_at?: string
-          snapshot_date?: string
-          source_kind?: string | null
-          team_id?: number
-          team_name?: string
-          total_against?: number | null
-          total_for?: number | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       governance_change_log: {
         Row: {
           actor_db_role: string
@@ -1837,221 +841,6 @@ export type Database = {
         }
         Relationships: []
       }
-      market_candidates: {
-        Row: {
-          block_reason: string | null
-          confidence_score: number | null
-          created_at: string
-          data_quality_score: number | null
-          data_status: string
-          fair_odd_info: number | null
-          id: string
-          line_canonical: number | null
-          line_raw: string | null
-          market: string
-          market_family: string
-          market_label: string
-          market_score: number | null
-          match_id: string | null
-          model_status: string
-          p_cal: number | null
-          p_cons: number | null
-          participant: string | null
-          prediction_id: string
-          published: boolean
-          reason_short: string | null
-          run_id: string
-          sample_reliability: number | null
-          settlement_definition: string | null
-          side: string | null
-          sources: Json
-          stability: number | null
-          uncertainty: number | null
-        }
-        Insert: {
-          block_reason?: string | null
-          confidence_score?: number | null
-          created_at?: string
-          data_quality_score?: number | null
-          data_status: string
-          fair_odd_info?: number | null
-          id?: string
-          line_canonical?: number | null
-          line_raw?: string | null
-          market: string
-          market_family: string
-          market_label: string
-          market_score?: number | null
-          match_id?: string | null
-          model_status: string
-          p_cal?: number | null
-          p_cons?: number | null
-          participant?: string | null
-          prediction_id: string
-          published?: boolean
-          reason_short?: string | null
-          run_id: string
-          sample_reliability?: number | null
-          settlement_definition?: string | null
-          side?: string | null
-          sources?: Json
-          stability?: number | null
-          uncertainty?: number | null
-        }
-        Update: {
-          block_reason?: string | null
-          confidence_score?: number | null
-          created_at?: string
-          data_quality_score?: number | null
-          data_status?: string
-          fair_odd_info?: number | null
-          id?: string
-          line_canonical?: number | null
-          line_raw?: string | null
-          market?: string
-          market_family?: string
-          market_label?: string
-          market_score?: number | null
-          match_id?: string | null
-          model_status?: string
-          p_cal?: number | null
-          p_cons?: number | null
-          participant?: string | null
-          prediction_id?: string
-          published?: boolean
-          reason_short?: string | null
-          run_id?: string
-          sample_reliability?: number | null
-          settlement_definition?: string | null
-          side?: string | null
-          sources?: Json
-          stability?: number | null
-          uncertainty?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "market_candidates_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "market_candidates_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "market_candidates_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-        ]
-      }
-      match_external_ids: {
-        Row: {
-          confidence: number | null
-          created_at: string
-          external_id: string
-          id: string
-          match_id: string
-          source: string
-        }
-        Insert: {
-          confidence?: number | null
-          created_at?: string
-          external_id: string
-          id?: string
-          match_id: string
-          source: string
-        }
-        Update: {
-          confidence?: number | null
-          created_at?: string
-          external_id?: string
-          id?: string
-          match_id?: string
-          source?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "match_external_ids_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      matches: {
-        Row: {
-          away_team: string | null
-          competition: string | null
-          country: string | null
-          created_at: string
-          home_team: string | null
-          id: string
-          kickoff_local: string | null
-          raw_campeonato: string
-          raw_horario: string
-          raw_partida: string
-          resolution_reason: string | null
-          resolution_status: string
-          resolver_confidence: number | null
-          run_id: string
-          season: string | null
-          timezone: string
-        }
-        Insert: {
-          away_team?: string | null
-          competition?: string | null
-          country?: string | null
-          created_at?: string
-          home_team?: string | null
-          id?: string
-          kickoff_local?: string | null
-          raw_campeonato: string
-          raw_horario: string
-          raw_partida: string
-          resolution_reason?: string | null
-          resolution_status?: string
-          resolver_confidence?: number | null
-          run_id: string
-          season?: string | null
-          timezone?: string
-        }
-        Update: {
-          away_team?: string | null
-          competition?: string | null
-          country?: string | null
-          created_at?: string
-          home_team?: string | null
-          id?: string
-          kickoff_local?: string | null
-          raw_campeonato?: string
-          raw_horario?: string
-          raw_partida?: string
-          resolution_reason?: string | null
-          resolution_status?: string
-          resolver_confidence?: number | null
-          run_id?: string
-          season?: string | null
-          timezone?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "matches_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       metric_definitions: {
         Row: {
           data_owner_domain: string
@@ -2099,185 +888,6 @@ export type Database = {
           },
         ]
       }
-      model_predictions: {
-        Row: {
-          calibration_version: string | null
-          conservative_probability: number | null
-          data_status: string
-          id: string
-          line_canonical: number | null
-          line_raw: string | null
-          market: string
-          match_id: string | null
-          model_probability: number | null
-          model_status: string
-          model_version: string | null
-          outcome_distribution: Json
-          p_cal: number | null
-          participant: string | null
-          prediction_at: string
-          prediction_id: string
-          run_id: string
-          side: string | null
-        }
-        Insert: {
-          calibration_version?: string | null
-          conservative_probability?: number | null
-          data_status: string
-          id?: string
-          line_canonical?: number | null
-          line_raw?: string | null
-          market: string
-          match_id?: string | null
-          model_probability?: number | null
-          model_status: string
-          model_version?: string | null
-          outcome_distribution?: Json
-          p_cal?: number | null
-          participant?: string | null
-          prediction_at?: string
-          prediction_id: string
-          run_id: string
-          side?: string | null
-        }
-        Update: {
-          calibration_version?: string | null
-          conservative_probability?: number | null
-          data_status?: string
-          id?: string
-          line_canonical?: number | null
-          line_raw?: string | null
-          market?: string
-          match_id?: string | null
-          model_probability?: number | null
-          model_status?: string
-          model_version?: string | null
-          outcome_distribution?: Json
-          p_cal?: number | null
-          participant?: string | null
-          prediction_at?: string
-          prediction_id?: string
-          run_id?: string
-          side?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "model_predictions_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "model_predictions_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "model_predictions_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-        ]
-      }
-      model_versions: {
-        Row: {
-          calibration_version: string | null
-          created_at: string
-          id: string
-          market_family: string
-          model_version: string
-          out_of_sample_metrics: Json
-          validation_status: string
-        }
-        Insert: {
-          calibration_version?: string | null
-          created_at?: string
-          id?: string
-          market_family: string
-          model_version: string
-          out_of_sample_metrics?: Json
-          validation_status?: string
-        }
-        Update: {
-          calibration_version?: string | null
-          created_at?: string
-          id?: string
-          market_family?: string
-          model_version?: string
-          out_of_sample_metrics?: Json
-          validation_status?: string
-        }
-        Relationships: []
-      }
-      normalized_match_stats: {
-        Row: {
-          created_at: string
-          definition_version: string | null
-          id: string
-          lineage: Json
-          match_id: string | null
-          metric: string
-          normalized_value: number | null
-          run_id: string
-          sample_size: number | null
-          scope: string
-          source: string | null
-        }
-        Insert: {
-          created_at?: string
-          definition_version?: string | null
-          id?: string
-          lineage?: Json
-          match_id?: string | null
-          metric: string
-          normalized_value?: number | null
-          run_id: string
-          sample_size?: number | null
-          scope: string
-          source?: string | null
-        }
-        Update: {
-          created_at?: string
-          definition_version?: string | null
-          id?: string
-          lineage?: Json
-          match_id?: string | null
-          metric?: string
-          normalized_value?: number | null
-          run_id?: string
-          sample_size?: number | null
-          scope?: string
-          source?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "normalized_match_stats_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "normalized_match_stats_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "normalized_match_stats_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-        ]
-      }
       performance_vitals: {
         Row: {
           created_at: string
@@ -2304,44 +914,6 @@ export type Database = {
           value?: number
         }
         Relationships: []
-      }
-      pipeline_logs: {
-        Row: {
-          created_at: string
-          id: string
-          level: string
-          message: string
-          payload: Json
-          run_id: string
-          step: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          level?: string
-          message: string
-          payload?: Json
-          run_id: string
-          step: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          level?: string
-          message?: string
-          payload?: Json
-          run_id?: string
-          step?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pipeline_logs_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       privacy_processing_activities: {
         Row: {
@@ -2499,74 +1071,6 @@ export type Database = {
         }
         Relationships: []
       }
-      raw_observations: {
-        Row: {
-          definition_version: string | null
-          fetched_at: string
-          id: string
-          match_id: string | null
-          metric: string
-          observation_key: string
-          observed_at: string | null
-          raw_value: Json | null
-          run_id: string
-          source: string
-        }
-        Insert: {
-          definition_version?: string | null
-          fetched_at?: string
-          id?: string
-          match_id?: string | null
-          metric: string
-          observation_key: string
-          observed_at?: string | null
-          raw_value?: Json | null
-          run_id: string
-          source: string
-        }
-        Update: {
-          definition_version?: string | null
-          fetched_at?: string
-          id?: string
-          match_id?: string | null
-          metric?: string
-          observation_key?: string
-          observed_at?: string | null
-          raw_value?: Json | null
-          run_id?: string
-          source?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "raw_observations_match_id_fkey"
-            columns: ["match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "raw_observations_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "raw_observations_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-          {
-            foreignKeyName: "raw_observations_source_definition_fkey"
-            columns: ["source", "definition_version"]
-            isOneToOne: false
-            referencedRelation: "source_definitions"
-            referencedColumns: ["source", "definition_version"]
-          },
-        ]
-      }
       source_definitions: {
         Row: {
           configured: boolean
@@ -2632,243 +1136,1298 @@ export type Database = {
           },
         ]
       }
-      source_fetches: {
+      sports_briefing_items: {
         Row: {
-          attempt: number
-          definition_version: string | null
-          error_message: string | null
-          fetched_at: string
-          http_status: number | null
+          body: string | null
+          briefing_id: string
+          created_at: string
+          facts: Json
+          fixture_id: string | null
           id: string
-          match_id: string | null
-          run_id: string
-          source: string
-          status: string
+          item_kind: string
+          priority: number
+          provenance: Json
+          title: string
         }
         Insert: {
-          attempt?: number
-          definition_version?: string | null
-          error_message?: string | null
-          fetched_at?: string
-          http_status?: number | null
+          body?: string | null
+          briefing_id: string
+          created_at?: string
+          facts?: Json
+          fixture_id?: string | null
           id?: string
-          match_id?: string | null
-          run_id: string
-          source: string
-          status: string
+          item_kind: string
+          priority?: number
+          provenance?: Json
+          title: string
         }
         Update: {
-          attempt?: number
-          definition_version?: string | null
-          error_message?: string | null
-          fetched_at?: string
-          http_status?: number | null
+          body?: string | null
+          briefing_id?: string
+          created_at?: string
+          facts?: Json
+          fixture_id?: string | null
           id?: string
-          match_id?: string | null
-          run_id?: string
-          source?: string
+          item_kind?: string
+          priority?: number
+          provenance?: Json
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_briefing_items_briefing_id_fkey"
+            columns: ["briefing_id"]
+            isOneToOne: false
+            referencedRelation: "sports_daily_briefings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_briefing_items_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_broadcast_evidence: {
+        Row: {
+          broadcaster: string
+          checked_at: string
+          confidence: number
+          created_at: string
+          fixture_id: string
+          id: string
+          is_primary: boolean
+          metadata: Json
+          platform: string | null
+          source_kind: string
+          source_name: string
+          source_url: string | null
+        }
+        Insert: {
+          broadcaster: string
+          checked_at: string
+          confidence: number
+          created_at?: string
+          fixture_id: string
+          id?: string
+          is_primary?: boolean
+          metadata?: Json
+          platform?: string | null
+          source_kind: string
+          source_name: string
+          source_url?: string | null
+        }
+        Update: {
+          broadcaster?: string
+          checked_at?: string
+          confidence?: number
+          created_at?: string
+          fixture_id?: string
+          id?: string
+          is_primary?: boolean
+          metadata?: Json
+          platform?: string | null
+          source_kind?: string
+          source_name?: string
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_broadcast_evidence_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_competitions: {
+        Row: {
+          active: boolean
+          api_football_league_id: number | null
+          canonical_key: string
+          competition_kind: string
+          country_code: string | null
+          created_at: string
+          division_level: number | null
+          five_dollar_league_id: number | null
+          id: string
+          metadata: Json
+          name: string
+          region: string | null
+          season: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          api_football_league_id?: number | null
+          canonical_key: string
+          competition_kind: string
+          country_code?: string | null
+          created_at?: string
+          division_level?: number | null
+          five_dollar_league_id?: number | null
+          id?: string
+          metadata?: Json
+          name: string
+          region?: string | null
+          season?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          api_football_league_id?: number | null
+          canonical_key?: string
+          competition_kind?: string
+          country_code?: string | null
+          created_at?: string
+          division_level?: number | null
+          five_dollar_league_id?: number | null
+          id?: string
+          metadata?: Json
+          name?: string
+          region?: string | null
+          season?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sports_daily_briefings: {
+        Row: {
+          briefing_date: string
+          created_at: string
+          facts_through: string | null
+          football_summary: string | null
+          generated_at: string | null
+          id: string
+          metadata: Json
+          other_sports_summary: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          briefing_date: string
+          created_at?: string
+          facts_through?: string | null
+          football_summary?: string | null
+          generated_at?: string | null
+          id?: string
+          metadata?: Json
+          other_sports_summary?: string | null
           status?: string
+          updated_at?: string
+        }
+        Update: {
+          briefing_date?: string
+          created_at?: string
+          facts_through?: string | null
+          football_summary?: string | null
+          generated_at?: string | null
+          id?: string
+          metadata?: Json
+          other_sports_summary?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sports_fixture_events: {
+        Row: {
+          added_minute: number | null
+          detail: string | null
+          event_type: string
+          external_event_id: string | null
+          fetched_at: string
+          fixture_id: string
+          id: string
+          metadata: Json
+          minute: number | null
+          player_external_id: string | null
+          player_name: string | null
+          provider: string
+          team_id: string | null
+        }
+        Insert: {
+          added_minute?: number | null
+          detail?: string | null
+          event_type: string
+          external_event_id?: string | null
+          fetched_at?: string
+          fixture_id: string
+          id?: string
+          metadata?: Json
+          minute?: number | null
+          player_external_id?: string | null
+          player_name?: string | null
+          provider: string
+          team_id?: string | null
+        }
+        Update: {
+          added_minute?: number | null
+          detail?: string | null
+          event_type?: string
+          external_event_id?: string | null
+          fetched_at?: string
+          fixture_id?: string
+          id?: string
+          metadata?: Json
+          minute?: number | null
+          player_external_id?: string | null
+          player_name?: string | null
+          provider?: string
+          team_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "source_fetches_match_id_fkey"
-            columns: ["match_id"]
+            foreignKeyName: "sports_fixture_events_fixture_id_fkey"
+            columns: ["fixture_id"]
             isOneToOne: false
-            referencedRelation: "matches"
+            referencedRelation: "sports_fixtures"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "source_fetches_run_id_fkey"
-            columns: ["run_id"]
+            foreignKeyName: "sports_fixture_events_team_id_fkey"
+            columns: ["team_id"]
             isOneToOne: false
-            referencedRelation: "analysis_runs"
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_events_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "source_fetches_run_match_fkey"
-            columns: ["run_id", "match_id"]
-            isOneToOne: false
-            referencedRelation: "matches"
-            referencedColumns: ["run_id", "id"]
-          },
-          {
-            foreignKeyName: "source_fetches_source_definition_fkey"
-            columns: ["source", "definition_version"]
-            isOneToOne: false
-            referencedRelation: "source_definitions"
-            referencedColumns: ["source", "definition_version"]
           },
         ]
       }
-      uploaded_files: {
+      sports_fixture_lineups: {
+        Row: {
+          fetched_at: string
+          fixture_id: string
+          formation: string | null
+          grid_position: string | null
+          is_starting: boolean
+          is_substitute: boolean
+          jersey_number: number | null
+          metadata: Json
+          player_id: string
+          position: string | null
+          provider: string
+          team_id: string
+        }
+        Insert: {
+          fetched_at?: string
+          fixture_id: string
+          formation?: string | null
+          grid_position?: string | null
+          is_starting?: boolean
+          is_substitute?: boolean
+          jersey_number?: number | null
+          metadata?: Json
+          player_id: string
+          position?: string | null
+          provider: string
+          team_id: string
+        }
+        Update: {
+          fetched_at?: string
+          fixture_id?: string
+          formation?: string | null
+          grid_position?: string | null
+          is_starting?: boolean
+          is_substitute?: boolean
+          jersey_number?: number | null
+          metadata?: Json
+          player_id?: string
+          position?: string | null
+          provider?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_fixture_lineups_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_lineups_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "sports_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_lineups_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_lineups_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_fixture_player_stats: {
+        Row: {
+          fetched_at: string
+          fixture_id: string
+          minutes: number | null
+          participation_state: string
+          player_id: string
+          provider: string
+          provider_rating: number | null
+          stats: Json
+          team_id: string
+        }
+        Insert: {
+          fetched_at?: string
+          fixture_id: string
+          minutes?: number | null
+          participation_state?: string
+          player_id: string
+          provider: string
+          provider_rating?: number | null
+          stats?: Json
+          team_id: string
+        }
+        Update: {
+          fetched_at?: string
+          fixture_id?: string
+          minutes?: number | null
+          participation_state?: string
+          player_id?: string
+          provider?: string
+          provider_rating?: number | null
+          stats?: Json
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_fixture_player_stats_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_player_stats_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "sports_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_player_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_player_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_fixture_team_stats: {
+        Row: {
+          fetched_at: string
+          fixture_id: string
+          metadata: Json
+          observed_at: string | null
+          provider: string
+          raw_hash: string | null
+          stat_key: string
+          stat_text: string | null
+          stat_value: number | null
+          team_id: string
+          unit: string | null
+        }
+        Insert: {
+          fetched_at?: string
+          fixture_id: string
+          metadata?: Json
+          observed_at?: string | null
+          provider: string
+          raw_hash?: string | null
+          stat_key: string
+          stat_text?: string | null
+          stat_value?: number | null
+          team_id: string
+          unit?: string | null
+        }
+        Update: {
+          fetched_at?: string
+          fixture_id?: string
+          metadata?: Json
+          observed_at?: string | null
+          provider?: string
+          raw_hash?: string | null
+          stat_key?: string
+          stat_text?: string | null
+          stat_value?: number | null
+          team_id?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_fixture_team_stats_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_team_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_fixture_team_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_fixtures: {
+        Row: {
+          api_football_fixture_id: number | null
+          away_goals: number | null
+          away_team_id: string
+          canonical_key: string
+          competition_id: string
+          created_at: string
+          finished_at: string | null
+          five_dollar_fixture_id: number | null
+          home_goals: number | null
+          home_team_id: string
+          id: string
+          kickoff_at: string
+          metadata: Json
+          primary_fixture_id: string
+          primary_provider: string
+          season: string
+          source_fetched_at: string | null
+          source_payload_hash: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          api_football_fixture_id?: number | null
+          away_goals?: number | null
+          away_team_id: string
+          canonical_key: string
+          competition_id: string
+          created_at?: string
+          finished_at?: string | null
+          five_dollar_fixture_id?: number | null
+          home_goals?: number | null
+          home_team_id: string
+          id?: string
+          kickoff_at: string
+          metadata?: Json
+          primary_fixture_id: string
+          primary_provider: string
+          season?: string
+          source_fetched_at?: string | null
+          source_payload_hash?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          api_football_fixture_id?: number | null
+          away_goals?: number | null
+          away_team_id?: string
+          canonical_key?: string
+          competition_id?: string
+          created_at?: string
+          finished_at?: string | null
+          five_dollar_fixture_id?: number | null
+          home_goals?: number | null
+          home_team_id?: string
+          id?: string
+          kickoff_at?: string
+          metadata?: Json
+          primary_fixture_id?: string
+          primary_provider?: string
+          season?: string
+          source_fetched_at?: string | null
+          source_payload_hash?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_fixtures_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_fixtures_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_fixtures_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "sports_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_fixtures_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "sports_league_elo_current"
+            referencedColumns: ["sports_competition_id"]
+          },
+          {
+            foreignKeyName: "sports_fixtures_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_fixtures_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_injuries: {
+        Row: {
+          ends_at: string | null
+          fetched_at: string
+          fixture_id: string | null
+          id: string
+          injury_type: string | null
+          metadata: Json
+          player_id: string | null
+          provider: string
+          reason: string | null
+          starts_at: string | null
+          team_id: string | null
+        }
+        Insert: {
+          ends_at?: string | null
+          fetched_at?: string
+          fixture_id?: string | null
+          id?: string
+          injury_type?: string | null
+          metadata?: Json
+          player_id?: string | null
+          provider: string
+          reason?: string | null
+          starts_at?: string | null
+          team_id?: string | null
+        }
+        Update: {
+          ends_at?: string | null
+          fetched_at?: string
+          fixture_id?: string | null
+          id?: string
+          injury_type?: string | null
+          metadata?: Json
+          player_id?: string | null
+          provider?: string
+          reason?: string | null
+          starts_at?: string | null
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_injuries_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_injuries_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "sports_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_injuries_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_injuries_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_jobs: {
+        Row: {
+          attempts: number
+          available_at: string
+          completed_at: string | null
+          created_at: string
+          fixture_id: string | null
+          id: string
+          idempotency_key: string
+          job_type: string
+          last_error: string | null
+          lease_expires_at: string | null
+          lease_token: string | null
+          max_attempts: number
+          payload: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          available_at?: string
+          completed_at?: string | null
+          created_at?: string
+          fixture_id?: string | null
+          id?: string
+          idempotency_key: string
+          job_type: string
+          last_error?: string | null
+          lease_expires_at?: string | null
+          lease_token?: string | null
+          max_attempts?: number
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          available_at?: string
+          completed_at?: string | null
+          created_at?: string
+          fixture_id?: string | null
+          id?: string
+          idempotency_key?: string
+          job_type?: string
+          last_error?: string | null
+          lease_expires_at?: string | null
+          lease_token?: string | null
+          max_attempts?: number
+          payload?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_jobs_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_match_fact_packs: {
+        Row: {
+          checksum: string | null
+          definition_version: string
+          fixture_id: string
+          generated_at: string
+          payload: Json
+          source_fetched_at: string | null
+        }
+        Insert: {
+          checksum?: string | null
+          definition_version?: string
+          fixture_id: string
+          generated_at?: string
+          payload: Json
+          source_fetched_at?: string | null
+        }
+        Update: {
+          checksum?: string | null
+          definition_version?: string
+          fixture_id?: string
+          generated_at?: string
+          payload?: Json
+          source_fetched_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_match_fact_packs_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: true
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_match_reviews: {
+        Row: {
+          auto_closed: boolean
+          created_at: string
+          finalized_at: string | null
+          fixture_id: string
+          id: string
+          notes: string | null
+          owner_id: string
+          status: string
+          updated_at: string
+          watched: boolean | null
+        }
+        Insert: {
+          auto_closed?: boolean
+          created_at?: string
+          finalized_at?: string | null
+          fixture_id: string
+          id?: string
+          notes?: string | null
+          owner_id: string
+          status?: string
+          updated_at?: string
+          watched?: boolean | null
+        }
+        Update: {
+          auto_closed?: boolean
+          created_at?: string
+          finalized_at?: string | null
+          fixture_id?: string
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          status?: string
+          updated_at?: string
+          watched?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_match_reviews_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "sports_fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_player_personal_ratings: {
+        Row: {
+          notes: string | null
+          participation_state: string
+          player_id: string
+          provider_rating_snapshot: number | null
+          rating: number | null
+          review_id: string
+          updated_at: string
+        }
+        Insert: {
+          notes?: string | null
+          participation_state?: string
+          player_id: string
+          provider_rating_snapshot?: number | null
+          rating?: number | null
+          review_id: string
+          updated_at?: string
+        }
+        Update: {
+          notes?: string | null
+          participation_state?: string
+          player_id?: string
+          provider_rating_snapshot?: number | null
+          rating?: number | null
+          review_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_player_personal_ratings_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "sports_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_player_personal_ratings_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "sports_match_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_player_season_stats: {
+        Row: {
+          appearances: number | null
+          competition_id: string
+          fetched_at: string
+          minutes: number | null
+          player_id: string
+          provider: string
+          provider_rating: number | null
+          season: string
+          starts: number | null
+          stats: Json
+          team_id: string
+        }
+        Insert: {
+          appearances?: number | null
+          competition_id: string
+          fetched_at?: string
+          minutes?: number | null
+          player_id: string
+          provider: string
+          provider_rating?: number | null
+          season?: string
+          starts?: number | null
+          stats?: Json
+          team_id: string
+        }
+        Update: {
+          appearances?: number | null
+          competition_id?: string
+          fetched_at?: string
+          minutes?: number | null
+          player_id?: string
+          provider?: string
+          provider_rating?: number | null
+          season?: string
+          starts?: number | null
+          stats?: Json
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_player_season_stats_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "sports_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_player_season_stats_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "sports_league_elo_current"
+            referencedColumns: ["sports_competition_id"]
+          },
+          {
+            foreignKeyName: "sports_player_season_stats_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "sports_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_player_season_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_player_season_stats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_players: {
+        Row: {
+          api_football_player_id: number | null
+          canonical_key: string
+          created_at: string
+          date_of_birth: string | null
+          five_dollar_player_id: number | null
+          id: string
+          metadata: Json
+          name: string
+          nationality: string | null
+          photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_football_player_id?: number | null
+          canonical_key: string
+          created_at?: string
+          date_of_birth?: string | null
+          five_dollar_player_id?: number | null
+          id?: string
+          metadata?: Json
+          name: string
+          nationality?: string | null
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_football_player_id?: number | null
+          canonical_key?: string
+          created_at?: string
+          date_of_birth?: string | null
+          five_dollar_player_id?: number | null
+          id?: string
+          metadata?: Json
+          name?: string
+          nationality?: string | null
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sports_review_field_marks: {
         Row: {
           created_at: string
-          filename: string
           id: string
-          invalid_row_count: number
-          leagues: string[]
-          raw_headers: string[]
-          row_count: number
-          run_id: string
+          note: string | null
+          player_id: string | null
+          review_id: string
+          updated_at: string
+          x_percent: number
+          y_percent: number
         }
         Insert: {
           created_at?: string
-          filename: string
           id?: string
-          invalid_row_count?: number
-          leagues?: string[]
-          raw_headers?: string[]
-          row_count?: number
-          run_id: string
+          note?: string | null
+          player_id?: string | null
+          review_id: string
+          updated_at?: string
+          x_percent: number
+          y_percent: number
         }
         Update: {
           created_at?: string
-          filename?: string
           id?: string
-          invalid_row_count?: number
-          leagues?: string[]
-          raw_headers?: string[]
-          row_count?: number
-          run_id?: string
+          note?: string | null
+          player_id?: string | null
+          review_id?: string
+          updated_at?: string
+          x_percent?: number
+          y_percent?: number
         }
         Relationships: [
           {
-            foreignKeyName: "uploaded_files_run_id_fkey"
-            columns: ["run_id"]
+            foreignKeyName: "sports_review_field_marks_player_id_fkey"
+            columns: ["player_id"]
             isOneToOne: false
-            referencedRelation: "analysis_runs"
+            referencedRelation: "sports_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_review_field_marks_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "sports_match_reviews"
             referencedColumns: ["id"]
           },
         ]
       }
-      user_odds: {
+      sports_standings: {
         Row: {
-          bookmaker: string
-          candidate_id: string
-          entered_at: string
-          id: string
-          line_at_entry: number | null
-          odd: number
-          run_id: string
+          competition_id: string
+          draws: number | null
+          fetched_at: string
+          form: string | null
+          goals_against: number | null
+          goals_for: number | null
+          losses: number | null
+          payload: Json
+          played: number | null
+          points: number | null
+          position: number | null
+          provider: string
+          season: string
+          team_id: string
+          wins: number | null
         }
         Insert: {
-          bookmaker?: string
-          candidate_id: string
-          entered_at?: string
-          id?: string
-          line_at_entry?: number | null
-          odd: number
-          run_id: string
+          competition_id: string
+          draws?: number | null
+          fetched_at?: string
+          form?: string | null
+          goals_against?: number | null
+          goals_for?: number | null
+          losses?: number | null
+          payload?: Json
+          played?: number | null
+          points?: number | null
+          position?: number | null
+          provider: string
+          season?: string
+          team_id: string
+          wins?: number | null
         }
         Update: {
-          bookmaker?: string
-          candidate_id?: string
-          entered_at?: string
-          id?: string
-          line_at_entry?: number | null
-          odd?: number
-          run_id?: string
+          competition_id?: string
+          draws?: number | null
+          fetched_at?: string
+          form?: string | null
+          goals_against?: number | null
+          goals_for?: number | null
+          losses?: number | null
+          payload?: Json
+          played?: number | null
+          points?: number | null
+          position?: number | null
+          provider?: string
+          season?: string
+          team_id?: string
+          wins?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "user_odds_candidate_id_fkey"
-            columns: ["candidate_id"]
+            foreignKeyName: "sports_standings_competition_id_fkey"
+            columns: ["competition_id"]
             isOneToOne: false
-            referencedRelation: "market_candidates"
+            referencedRelation: "sports_competitions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_odds_run_candidate_fkey"
-            columns: ["run_id", "candidate_id"]
-            isOneToOne: true
-            referencedRelation: "market_candidates"
-            referencedColumns: ["run_id", "id"]
+            foreignKeyName: "sports_standings_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "sports_league_elo_current"
+            referencedColumns: ["sports_competition_id"]
           },
           {
-            foreignKeyName: "user_odds_run_id_fkey"
-            columns: ["run_id"]
+            foreignKeyName: "sports_standings_team_id_fkey"
+            columns: ["team_id"]
             isOneToOne: false
-            referencedRelation: "analysis_runs"
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_standings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
             referencedColumns: ["id"]
           },
         ]
       }
-      value_evaluations: {
+      sports_sync_state: {
         Row: {
-          candidate_id: string
+          cursor_value: string | null
+          domain: string
+          last_attempt_at: string | null
+          last_error: string | null
+          last_success_at: string | null
+          metadata: Json
+          provider: string
+          season: string
+          updated_at: string
+        }
+        Insert: {
+          cursor_value?: string | null
+          domain: string
+          last_attempt_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          metadata?: Json
+          provider: string
+          season?: string
+          updated_at?: string
+        }
+        Update: {
+          cursor_value?: string | null
+          domain?: string
+          last_attempt_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          metadata?: Json
+          provider?: string
+          season?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sports_team_squads: {
+        Row: {
+          active: boolean
+          fetched_at: string
+          jersey_number: number | null
+          metadata: Json
+          player_id: string
+          position: string | null
+          provider: string
+          season: string
+          team_id: string
+        }
+        Insert: {
+          active?: boolean
+          fetched_at?: string
+          jersey_number?: number | null
+          metadata?: Json
+          player_id: string
+          position?: string | null
+          provider: string
+          season?: string
+          team_id: string
+        }
+        Update: {
+          active?: boolean
+          fetched_at?: string
+          jersey_number?: number | null
+          metadata?: Json
+          player_id?: string
+          position?: string | null
+          provider?: string
+          season?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sports_team_squads_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "sports_players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sports_team_squads_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_team_elo_current"
+            referencedColumns: ["sports_team_id"]
+          },
+          {
+            foreignKeyName: "sports_team_squads_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "sports_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sports_teams: {
+        Row: {
+          api_football_team_id: number | null
+          canonical_key: string
+          country_code: string | null
           created_at: string
-          edge_cons: number | null
-          ev_cons: number | null
-          execution_status: string
-          fair_odd: number | null
+          five_dollar_team_id: number | null
           id: string
-          implied_probability: number | null
-          l_eff: number | null
-          min_odd_target: number | null
-          odd: number
-          probability_status: string
-          rejection_reason: string | null
-          run_id: string
-          value_status: string
-          w_eff: number | null
+          logo_url: string | null
+          metadata: Json
+          name: string
+          region: string | null
+          short_name: string | null
+          updated_at: string
         }
         Insert: {
-          candidate_id: string
+          api_football_team_id?: number | null
+          canonical_key: string
+          country_code?: string | null
           created_at?: string
-          edge_cons?: number | null
-          ev_cons?: number | null
-          execution_status: string
-          fair_odd?: number | null
+          five_dollar_team_id?: number | null
           id?: string
-          implied_probability?: number | null
-          l_eff?: number | null
-          min_odd_target?: number | null
-          odd: number
-          probability_status: string
-          rejection_reason?: string | null
-          run_id: string
-          value_status: string
-          w_eff?: number | null
+          logo_url?: string | null
+          metadata?: Json
+          name: string
+          region?: string | null
+          short_name?: string | null
+          updated_at?: string
         }
         Update: {
-          candidate_id?: string
+          api_football_team_id?: number | null
+          canonical_key?: string
+          country_code?: string | null
           created_at?: string
-          edge_cons?: number | null
-          ev_cons?: number | null
-          execution_status?: string
-          fair_odd?: number | null
+          five_dollar_team_id?: number | null
           id?: string
-          implied_probability?: number | null
-          l_eff?: number | null
-          min_odd_target?: number | null
-          odd?: number
-          probability_status?: string
-          rejection_reason?: string | null
-          run_id?: string
-          value_status?: string
-          w_eff?: number | null
+          logo_url?: string | null
+          metadata?: Json
+          name?: string
+          region?: string | null
+          short_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sports_tracking_rules: {
+        Row: {
+          always_track: boolean
+          competition_id: string | null
+          competition_kind: string | null
+          country_code: string | null
+          created_at: string
+          division_level: number | null
+          enabled: boolean
+          id: string
+          metadata: Json
+          priority: number
+          region: string | null
+          rule_key: string
+          updated_at: string
+        }
+        Insert: {
+          always_track?: boolean
+          competition_id?: string | null
+          competition_kind?: string | null
+          country_code?: string | null
+          created_at?: string
+          division_level?: number | null
+          enabled?: boolean
+          id?: string
+          metadata?: Json
+          priority?: number
+          region?: string | null
+          rule_key: string
+          updated_at?: string
+        }
+        Update: {
+          always_track?: boolean
+          competition_id?: string | null
+          competition_kind?: string | null
+          country_code?: string | null
+          created_at?: string
+          division_level?: number | null
+          enabled?: boolean
+          id?: string
+          metadata?: Json
+          priority?: number
+          region?: string | null
+          rule_key?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "value_evaluations_candidate_id_fkey"
-            columns: ["candidate_id"]
+            foreignKeyName: "sports_tracking_rules_competition_id_fkey"
+            columns: ["competition_id"]
             isOneToOne: false
-            referencedRelation: "market_candidates"
+            referencedRelation: "sports_competitions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "value_evaluations_run_candidate_fkey"
-            columns: ["run_id", "candidate_id"]
-            isOneToOne: true
-            referencedRelation: "market_candidates"
-            referencedColumns: ["run_id", "id"]
-          },
-          {
-            foreignKeyName: "value_evaluations_run_id_fkey"
-            columns: ["run_id"]
+            foreignKeyName: "sports_tracking_rules_competition_id_fkey"
+            columns: ["competition_id"]
             isOneToOne: false
-            referencedRelation: "analysis_runs"
-            referencedColumns: ["id"]
+            referencedRelation: "sports_league_elo_current"
+            referencedColumns: ["sports_competition_id"]
           },
         ]
       }
@@ -2973,16 +2532,49 @@ export type Database = {
         }
         Relationships: []
       }
+      sports_league_elo_current: {
+        Row: {
+          canonical_competition_name: string | null
+          country_code: string | null
+          division_level: number | null
+          evidence_adjustment: number | null
+          evidence_matches: number | null
+          focus_role: string | null
+          hierarchy_constrained: boolean | null
+          league_id: number | null
+          league_key: string | null
+          league_name: string | null
+          model_version: string | null
+          prior_rating: number | null
+          rating: number | null
+          region: string | null
+          sports_competition_id: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      sports_team_elo_current: {
+        Row: {
+          canonical_team_name: string | null
+          elo_team_id: number | null
+          elo_team_name: string | null
+          first_fixture_at: string | null
+          global_rating: number | null
+          last_fixture_at: string | null
+          league_id: number | null
+          league_key: string | null
+          league_name: string | null
+          league_rating: number | null
+          local_rating: number | null
+          matches_processed: number | null
+          sports_team_id: string | null
+          team_model_version: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      accept_decision_opportunity_atomic: {
-        Args: { p_owner_id: string; p_queue_id: string }
-        Returns: {
-          accepted: boolean
-          accepted_count: number
-          ready_for_stake: boolean
-        }[]
-      }
       acquire_external_api_slot: {
         Args: {
           p_limit?: number
@@ -3007,43 +2599,9 @@ export type Database = {
         }
         Returns: string
       }
-      app_replace_value_results_atomic: {
-        Args: {
-          p_completed_at?: string
-          p_evaluations: Json
-          p_run_id: string
-          p_selections: Json
-          p_user_odds: Json
-        }
-        Returns: Json
-      }
-      apply_analysis_draft_corrections: {
-        Args: { p_corrections: Json; p_draft_id: string; p_owner_id: string }
+      auto_close_sports_reviews: {
+        Args: { p_cutoff: string; p_owner_id: string }
         Returns: number
-      }
-      backfill_five_dollar_model_history_window: {
-        Args: { p_end: string; p_start: string }
-        Returns: number
-      }
-      claim_analysis_job: {
-        Args: { p_dispatch_token: string; p_run_id: string }
-        Returns: {
-          attempts: number
-          completed_steps: string[]
-          lease_token: string
-          run_id: string
-          user_id: string
-        }[]
-      }
-      claim_model_validation: {
-        Args: { p_dispatch_token: string; p_job_id: string }
-        Returns: {
-          accepted: boolean
-          market_family: string
-          protocol_version: string
-          target_calibration_version: string
-          target_model_version: string
-        }[]
       }
       claim_push_delivery_batch: {
         Args: { p_limit?: number }
@@ -3071,120 +2629,44 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      claim_stage4_model_validation: {
-        Args: { p_dispatch_token: string; p_job_id: string }
+      claim_sports_job: {
+        Args: { p_lease_seconds?: number; p_worker_token: string }
         Returns: {
-          accepted: boolean
-          target_model_version: string
-        }[]
+          attempts: number
+          available_at: string
+          completed_at: string | null
+          created_at: string
+          fixture_id: string | null
+          id: string
+          idempotency_key: string
+          job_type: string
+          last_error: string | null
+          lease_expires_at: string | null
+          lease_token: string | null
+          max_attempts: number
+          payload: Json
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sports_jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       cleanup_external_api_cache: { Args: never; Returns: number }
-      complete_analysis_job_step_atomic: {
-        Args: {
-          p_finished: boolean
-          p_lease_token: string
-          p_run_id: string
-          p_step: string
-        }
-        Returns: {
-          accepted: boolean
-        }[]
-      }
-      complete_model_validation: {
-        Args: {
-          p_dispatch_token: string
-          p_error?: string
-          p_job_id: string
-          p_report: Json
-        }
-        Returns: boolean
-      }
       complete_push_delivery_event: {
         Args: { p_delivery_state: Json; p_id: string; p_lock_token: string }
         Returns: boolean
       }
-      complete_stage4_model_validation: {
-        Args: {
-          p_dispatch_token: string
-          p_error?: string
-          p_job_id: string
-          p_report: Json
-        }
+      complete_sports_job: {
+        Args: { p_job_id: string; p_worker_token: string }
         Returns: boolean
       }
-      complete_stage8_model_error_audit: {
-        Args: {
-          p_dispatch_token: string
-          p_error?: string
-          p_job_id: string
-          p_report: Json
-        }
+      dead_sports_job: {
+        Args: { p_error: string; p_job_id: string; p_worker_token: string }
         Returns: boolean
-      }
-      confirm_experimental_bet_atomic: {
-        Args: {
-          p_edge: number
-          p_entry_odd: number
-          p_expected_value: number
-          p_id: string
-          p_line_canonical: number
-          p_quote_captured_at: string
-          p_stake_brl: number
-        }
-        Returns: {
-          available_after: number
-          max_allowed: number
-          minimum_stake: number
-          stake_brl: number
-          status: string
-        }[]
-      }
-      create_analysis_draft_atomic: {
-        Args: {
-          p_client_request_id: string
-          p_filename: string
-          p_headers: string[]
-          p_invalid_count: number
-          p_leagues: string[]
-          p_owner_id: string
-          p_rows: Json
-          p_target_date: string
-        }
-        Returns: {
-          draft_id: string
-          reused: boolean
-        }[]
-      }
-      create_analysis_run_atomic: {
-        Args: {
-          p_filename: string
-          p_headers: string[]
-          p_idempotency_key: string
-          p_invalid_count: number
-          p_leagues: string[]
-          p_owner_id: string
-          p_rows: Json
-          p_target_date: string
-        }
-        Returns: {
-          reused: boolean
-          run_id: string
-        }[]
-      }
-      create_scheduled_analysis_run_atomic: {
-        Args: { p_fixtures: Json; p_owner_id: string; p_target_date: string }
-        Returns: {
-          reused: boolean
-          run_id: string
-        }[]
-      }
-      decline_decision_opportunity_atomic: {
-        Args: { p_owner_id: string; p_queue_id: string }
-        Returns: {
-          accepted_count: number
-          declined: boolean
-          exhausted: boolean
-        }[]
       }
       elo_bootstrap_runner: { Args: never; Returns: Json }
       elo_finalize_daily: { Args: never; Returns: Json }
@@ -3198,7 +2680,6 @@ export type Database = {
       }
       elo_rebuild_league: { Args: { p_league_id: number }; Returns: Json }
       elo_rebuild_league_ratings: { Args: never; Returns: Json }
-      elo_refresh_cross_fixtures_from_raw: { Args: never; Returns: Json }
       elo_run_audit: { Args: never; Returns: Json }
       elo_seed_rating: {
         Args: { p_before: string; p_new_league_id: number; p_team_id: number }
@@ -3214,12 +2695,9 @@ export type Database = {
       elo_sync_from_5dollar: { Args: never; Returns: Json }
       elo_sync_next_target: { Args: never; Returns: Json }
       elo_sync_next_target_when_idle: { Args: never; Returns: Json }
-      enqueue_analysis_job_atomic: {
-        Args: { p_run_id: string; p_user_id: string }
-        Returns: {
-          created: boolean
-          status: string
-        }[]
+      enqueue_finished_sports_reviews: {
+        Args: { p_limit?: number; p_owner_id: string }
+        Returns: number
       }
       enqueue_push_delivery_event: {
         Args: {
@@ -3230,12 +2708,37 @@ export type Database = {
         }
         Returns: string
       }
-      enqueue_scheduled_analysis_job_atomic: {
-        Args: { p_run_id: string; p_user_id: string }
+      enqueue_sports_job: {
+        Args: {
+          p_fixture_id?: string
+          p_idempotency_key: string
+          p_job_type: string
+          p_max_attempts?: number
+          p_payload?: Json
+        }
         Returns: {
-          created: boolean
+          attempts: number
+          available_at: string
+          completed_at: string | null
+          created_at: string
+          fixture_id: string | null
+          id: string
+          idempotency_key: string
+          job_type: string
+          last_error: string | null
+          lease_expires_at: string | null
+          lease_token: string | null
+          max_attempts: number
+          payload: Json
           status: string
-        }[]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sports_jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       erase_user_application_data: {
         Args: { p_user_id: string }
@@ -3244,12 +2747,6 @@ export type Database = {
       external_api_take_rate_slot: {
         Args: { p_bucket: string; p_limit?: number; p_window_ms?: number }
         Returns: number
-      }
-      fail_analysis_job_atomic: {
-        Args: { p_error: string; p_lease_token: string; p_run_id: string }
-        Returns: {
-          accepted: boolean
-        }[]
       }
       fail_push_delivery_event: {
         Args: {
@@ -3261,81 +2758,14 @@ export type Database = {
         }
         Returns: boolean
       }
-      finalize_analysis_draft_atomic: {
+      fail_sports_job: {
         Args: {
-          p_draft_id: string
-          p_idempotency_key: string
-          p_owner_id: string
+          p_error: string
+          p_job_id: string
+          p_retry_after_seconds?: number
+          p_worker_token: string
         }
-        Returns: {
-          reused: boolean
-          run_id: string
-        }[]
-      }
-      finalize_decision_selection_atomic: {
-        Args: { p_owner_id: string; p_run_id: string }
-        Returns: {
-          accepted_count: number
-          finalized: boolean
-        }[]
-      }
-      get_due_clv_tracking_ids: {
-        Args: { p_limit?: number; p_owner_id: string }
-        Returns: {
-          id: string
-        }[]
-      }
-      get_five_dollar_model_history_rows: {
-        Args: { p_lookback_days?: number; p_prediction_at: string }
-        Returns: {
-          raw_value: Json
-        }[]
-      }
-      get_model_artifact_inventory: {
-        Args: never
-        Returns: {
-          calibration_version: string
-          data_status: string
-          first_prediction_at: string
-          inferred_family: string
-          last_prediction_at: string
-          market: string
-          model_status: string
-          model_version: string
-          prediction_count: number
-          registry_calibration_version: string
-          registry_found: boolean
-          registry_validation_status: string
-        }[]
-      }
-      get_model_lab_events: {
-        Args: { p_limit?: number; p_owner_id: string }
-        Returns: {
-          candidate_version: string
-          created_at: string
-          event_type: string
-          id: string
-          message: string
-          model_version: string
-          payload: Json
-          read_at: string
-          severity: string
-          stage: string
-          title: string
-        }[]
-      }
-      get_owner_bankroll_metrics: {
-        Args: { p_owner_id: string }
-        Returns: {
-          available_bankroll: number
-          current_equity: number
-          fractional_kelly: number
-          initial_bankroll: number
-          locked_stake: number
-          max_stake_pct: number
-          min_stake_brl: number
-          settled_profit: number
-        }[]
+        Returns: string
       }
       get_owner_home_metrics: {
         Args: { p_owner_id: string }
@@ -3349,132 +2779,6 @@ export type Database = {
       get_owner_latest_proposed_run_id: {
         Args: { p_owner_id: string }
         Returns: string
-      }
-      get_owner_open_bets: {
-        Args: { p_owner_id: string }
-        Returns: {
-          accepted_at: string | null
-          bet_status: string
-          closing_fetched_at: string | null
-          closing_line: number | null
-          closing_odd: number | null
-          closing_source: string | null
-          closing_stage: string | null
-          clv_attempts: number
-          clv_implied_delta: number | null
-          clv_next_retry_at: string | null
-          clv_pct: number | null
-          clv_status: string | null
-          competition: string | null
-          created_at: string
-          decision_edge: number | null
-          decision_expected_value: number | null
-          decision_odd: number | null
-          decision_policy_version: string
-          decision_quote_captured_at: string | null
-          declined_at: string | null
-          edge: number | null
-          entry_odd: number
-          execution_quote_captured_at: string | null
-          execution_quote_source: string | null
-          expected_value: number | null
-          fair_odd: number | null
-          id: string
-          line_canonical: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id: string | null
-          match_label: string
-          min_odd_target: number | null
-          model_probability: number
-          model_status: string
-          model_version: string
-          notes: string | null
-          opening_line: number | null
-          opening_odd: number | null
-          participant: string | null
-          prediction_id: string
-          profit_brl: number | null
-          profit_units: number | null
-          result: string
-          run_id: string
-          selection_rank: number | null
-          settled_at: string | null
-          side: string | null
-          stake_brl: number | null
-          target_date: string | null
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "experimental_bet_tracking"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      get_owner_tracking_history: {
-        Args: { p_limit?: number; p_owner_id: string }
-        Returns: {
-          accepted_at: string | null
-          bet_status: string
-          closing_fetched_at: string | null
-          closing_line: number | null
-          closing_odd: number | null
-          closing_source: string | null
-          closing_stage: string | null
-          clv_attempts: number
-          clv_implied_delta: number | null
-          clv_next_retry_at: string | null
-          clv_pct: number | null
-          clv_status: string | null
-          competition: string | null
-          created_at: string
-          decision_edge: number | null
-          decision_expected_value: number | null
-          decision_odd: number | null
-          decision_policy_version: string
-          decision_quote_captured_at: string | null
-          declined_at: string | null
-          edge: number | null
-          entry_odd: number
-          execution_quote_captured_at: string | null
-          execution_quote_source: string | null
-          expected_value: number | null
-          fair_odd: number | null
-          id: string
-          line_canonical: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id: string | null
-          match_label: string
-          min_odd_target: number | null
-          model_probability: number
-          model_status: string
-          model_version: string
-          notes: string | null
-          opening_line: number | null
-          opening_odd: number | null
-          participant: string | null
-          prediction_id: string
-          profit_brl: number | null
-          profit_units: number | null
-          result: string
-          run_id: string
-          selection_rank: number | null
-          settled_at: string | null
-          side: string | null
-          stake_brl: number | null
-          target_date: string | null
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "experimental_bet_tracking"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_raw_observation_cache_rows: {
         Args: {
@@ -3490,260 +2794,15 @@ export type Database = {
           raw_value: Json
         }[]
       }
-      get_scheduled_daily_analysis_config: {
-        Args: never
-        Returns: {
-          enabled: boolean
-          owner_id: string
-          target_offset_days: number
-        }[]
-      }
-      get_scheduled_daily_analysis_state: {
-        Args: { p_owner_id: string; p_target_date: string }
-        Returns: {
-          job_status: string
-          run_id: string
-          run_status: string
-        }[]
-      }
-      get_stage4_corners_validation_rows: {
-        Args: never
-        Returns: {
-          away_corners: number
-          away_team_id: number
-          fixture_date: string
-          fixture_id: number
-          home_corners: number
-          home_team_id: number
-          league: string
-        }[]
-      }
-      get_stage4_corners_validation_rows_page: {
-        Args: {
-          p_after_date?: string
-          p_after_fixture_id?: number
-          p_limit?: number
-        }
-        Returns: {
-          away_corners: number
-          away_team_id: number
-          fixture_date: string
-          fixture_id: number
-          home_corners: number
-          home_team_id: number
-          league: string
-        }[]
-      }
-      get_stage6_goals_validation_rows_page: {
-        Args: {
-          p_after_date?: string
-          p_after_fixture_id?: number
-          p_limit?: number
-        }
-        Returns: {
-          away_goals: number
-          away_team_id: number
-          elo_away_rating_before: number
-          elo_home_rating_before: number
-          elo_model_version: string
-          fixture_date: string
-          fixture_id: number
-          home_goals: number
-          home_team_id: number
-          league: string
-        }[]
-      }
-      get_stage7_1x2_holdout_rows_page: {
-        Args: {
-          p_after_prediction_at?: string
-          p_after_prediction_id?: string
-          p_calibration_version: string
-          p_limit?: number
-        }
-        Returns: {
-          away_goals: number
-          calibrated_probability: number
-          fixture_date: string
-          fixture_id: number
-          home_goals: number
-          league: string
-          prediction_at: string
-          prediction_id: string
-          raw_probability: number
-          side: string
-        }[]
-      }
-      get_stage7_active_calibration: {
-        Args: { p_market_family: string; p_model_version: string }
-        Returns: {
-          calibration_version: string
-          fit_report: Json
-          parameters: Json
-          status: string
-        }[]
-      }
-      get_stage9_1x2_holdout_rows_page: {
-        Args: {
-          p_after_prediction_at?: string
-          p_after_prediction_id?: string
-          p_limit?: number
-        }
-        Returns: {
-          away_goals: number
-          calibrated_probability: number
-          fixture_date: string
-          fixture_id: number
-          home_goals: number
-          league: string
-          prediction_at: string
-          prediction_id: string
-          raw_probability: number
-          side: string
-        }[]
-      }
-      get_stage9_active_calibration: {
-        Args: { p_market_family: string; p_model_version: string }
-        Returns: {
-          calibration_version: string
-          fit_report: Json
-          parameters: Json
-          status: string
-          validation_status: string
-        }[]
-      }
-      heartbeat_analysis_job: {
-        Args: { p_lease_token: string; p_run_id: string }
-        Returns: boolean
-      }
       is_approved_app_user: { Args: never; Returns: boolean }
-      kick_analysis_worker: { Args: never; Returns: number }
-      kick_external_api_maintenance: { Args: never; Returns: number }
-      kick_external_api_maintenance_when_idle: { Args: never; Returns: Json }
       kick_push_delivery_dispatcher: { Args: never; Returns: number }
-      kick_scheduled_daily_analysis: { Args: never; Returns: number }
-      kick_stage4_corners_validation: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage6_goals_validation: {
-        Args: { p_market_family: string; p_model_version: string }
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage7_1x2_calibration: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage7_1x2_holdout: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage7b_1x2_calibration: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage7b_1x2_holdout: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage7c_1x2_calibration: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage7c_1x2_holdout: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage8_1x2_error_audit: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage9_1x2_calibration: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage9_1x2_holdout: {
-        Args: never
-        Returns: {
-          job_id: string
-          request_id: number
-        }[]
-      }
-      kick_stage9_daily_lab: { Args: never; Returns: string }
+      kick_sports_api_maintenance: { Args: never; Returns: Json }
+      kick_sports_daily_sync: { Args: { p_day_offset: number }; Returns: Json }
+      kick_sports_job_worker: { Args: never; Returns: Json }
       mark_external_api_rate_limited: {
         Args: { p_provider: string; p_retry_after_seconds: number }
         Returns: undefined
       }
-      mark_model_lab_events_read: {
-        Args: { p_owner_id: string }
-        Returns: number
-      }
-      next_decision_batch_atomic: {
-        Args: { p_limit?: number; p_owner_id: string; p_run_id: string }
-        Returns: {
-          batch_no: number | null
-          competition: string | null
-          created_at: string
-          edge: number | null
-          entry_odd: number
-          expected_value: number | null
-          fair_odd: number | null
-          id: string
-          line_canonical: number | null
-          market: string
-          market_family: string
-          market_label: string
-          match_id: string | null
-          match_label: string
-          min_odd_target: number | null
-          model_probability: number
-          model_status: string
-          model_version: string
-          participant: string | null
-          prediction_id: string
-          queue_state: string
-          rank_global: number
-          run_id: string
-          side: string | null
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "decision_opportunity_queue"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      promote_stage9_1x2_if_holdout_passed: { Args: never; Returns: boolean }
       raw_observation_identity: {
         Args: {
           p_definition_version: string
@@ -3760,115 +2819,49 @@ export type Database = {
         Args: { p_timeout_minutes?: number }
         Returns: Json
       }
-      reconcile_orphan_analysis_runs: {
-        Args: { p_stale_minutes?: number }
-        Returns: number
-      }
-      replace_decision_queue_atomic: {
-        Args: { p_owner_id: string; p_rows: Json; p_run_id: string }
-        Returns: number
-      }
-      replace_run_value_analysis_atomic: {
+      renew_sports_job_lease: {
         Args: {
-          p_evaluations: Json
-          p_owner_id: string
-          p_run_id: string
-          p_selections: Json
-          p_user_odds: Json
+          p_job_id: string
+          p_lease_seconds?: number
+          p_worker_token: string
         }
-        Returns: number
+        Returns: boolean
       }
-      retry_analysis_job_atomic: {
-        Args: { p_run_id: string; p_user_id: string }
-        Returns: {
-          retried: boolean
-          status: string
-        }[]
-      }
+      requeue_unlinked_api_football_jobs: { Args: never; Returns: number }
       run_performance_retention_cleanup: { Args: never; Returns: Json }
       run_privacy_retention_cleanup: { Args: never; Returns: Json }
-      settle_experimental_bet_atomic: {
-        Args: { p_id: string; p_outcome: string }
+      sports_fixture_in_api_football_scope: {
+        Args: { p_fixture_id: string }
+        Returns: boolean
+      }
+      sports_fixture_is_always_track: {
+        Args: { p_fixture_id: string }
+        Returns: boolean
+      }
+      sports_fixture_is_review_eligible: {
+        Args: { p_fixture_id: string }
+        Returns: boolean
+      }
+      sports_maintenance_tick: { Args: { p_now?: string }; Returns: Json }
+      sports_review_team_ratings: {
+        Args: { p_review_id: string }
         Returns: {
-          profit_brl: number
-          profit_units: number
+          complete: boolean
+          participants: number
+          personal_average: number
+          rated_players: number
+          team_id: string
         }[]
-      }
-      start_analysis_job_step_atomic: {
-        Args: { p_lease_token: string; p_run_id: string; p_step: string }
-        Returns: {
-          accepted: boolean
-        }[]
-      }
-      store_stage7_calibration_artifact: {
-        Args: {
-          p_calibration_version: string
-          p_market_family: string
-          p_model_version: string
-          p_parameters: Json
-          p_report: Json
-          p_status: string
-        }
-        Returns: boolean
-      }
-      store_stage7b_calibration_artifact: {
-        Args: {
-          p_calibration_version: string
-          p_market_family: string
-          p_model_version: string
-          p_parameters: Json
-          p_report: Json
-          p_status: string
-        }
-        Returns: boolean
-      }
-      store_stage7c_calibration_artifact: {
-        Args: {
-          p_calibration_version: string
-          p_market_family: string
-          p_model_version: string
-          p_parameters: Json
-          p_report: Json
-          p_status: string
-        }
-        Returns: boolean
-      }
-      store_stage9_calibration_artifact: {
-        Args: {
-          p_calibration_version: string
-          p_market_family: string
-          p_model_version: string
-          p_parameters: Json
-          p_report: Json
-          p_status: string
-        }
-        Returns: boolean
-      }
-      update_stage7_holdout_artifact: {
-        Args: {
-          p_calibration_version: string
-          p_holdout_report: Json
-          p_market_family: string
-          p_model_version: string
-          p_status: string
-        }
-        Returns: boolean
-      }
-      update_stage9_holdout_artifact: {
-        Args: {
-          p_calibration_version: string
-          p_holdout_report: Json
-          p_market_family: string
-          p_model_version: string
-          p_status: string
-        }
-        Returns: boolean
       }
       validate_external_api_maintenance_token: {
         Args: { p_token: string }
         Returns: boolean
       }
       validate_push_dispatch_token: {
+        Args: { p_token: string }
+        Returns: boolean
+      }
+      verify_sports_worker_cron_token: {
         Args: { p_token: string }
         Returns: boolean
       }
