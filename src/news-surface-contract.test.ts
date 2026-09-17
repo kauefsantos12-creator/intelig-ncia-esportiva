@@ -47,8 +47,42 @@ describe("Noticiário sports intelligence contract", () => {
     expect(route).toContain("A resenha ainda não foi publicada");
     expect(route).toContain("Resultados recentes");
     expect(route).toContain("Movimentos de Elo");
-    expect(route).toContain("Fatos considerados até");
+    expect(route).toContain("Fatos até");
     expect(route).not.toContain("Mandante × Visitante");
+  });
+
+  it("keeps the briefing as the primary reading surface and progressively discloses editorial context", () => {
+    const route = source("./routes/index.tsx");
+    expect(route.indexOf('title="Resenha esportiva"')).toBeGreaterThan(-1);
+    expect(route.indexOf('title="Resultados recentes"')).toBeGreaterThan(-1);
+    expect(route.indexOf('title="Movimentos de Elo"')).toBeGreaterThan(-1);
+    expect(route.indexOf('title="Resenha esportiva"')).toBeLessThan(route.indexOf('title="Resultados recentes"'));
+    expect(route.indexOf('title="Resenha esportiva"')).toBeLessThan(route.indexOf('title="Movimentos de Elo"'));
+    expect(route).toContain("max-w-[78ch]");
+    expect(route).toContain("<CollapsiblePanel");
+    expect(route).toContain("Contextos e destaques da resenha");
+    expect(route).toContain("Abra para consultar os itens editoriais");
+  });
+
+  it("keeps recent results scannable with real team logos and local-day grouping", () => {
+    const route = source("./routes/index.tsx");
+    expect(route).toContain("function ResultTeam");
+    expect(route).toContain("result.homeTeamLogo");
+    expect(route).toContain("result.awayTeamLogo");
+    expect(route).toContain('loading="lazy"');
+    expect(route).toContain("groupedResults");
+    expect(route).toContain('"Hoje"');
+    expect(route).toContain('"Ontem"');
+  });
+
+  it("keeps secondary factual context visible but subordinate", () => {
+    const route = source("./routes/index.tsx");
+    expect(route).toContain("overview.recentResults.length");
+    expect(route).toContain("overview.eloMovements.length");
+    expect(route).toContain("xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]");
+    expect(route).not.toContain("xl:sticky xl:top-24");
+    expect(route).toContain("Aguardando publicação");
+    expect(route).toContain("Publicada");
   });
 
   it("keeps loading, retry and refresh states explicit", () => {
