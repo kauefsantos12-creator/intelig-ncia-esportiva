@@ -35,7 +35,7 @@ function TeamLogo({ team }: { team: TodayTeam }) {
       <img
         src={team.logoUrl}
         alt=""
-        className="size-7 shrink-0 object-contain"
+        className="size-8 shrink-0 object-contain"
         loading="lazy"
         aria-hidden
       />
@@ -52,7 +52,7 @@ function TeamLogo({ team }: { team: TodayTeam }) {
 
   return (
     <span
-      className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-secondary/35 type-caption font-semibold text-muted-foreground"
+      className="flex size-8 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-white type-caption font-semibold text-muted-foreground shadow-sm"
       aria-hidden
     >
       {initials || "•"}
@@ -62,10 +62,10 @@ function TeamLogo({ team }: { team: TodayTeam }) {
 
 function MatchTeam({ team, goals }: { team: TodayTeam; goals: number | null }) {
   return (
-    <div className="grid min-w-0 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2.5">
+    <div className="grid min-w-0 grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-3">
       <TeamLogo team={team} />
       <p className="truncate type-label text-foreground">{team.name}</p>
-      {goals !== null ? <span className="type-metric min-w-6 text-right text-foreground">{goals}</span> : null}
+      {goals !== null ? <span className="type-metric min-w-7 rounded-lg bg-white/75 px-2 py-1 text-right text-foreground shadow-sm">{goals}</span> : null}
     </div>
   );
 }
@@ -86,7 +86,7 @@ function FormSequence({ form }: { form: RecentForm }) {
 function TeamForm({ team }: { team: TodayTeam }) {
   const form = team.recentForm;
   return (
-    <div className="rounded-xl border border-border/55 bg-secondary/22 p-3">
+    <div className="fixture-subcard rounded-2xl border p-3.5 shadow-sm">
       <div className="flex min-w-0 items-center gap-2.5">
         <TeamLogo team={team} />
         <p className="truncate type-label text-foreground">{team.name}</p>
@@ -110,12 +110,12 @@ function EloBlock({ home, away }: { home: TodayTeam; away: TodayTeam }) {
     <div className="space-y-3">
       <div className="grid gap-2 sm:grid-cols-2">
         {[home, away].map((team) => (
-          <div key={team.id} className="rounded-xl border border-border/55 bg-secondary/22 p-3">
+          <div key={team.id} className="fixture-subcard rounded-2xl border p-3.5 shadow-sm">
             <div className="flex min-w-0 items-center gap-2.5">
               <TeamLogo team={team} />
               <p className="truncate type-caption text-muted-foreground">{team.name}</p>
             </div>
-            <p className="mt-2 type-metric text-foreground">{team.elo ? team.elo.globalRating.toFixed(1) : "—"}</p>
+            <p className="mt-3 text-xl font-semibold tracking-tight text-foreground num">{team.elo ? team.elo.globalRating.toFixed(1) : "—"}</p>
             <p className="mt-1 type-caption text-muted-foreground">Elo global</p>
           </div>
         ))}
@@ -132,14 +132,14 @@ function BroadcastList({ broadcasts }: { broadcasts: BroadcastEvidence[] }) {
   return (
     <div className="space-y-2">
       {broadcasts.map((broadcast, index) => (
-        <div key={`${broadcast.broadcaster}-${index}`} className="rounded-xl border border-border/55 bg-secondary/22 p-3">
+        <div key={`${broadcast.broadcaster}-${index}`} className="fixture-subcard rounded-2xl border p-3.5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="type-label text-foreground">{broadcast.broadcaster}{broadcast.platform ? ` · ${broadcast.platform}` : ""}</p>
             {broadcast.isPrimary ? <StatusBadge tone="info">Principal</StatusBadge> : null}
           </div>
           <p className="mt-1 type-caption text-muted-foreground">Fonte: {broadcast.sourceName} · verificada às {formatTime(broadcast.checkedAt)}</p>
           {broadcast.sourceUrl ? (
-            <a href={broadcast.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex min-h-9 items-center type-caption font-medium text-primary underline-offset-4 hover:underline">
+            <a href={broadcast.sourceUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex min-h-9 items-center type-caption font-medium text-[var(--stage-accent-strong)] underline-offset-4 hover:underline">
               Abrir fonte
             </a>
           ) : null}
@@ -155,56 +155,56 @@ export function TodayFixtureRow({ fixture }: { fixture: TodayFixture }) {
   const hasBroadcast = fixture.broadcasts.length > 0;
 
   return (
-    <details className="group overflow-hidden rounded-2xl border border-border/60 bg-secondary/18 transition-colors open:bg-secondary/24">
-      <summary className="touch-target cursor-pointer list-none px-4 py-4 marker:hidden sm:px-5">
+    <details className="fixture-card group overflow-hidden rounded-3xl" data-status={fixture.status}>
+      <summary className="touch-target cursor-pointer list-none px-4 py-4 marker:hidden sm:px-5 sm:py-5">
         <div className="flex min-w-0 items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <p className="max-w-full truncate type-caption text-muted-foreground">{fixture.competition.name}</p>
+              <p className="max-w-full truncate type-caption font-medium text-muted-foreground">{fixture.competition.name}</p>
               <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
               {hasBroadcast ? (
                 <StatusBadge tone="info"><Tv className="mr-1 size-3.5" aria-hidden /> Transmissão</StatusBadge>
               ) : null}
             </div>
 
-            <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-[76px_minmax(0,1fr)] sm:items-center">
+            <div className="mt-4 grid min-w-0 gap-4 sm:grid-cols-[88px_minmax(0,1fr)] sm:items-center">
               <div className="flex items-baseline gap-2 sm:block">
-                <p className="type-metric text-foreground">{formatTime(fixture.kickoffAt)}</p>
+                <p className="text-lg font-semibold tracking-tight text-foreground num">{formatTime(fixture.kickoffAt)}</p>
                 <p className="type-caption text-muted-foreground sm:mt-1">Brasília</p>
               </div>
 
-              <div className="min-w-0 space-y-2">
+              <div className="min-w-0 space-y-2.5">
                 <MatchTeam team={fixture.home} goals={score?.home ?? null} />
                 <MatchTeam team={fixture.away} goals={score?.away ?? null} />
               </div>
             </div>
 
             {!hasBroadcast ? (
-              <p className="mt-3 type-caption text-muted-foreground sm:ml-[88px]">Transmissão ainda não confirmada</p>
+              <p className="mt-3 type-caption text-muted-foreground sm:ml-[100px]">Transmissão ainda não confirmada</p>
             ) : null}
           </div>
 
-          <div className="flex min-h-11 shrink-0 items-center">
-            <ChevronDown className="size-5 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--stage-soft)] text-[var(--stage-accent-strong)] transition-colors group-open:bg-white">
+            <ChevronDown className="size-5 transition-transform group-open:rotate-180" aria-hidden />
           </div>
         </div>
       </summary>
 
-      <div className="border-t border-border/55 px-4 py-4 sm:px-5">
+      <div className="border-t border-border/65 px-4 py-4 sm:px-5 sm:py-5">
         <div className="mb-3">
-          <p className="type-caption text-muted-foreground">Detalhes do confronto</p>
+          <p className="type-caption font-medium text-muted-foreground">Detalhes do confronto</p>
         </div>
-        <div className="grid gap-3 xl:grid-cols-3">
-          <section aria-label="Forma recente" className="rounded-2xl border border-border/55 bg-background/20 p-4">
-            <div className="flex items-center gap-2"><Activity className="size-4 text-primary" aria-hidden /><h3 className="type-label text-foreground">Momento recente</h3></div>
+        <div className="fixture-detail-grid grid gap-3 xl:grid-cols-3">
+          <section aria-label="Forma recente" className="rounded-3xl border border-border/65 p-4">
+            <div className="flex items-center gap-2"><Activity className="size-4 text-success" aria-hidden /><h3 className="type-label text-foreground">Momento recente</h3></div>
             <div className="mt-3 space-y-2"><TeamForm team={fixture.home} /><TeamForm team={fixture.away} /></div>
           </section>
-          <section aria-label="Ratings Elo" className="rounded-2xl border border-border/55 bg-background/20 p-4">
-            <div className="flex items-center gap-2"><Radio className="size-4 text-primary" aria-hidden /><h3 className="type-label text-foreground">Elo atual</h3></div>
+          <section aria-label="Ratings Elo" className="rounded-3xl border border-border/65 p-4">
+            <div className="flex items-center gap-2"><Radio className="size-4 text-[#725ca0]" aria-hidden /><h3 className="type-label text-foreground">Elo atual</h3></div>
             <div className="mt-3"><EloBlock home={fixture.home} away={fixture.away} /></div>
           </section>
-          <section aria-label="Onde assistir" className="rounded-2xl border border-border/55 bg-background/20 p-4">
-            <div className="flex items-center gap-2"><Tv className="size-4 text-primary" aria-hidden /><h3 className="type-label text-foreground">Onde assistir</h3></div>
+          <section aria-label="Onde assistir" className="rounded-3xl border border-border/65 p-4">
+            <div className="flex items-center gap-2"><Tv className="size-4 text-[#477da8]" aria-hidden /><h3 className="type-label text-foreground">Onde assistir</h3></div>
             <div className="mt-3"><BroadcastList broadcasts={fixture.broadcasts} /></div>
           </section>
         </div>
