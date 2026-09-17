@@ -24,7 +24,7 @@ function NotFoundComponent() {
         <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
         <p className="mt-2 text-sm text-muted-foreground">O endereço acessado não existe ou foi movido.</p>
         <div className="mt-6">
-          <Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Voltar ao Noticiário</Link>
+          <Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Voltar ao Noticiário</Link>
         </div>
       </div>
     </div>
@@ -44,8 +44,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Esta página não carregou</h1>
         <p className="mt-2 text-sm text-muted-foreground">Algo não carregou como esperado. Tente novamente ou volte ao Noticiário.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button type="button" onClick={() => { router.invalidate(); reset(); }} className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Tentar novamente</button>
-          <a href="/" className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">Noticiário</a>
+          <button type="button" onClick={() => { router.invalidate(); reset(); }} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Tentar novamente</button>
+          <a href="/" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-input bg-white px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">Noticiário</a>
         </div>
       </div>
     </div>
@@ -57,10 +57,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#08110f" },
+      { name: "theme-color", content: "#f7f8f5" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Inteligência Esportiva" },
       { name: "format-detection", content: "telephone=no" },
       { name: "author", content: "Motor de Inteligência Esportiva" },

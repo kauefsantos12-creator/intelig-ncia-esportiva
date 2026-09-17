@@ -56,36 +56,37 @@ export function AppShell({ stage, children }: { stage: ShellStage; children: Rea
     window.location.assign("/");
   }
 
-  const desktopNavClass = (active: boolean) =>
-    `touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium transition-colors ${
-      active ? "bg-primary/12 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-    }`;
-
   const utilityNavClass = (active: boolean) =>
-    `touch-target flex min-h-11 min-w-11 items-center justify-center rounded-xl transition-colors ${
-      active ? "bg-primary/12 text-primary" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+    `touch-target flex min-h-11 min-w-11 items-center justify-center rounded-2xl transition-all ${
+      active ? "bg-[var(--stage-soft)] text-[var(--stage-accent-strong)] shadow-sm" : "text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm"
     }`;
 
   return (
-    <div className="min-h-[100dvh]" data-keyboard-open={keyboardOpen ? "true" : "false"}>
+    <div className="app-shell min-h-[100dvh]" data-stage={stage} data-keyboard-open={keyboardOpen ? "true" : "false"}>
       <a href="#conteudo-principal" className="skip-link">Pular para o conteúdo principal</a>
 
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
+      <header className="app-shell-header sticky top-0 z-30 border-b pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
           <Link to="/" className="touch-target flex min-h-11 min-w-0 shrink-0 items-center gap-2.5" aria-label="Ir para o Noticiário">
-            <img src="/icons/favicon-32.png" alt="" className="size-8 shrink-0 rounded-xl ring-1 ring-primary/15" aria-hidden />
+            <img src="/icons/favicon-32.png" alt="" className="product-brand-mark size-9 shrink-0 rounded-2xl ring-1 ring-border/70" aria-hidden />
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold tracking-tight text-primary">INTELIGÊNCIA ESPORTIVA</span>
+              <span className="block truncate text-sm font-semibold tracking-tight text-foreground">INTELIGÊNCIA ESPORTIVA</span>
               <span className="hidden text-xs text-muted-foreground xl:block">Futebol, Elo e leitura de jogo</span>
             </span>
           </Link>
 
-          <nav className="ml-auto hidden min-w-0 items-center justify-center gap-1 lg:flex" aria-label="Navegação principal">
+          <nav className="product-nav-shell ml-auto hidden min-w-0 items-center justify-center gap-1 rounded-2xl p-1 lg:flex" aria-label="Navegação principal">
             {PRODUCT_NAV.map((item) => {
               const Icon = item.icon;
               const active = stage === item.stage;
               return (
-                <Link key={item.to} to={item.to} aria-current={active ? "page" : undefined} className={desktopNavClass(active)}>
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  aria-current={active ? "page" : undefined}
+                  data-active={active ? "true" : "false"}
+                  className="product-nav-link touch-target inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium"
+                >
                   <Icon className="size-4" aria-hidden />
                   <span>{item.label}</span>
                 </Link>
@@ -104,7 +105,7 @@ export function AppShell({ stage, children }: { stage: ShellStage; children: Rea
         </div>
       </header>
 
-      <main id="conteudo-principal" tabIndex={-1} className="mx-auto min-w-0 max-w-[1440px] px-4 py-5 pb-28 sm:px-6 sm:py-7 sm:pb-28 lg:px-8 lg:pb-8">
+      <main id="conteudo-principal" tabIndex={-1} className="mx-auto min-w-0 max-w-[1440px] px-4 py-6 pb-28 sm:px-6 sm:py-8 sm:pb-28 lg:px-8 lg:pb-10">
         {children}
       </main>
 
@@ -113,8 +114,8 @@ export function AppShell({ stage, children }: { stage: ShellStage; children: Rea
       </footer>
 
       {!keyboardOpen ? (
-        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden" aria-label="Navegação principal">
-          <div className="mx-auto grid max-w-xl grid-cols-5 px-1.5 py-1.5">
+        <nav className="product-mobile-nav fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden" aria-label="Navegação principal">
+          <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2 py-2">
             {PRODUCT_NAV.map((item) => {
               const Icon = item.icon;
               const active = stage === item.stage;
@@ -123,9 +124,8 @@ export function AppShell({ stage, children }: { stage: ShellStage; children: Rea
                   key={item.to}
                   to={item.to}
                   aria-current={active ? "page" : undefined}
-                  className={`touch-target flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-xs font-medium transition-colors ${
-                    active ? "bg-primary/12 text-primary" : "text-muted-foreground"
-                  }`}
+                  data-active={active ? "true" : "false"}
+                  className="product-nav-link touch-target flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 text-xs font-medium"
                 >
                   <Icon className="size-5" aria-hidden />
                   <span className="max-w-full truncate">{item.label}</span>
