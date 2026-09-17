@@ -62,6 +62,20 @@ export function sportsJobFailureDecision(input: {
   }
 
   if (
+    normalized.includes("per day")
+    || normalized.includes("daily quota")
+    || normalized.includes("daily request")
+    || normalized.includes("request limit for the day")
+    || normalized.includes("requests/day")
+  ) {
+    return {
+      action: "RETRY",
+      retryAfterSeconds: boundedBackoff(4 * 60 * 60, attempts, 12 * 60 * 60),
+      reason: "provider_daily_quota",
+    };
+  }
+
+  if (
     normalized.includes("rate limit")
     || normalized.includes("http 429")
     || normalized.includes("cota da api-football")

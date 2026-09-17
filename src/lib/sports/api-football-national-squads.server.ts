@@ -4,12 +4,13 @@ import {
   extractApiFootballResponse,
   type ApiFootballSquad,
 } from "@/lib/adapters/api_football.players.server";
+import { fiveDollarGet } from "@/lib/adapters/five_dollar.server";
 
 import { sportsDb } from "./sports-db.server";
 
 type Row = Record<string, unknown>;
 
-type ApiLeagueTeam = {
+type ApiCountryTeam = {
   team?: {
     id?: number;
     name?: string;
@@ -19,24 +20,30 @@ type ApiLeagueTeam = {
   };
 };
 
+type FiveDollarStandingTeam = {
+  id: number;
+  name: string;
+};
+
 export type NationalLeagueTarget = {
   leagueId: number;
+  fiveDollarLeagueId: number;
   name: string;
   countryCode: string;
+  apiCountry: string;
   region: "EUROPE" | "SOUTH_AMERICA";
 };
 
 export const NATIONAL_LEAGUE_TARGETS: readonly NationalLeagueTarget[] = [
-  { leagueId: 39, name: "English Premier League", countryCode: "GB-ENG", region: "EUROPE" },
-  { leagueId: 61, name: "France Ligue 1", countryCode: "FR", region: "EUROPE" },
-  { leagueId: 78, name: "Germany Bundesliga", countryCode: "DE", region: "EUROPE" },
-  { leagueId: 135, name: "Italy Serie A", countryCode: "IT", region: "EUROPE" },
-  { leagueId: 140, name: "Spain La Liga", countryCode: "ES", region: "EUROPE" },
-  { leagueId: 71, name: "Brazil Serie A", countryCode: "BR", region: "SOUTH_AMERICA" },
+  { leagueId: 39, fiveDollarLeagueId: 4160026622, name: "English Premier League", countryCode: "GB-ENG", apiCountry: "England", region: "EUROPE" },
+  { leagueId: 61, fiveDollarLeagueId: 3614399544, name: "France Ligue 1", countryCode: "FR", apiCountry: "France", region: "EUROPE" },
+  { leagueId: 78, fiveDollarLeagueId: 686337048, name: "Germany Bundesliga", countryCode: "DE", apiCountry: "Germany", region: "EUROPE" },
+  { leagueId: 135, fiveDollarLeagueId: 3405541143, name: "Italy Serie A", countryCode: "IT", apiCountry: "Italy", region: "EUROPE" },
+  { leagueId: 140, fiveDollarLeagueId: 4212821298, name: "Spain La Liga", countryCode: "ES", apiCountry: "Spain", region: "EUROPE" },
+  { leagueId: 71, fiveDollarLeagueId: 3118717965, name: "Brazil Serie A", countryCode: "BR", apiCountry: "Brazil", region: "SOUTH_AMERICA" },
 ] as const;
 
 const SEASON = "2026/27";
-const API_SEASON = 2026;
 const SQUAD_FRESHNESS_MS = 7 * 24 * 60 * 60 * 1000;
 
 function record(value: unknown): Row | null {
@@ -48,7 +55,36 @@ function text(value: unknown): string | null {
 }
 
 function numberValue(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
+  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function normalizeTeamName(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\b(fc|cf|ac|sc|afc|ssc|calcio|futebol|football|club|clube)\b/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function teamTokens(value: string) {
+  return new Set(normalizeTeamName(value).split(" ").filter(Boolean));
+}
+
+export function teamNameScore(left: string, right: string) {
+  const a = normalizeTeamName(left);
+  const b = normalizeTeamName(right);
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  if (a.includes(b) || b.includes(a)) return Math.min(a.length, b.length) / Math.max(a.length, b.length);
+  const at = teamTokens(a);
+  const bt = teamTokens(b);
+  const intersection = [...at].filter((token) => bt.has(token)).length;
+  const union = new Set([...at, ...bt]).size;
+  return union ? intersection / union : 0;
 }
 
 function squadBucket(now = new Date()) {
@@ -71,60 +107,108 @@ async function competitionForLeague(db: Awaited<ReturnType<typeof sportsDb>>, ta
   return String((result.data[0] as Row)["id"]);
 }
 
+function parseFiveDollarStandingTeams(payload: unknown): FiveDollarStandingTeam[] {
+  const root = record(payload);
+  const data = record(root?.["data"]);
+  const table = Array.isArray(data?.["table"]) ? data["table"] as unknown[] : [];
+  const result = new Map<number, FiveDollarStandingTeam>();
+  for (const raw of table) {
+    const row = record(raw);
+    const team = record(row?.["team"]);
+    const id = numberValue(team?.["id"]);
+    const name = text(team?.["name"]);
+    if (id !== null && name) result.set(id, { id, name });
+  }
+  return [...result.values()];
+}
+
+function parseApiCountryTeams(payload: unknown): ApiCountryTeam[] {
+  const root = record(payload);
+  return Array.isArray(root?.["response"]) ? root["response"] as ApiCountryTeam[] : [];
+}
+
+function bestApiTeamMatch(team: FiveDollarStandingTeam, candidates: ApiCountryTeam[]) {
+  const ranked = candidates
+    .filter((entry) => entry.team?.id && entry.team.name)
+    .map((entry) => ({ entry, score: teamNameScore(team.name, String(entry.team!.name)) }))
+    .sort((a, b) => b.score - a.score);
+  if (!ranked.length || ranked[0]!.score < 0.72) return null;
+  if (ranked[1] && ranked[0]!.score - ranked[1].score < 0.12) return null;
+  return ranked[0]!.entry.team!;
+}
+
 async function upsertTeam(
   db: Awaited<ReturnType<typeof sportsDb>>,
-  rawTeam: NonNullable<ApiLeagueTeam["team"]>,
+  fiveDollarTeam: FiveDollarStandingTeam,
+  apiTeam: NonNullable<ApiCountryTeam["team"]> | null,
   target: NationalLeagueTarget,
 ) {
-  const apiTeamId = numberValue(rawTeam.id);
-  const name = text(rawTeam.name);
-  if (apiTeamId === null || !name) return null;
-
-  const byApi = await db.from("sports_teams")
-    .select("id")
-    .eq("api_football_team_id", apiTeamId)
+  const matchedApiTeamId = apiTeam ? numberValue(apiTeam.id) : null;
+  const byFiveDollar = await db.from("sports_teams")
+    .select("id,api_football_team_id,short_name,logo_url")
+    .eq("five_dollar_team_id", fiveDollarTeam.id)
     .limit(1);
-  if (byApi.error) throw new Error(`Falha ao localizar time API-Football ${apiTeamId}: ${byApi.error.message}`);
+  if (byFiveDollar.error) throw new Error(`Falha ao localizar time 5Dollar ${fiveDollarTeam.id}: ${byFiveDollar.error.message}`);
 
-  let teamId: string | null = byApi.data?.length ? String((byApi.data[0] as Row)["id"]) : null;
+  const existingFiveDollarRow = byFiveDollar.data?.length ? byFiveDollar.data[0] as Row : null;
+  let teamId: string | null = existingFiveDollarRow ? String(existingFiveDollarRow["id"]) : null;
+  let existingApiTeamId = existingFiveDollarRow ? numberValue(existingFiveDollarRow["api_football_team_id"]) : null;
 
-  if (!teamId) {
-    const byName = await db.from("sports_teams")
-      .select("id,api_football_team_id")
-      .eq("name", name)
-      .limit(2);
-    if (byName.error) throw new Error(`Falha ao localizar time por nome ${name}: ${byName.error.message}`);
-    if (byName.data?.length === 1 && numberValue((byName.data[0] as Row)["api_football_team_id"]) === null) {
-      teamId = String((byName.data[0] as Row)["id"]);
+  if (!teamId && matchedApiTeamId !== null) {
+    const byApi = await db.from("sports_teams")
+      .select("id,api_football_team_id,short_name,logo_url")
+      .eq("api_football_team_id", matchedApiTeamId)
+      .limit(1);
+    if (byApi.error) throw new Error(`Falha ao localizar time API-Football ${matchedApiTeamId}: ${byApi.error.message}`);
+    if (byApi.data?.length) {
+      const row = byApi.data[0] as Row;
+      teamId = String(row["id"]);
+      existingApiTeamId = numberValue(row["api_football_team_id"]);
     }
   }
 
+  if (!teamId) {
+    const byName = await db.from("sports_teams")
+      .select("id,api_football_team_id,short_name,logo_url")
+      .eq("name", fiveDollarTeam.name)
+      .limit(2);
+    if (byName.error) throw new Error(`Falha ao localizar ${fiveDollarTeam.name}: ${byName.error.message}`);
+    if (byName.data?.length === 1) {
+      const row = byName.data[0] as Row;
+      teamId = String(row["id"]);
+      existingApiTeamId = numberValue(row["api_football_team_id"]);
+    }
+  }
+
+  const effectiveApiTeamId = matchedApiTeamId ?? existingApiTeamId;
+  const patch = {
+    name: fiveDollarTeam.name,
+    short_name: apiTeam ? text(apiTeam.code) : undefined,
+    country_code: target.countryCode,
+    region: target.region,
+    five_dollar_team_id: fiveDollarTeam.id,
+    api_football_team_id: effectiveApiTeamId,
+    logo_url: apiTeam ? text(apiTeam.logo) : undefined,
+    metadata: {
+      source: "national_catalog",
+      five_dollar_league_id: target.fiveDollarLeagueId,
+      api_match_score: apiTeam ? teamNameScore(fiveDollarTeam.name, String(apiTeam.name)) : null,
+      api_mapping_source: matchedApiTeamId !== null ? "country_name_match" : existingApiTeamId !== null ? "existing_reconciliation" : "unmapped",
+    },
+  };
+
   if (teamId) {
-    const update = await db.from("sports_teams").update({
-      name,
-      short_name: text(rawTeam.code),
-      country_code: target.countryCode,
-      region: target.region,
-      api_football_team_id: apiTeamId,
-      logo_url: text(rawTeam.logo),
-      metadata: { source: "api_football", national_catalog: true },
-    }).eq("id", teamId);
-    if (update.error) throw new Error(`Falha ao atualizar ${name}: ${update.error.message}`);
-    return { teamId, apiTeamId, name };
+    const update = await db.from("sports_teams").update(patch).eq("id", teamId);
+    if (update.error) throw new Error(`Falha ao atualizar ${fiveDollarTeam.name}: ${update.error.message}`);
+    return { teamId, apiTeamId: effectiveApiTeamId, name: fiveDollarTeam.name };
   }
 
   const inserted = await db.from("sports_teams").insert({
-    canonical_key: `api-football:${apiTeamId}`,
-    name,
-    short_name: text(rawTeam.code),
-    country_code: target.countryCode,
-    region: target.region,
-    api_football_team_id: apiTeamId,
-    logo_url: text(rawTeam.logo),
-    metadata: { source: "api_football", national_catalog: true },
+    canonical_key: `five-dollar:${fiveDollarTeam.id}`,
+    ...patch,
   }).select("id").single();
-  if (inserted.error || !inserted.data) throw new Error(`Falha ao criar ${name}: ${inserted.error?.message ?? "sem linha"}`);
-  return { teamId: String((inserted.data as Row)["id"]), apiTeamId, name };
+  if (inserted.error || !inserted.data) throw new Error(`Falha ao criar ${fiveDollarTeam.name}: ${inserted.error?.message ?? "sem linha"}`);
+  return { teamId: String((inserted.data as Row)["id"]), apiTeamId: effectiveApiTeamId, name: fiveDollarTeam.name };
 }
 
 async function squadIsFresh(db: Awaited<ReturnType<typeof sportsDb>>, teamId: string) {
@@ -145,51 +229,62 @@ export async function syncNationalLeagueTeams(leagueId: number) {
   const target = NATIONAL_LEAGUE_TARGETS.find((item) => item.leagueId === leagueId);
   if (!target) throw new Error(`Liga ${leagueId} fora do escopo nacional prioritário.`);
 
-  const fetch = await apiFootballGet(`/teams?league=${leagueId}&season=${API_SEASON}`);
-  if (fetch.status !== "OK" || !fetch.payload) {
-    throw new Error(fetch.errorMessage ?? `Catálogo API-Football indisponível para ${target.name}.`);
+  const [standingsFetch, countryFetch] = await Promise.all([
+    fiveDollarGet(`/standings?league=${target.fiveDollarLeagueId}`),
+    apiFootballGet(`/teams?country=${encodeURIComponent(target.apiCountry)}`),
+  ]);
+  if (standingsFetch.status !== "OK" || !standingsFetch.payload) {
+    throw new Error(standingsFetch.errorMessage ?? `Standings 5Dollar indisponíveis para ${target.name}.`);
   }
-  const envelope = record(fetch.payload);
-  const response = Array.isArray(envelope?.["response"]) ? envelope?.["response"] as ApiLeagueTeam[] : [];
-  if (!response.length) throw new Error(`API-Football retornou zero clubes para ${target.name}.`);
+  if (countryFetch.status !== "OK" || !countryFetch.payload) {
+    throw new Error(countryFetch.errorMessage ?? `Catálogo API-Football por país indisponível para ${target.name}.`);
+  }
+
+  const currentTeams = parseFiveDollarStandingTeams(standingsFetch.payload);
+  const apiTeams = parseApiCountryTeams(countryFetch.payload);
+  if (!currentTeams.length) throw new Error(`5Dollar retornou zero clubes atuais para ${target.name}.`);
+  if (!apiTeams.length) throw new Error(`API-Football retornou zero clubes para ${target.apiCountry}.`);
 
   const db = await sportsDb();
   const competitionId = await competitionForLeague(db, target);
   let teams = 0;
+  let mappedApiTeams = 0;
+  let unmappedApiTeams = 0;
   let squadJobs = 0;
   const bucket = squadBucket();
 
-  for (const entry of response) {
-    if (!entry.team) continue;
-    const team = await upsertTeam(db, entry.team, target);
-    if (!team) continue;
+  for (const currentTeam of currentTeams) {
+    const apiTeam = bestApiTeamMatch(currentTeam, apiTeams);
+    const team = await upsertTeam(db, currentTeam, apiTeam, target);
     teams += 1;
+    if (team.apiTeamId !== null) mappedApiTeams += 1;
+    else unmappedApiTeams += 1;
 
     const membership = await db.from("sports_team_competitions").upsert({
       competition_id: competitionId,
       team_id: team.teamId,
       season: SEASON,
-      provider: "api_football",
+      provider: "five_dollar",
       active: true,
-      fetched_at: fetch.fetchedAt,
-      metadata: { api_football_league_id: leagueId },
+      fetched_at: standingsFetch.fetchedAt,
+      metadata: { five_dollar_league_id: target.fiveDollarLeagueId, api_football_league_id: leagueId },
     }, { onConflict: "competition_id,team_id,season,provider" });
     if (membership.error) throw new Error(`Falha ao vincular ${team.name} a ${target.name}: ${membership.error.message}`);
 
-    if (!(await squadIsFresh(db, team.teamId))) {
+    if (team.apiTeamId !== null && !(await squadIsFresh(db, team.teamId))) {
       const enqueue = await db.rpc("enqueue_sports_job", {
         p_idempotency_key: `api-football-team-squad:${team.apiTeamId}:${bucket}`,
         p_job_type: "API_FOOTBALL_TEAM_SQUAD",
         p_fixture_id: null,
         p_payload: { teamId: team.teamId, apiTeamId: team.apiTeamId, leagueId, season: SEASON },
-        p_max_attempts: 5,
+        p_max_attempts: 20,
       });
       if (enqueue.error) throw new Error(`Falha ao enfileirar elenco de ${team.name}: ${enqueue.error.message}`);
       squadJobs += 1;
     }
   }
 
-  return { leagueId, competitionId, leagueName: target.name, teams, squadJobs };
+  return { leagueId, competitionId, leagueName: target.name, teams, mappedApiTeams, unmappedApiTeams, squadJobs };
 }
 
 async function upsertSquadPlayer(

@@ -36,6 +36,23 @@ describe("sports job failure policy", () => {
     expect(envelope).toEqual({ action: "RETRY", retryAfterSeconds: 300, reason: "provider_rate_limited" });
   });
 
+  it("defers daily quota exhaustion without burning attempts quickly", () => {
+    const first = sportsJobFailureDecision({
+      attempts: 1,
+      maxAttempts: 20,
+      code: "UPSTREAM_UNAVAILABLE",
+      message: "You have exceeded your daily request limit for the day.",
+    });
+    const later = sportsJobFailureDecision({
+      attempts: 4,
+      maxAttempts: 20,
+      code: "UPSTREAM_UNAVAILABLE",
+      message: "daily quota exceeded",
+    });
+    expect(first).toEqual({ action: "RETRY", retryAfterSeconds: 14400, reason: "provider_daily_quota" });
+    expect(later).toEqual({ action: "RETRY", retryAfterSeconds: 43200, reason: "provider_daily_quota" });
+  });
+
   it("keeps configuration failures recoverable with slow retries", () => {
     expect(sportsJobFailureDecision({ attempts: 1, maxAttempts: 5, code: "UPSTREAM_UNAVAILABLE", message: "API_FOOTBALL_KEY ausente no servidor." })).toEqual({
       action: "RETRY",
