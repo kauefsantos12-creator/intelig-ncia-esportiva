@@ -247,14 +247,26 @@ async function persistFixture(db: Awaited<ReturnType<typeof sportsDb>>, fixture:
     if (factResult.error) throw new Error(`Falha ao gerar fact pack ${fixture.eventId}: ${factResult.error.message}`);
   }
 
-  const jobKey = sportsJobIdempotencyKey("api-football-link", canonicalKey);
-  await db.rpc("enqueue_sports_job", {
-    p_idempotency_key: jobKey,
-    p_job_type: "API_FOOTBALL_LINK",
+  const scopeResult = await db.rpc("sports_fixture_in_api_football_scope", {
     p_fixture_id: sportsFixtureId,
-    p_payload: { fixtureId: sportsFixtureId },
-    p_max_attempts: 5,
   });
+  if (scopeResult.error) {
+    throw new Error(`Falha ao validar escopo API-Football da fixture ${fixture.eventId}: ${scopeResult.error.message}`);
+  }
+
+  if (scopeResult.data === true) {
+    const jobKey = sportsJobIdempotencyKey("api-football-link", canonicalKey);
+    const enqueueResult = await db.rpc("enqueue_sports_job", {
+      p_idempotency_key: jobKey,
+      p_job_type: "API_FOOTBALL_LINK",
+      p_fixture_id: sportsFixtureId,
+      p_payload: { fixtureId: sportsFixtureId },
+      p_max_attempts: 5,
+    });
+    if (enqueueResult.error) {
+      throw new Error(`Falha ao enfileirar vínculo API-Football da fixture ${fixture.eventId}: ${enqueueResult.error.message}`);
+    }
+  }
 
   return { sportsFixtureId, stats, events, status };
 }

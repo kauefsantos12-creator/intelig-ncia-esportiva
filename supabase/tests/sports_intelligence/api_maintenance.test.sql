@@ -1,5 +1,5 @@
 begin;
-select plan(10);
+select plan(11);
 
 select ok(
   to_regprocedure('public.requeue_unlinked_api_football_jobs()') is not null,
@@ -30,6 +30,11 @@ select ok(
   and position('status = ''succeeded''' in lower(pg_get_functiondef('public.requeue_unlinked_api_football_jobs()'::regprocedure))) > 0
   and position('status = ''pending''' in lower(pg_get_functiondef('public.requeue_unlinked_api_football_jobs()'::regprocedure))) > 0,
   'recovery only requeues false-success link jobs without provider id'
+);
+
+select ok(
+  position('sports_fixture_in_api_football_scope' in lower(pg_get_functiondef('public.requeue_unlinked_api_football_jobs()'::regprocedure))) > 0,
+  'recovery only requeues fixtures inside API-Football scope'
 );
 
 select ok(
