@@ -4,6 +4,7 @@ import { BarChart3, CalendarDays, RefreshCw, Search, ShieldCheck, UsersRound } f
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { NationalSquadHealthPanel } from "@/components/NationalSquadHealthPanel";
 import { FilterBar, FilterChip, SearchField, StatusBadge } from "@/components/ProductControls";
 import { MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
@@ -162,6 +163,8 @@ function AnalyticsPage() {
   return (
     <AppShell stage="analytics">
       <div className="space-y-6">
+        <NationalSquadHealthPanel />
+
         <ProductPageHeader
           eyebrow="Analytics 26/27"
           title="Da competição ao jogador"
