@@ -111,3 +111,8 @@ A ausência de resenhas deixou de ser tratada apenas como estado de frontend. A 
 A função grava `sports_briefing_items` com proveniência explícita do fact pack e publica `sports_daily_briefings` somente quando existem partidas elegíveis. A síntese automática é factual e determinística: placar e estatísticas persistidas; ela não atribui opinião, causalidade ou notícia externa que não esteja registrada. Sem partidas elegíveis, o briefing permanece `READY` sem síntese, preservando o estado vazio honesto no frontend.
 
 A migration executa uma primeira publicação para a data corrente. Automação recorrente deve chamar a mesma função, preservando idempotência por `briefing_date`.
+
+
+## Automação v2 — 19/09/2026
+
+A publicação factual diária passa a executar automaticamente às 05:55 de Brasília para o dia anterior, depois do sync diário das 05:20. O escopo editorial inclui 1ª/2ª divisões de Inglaterra, Alemanha, França, Itália, Espanha e Brasil; continentais de Europa/América do Sul; primeira divisão argentina; MLS; liga saudita quando catalogada; copas nacionais prioritárias quando catalogadas; e partidas internacionais catalogadas. A seleção continua exigindo fixture FINISHED + fact pack persistido e mantém proveniência por item. A função permanece idempotente e recompõe a data antes de publicar.
