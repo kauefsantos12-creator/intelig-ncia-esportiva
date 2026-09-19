@@ -95,7 +95,8 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 ## Limitações e pendências conhecidas
 
 - Em 19/09, o teste real Tottenham x Aston Villa revelou uma falha de identidade de competição: algumas fixtures das seis ligas estão ligadas ao registro canônico 5Dollar, enquanto os IDs API-Football podem estar em um registro irmão da mesma liga. A função de escopo deve reconhecer ambas as identidades de provedor. A correção está sendo versionada em migration própria e deve reabrir apenas jobs prospectivos que foram mortos por esse bug.
-- A lógica de agregação de **titularidades (starts)** da view prospectiva ainda precisa ser reconciliada com sports_fixture_lineups; não considerar esse ponto resolvido.
+- A correção de **titularidades (starts)** foi versionada na branch `fix/stage4-rate-limit-starts`: a view passa a derivar titularidade de `sports_fixture_lineups.is_starting`, em vez de inferi-la do JSON de stats. Só considerar resolvido após gates, merge e validação no Lovable Cloud.
+- O teste Osasuna x Rayo confirmou rate limit **por minuto** da API-Football (`Too many requests... per minute`), não cota diária. A correção reduz o teto distribuído, espaça chamadas, prioriza `API_FOOTBALL_FIXTURE_DATA` e amplia a tolerância de retry dos jobs pós-jogo.
 - A Etapa 4 só deve ser encerrada após pelo menos uma partida real completar automaticamente o fluxo de coleta detalhada.
 - Depois disso, executar a auditoria da Agenda/Programação (Etapa 4.5).
 
