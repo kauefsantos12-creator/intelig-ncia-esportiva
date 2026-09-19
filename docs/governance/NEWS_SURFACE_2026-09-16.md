@@ -102,3 +102,12 @@ Loading, erro, vazio e dados carregados usam os contratos já definidos em `Surf
 - fatos editoriais e métricas calculadas permanecem visual e semanticamente distinguíveis;
 - nenhuma regra de Elo, migration, job, cron, integração ou RLS é modificada por esta fatia;
 - implementado, testado, mergeado, sincronizado, publicado e validado em produção continuam sendo estados distintos.
+
+
+## Pipeline editorial factual — 19/09/2026
+
+A ausência de resenhas deixou de ser tratada apenas como estado de frontend. A geração diária passa a ter uma função server-side versionada, `publish_sports_daily_briefing(date)`, que recompõe idempotentemente o briefing da data a partir de partidas `FINISHED` do escopo `enabled + always_track` que já possuam `sports_match_fact_packs`.
+
+A função grava `sports_briefing_items` com proveniência explícita do fact pack e publica `sports_daily_briefings` somente quando existem partidas elegíveis. A síntese automática é factual e determinística: placar e estatísticas persistidas; ela não atribui opinião, causalidade ou notícia externa que não esteja registrada. Sem partidas elegíveis, o briefing permanece `READY` sem síntese, preservando o estado vazio honesto no frontend.
+
+A migration executa uma primeira publicação para a data corrente. Automação recorrente deve chamar a mesma função, preservando idempotência por `briefing_date`.
