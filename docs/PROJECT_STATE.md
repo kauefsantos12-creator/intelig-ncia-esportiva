@@ -94,7 +94,7 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 
 ## Limitações e pendências conhecidas
 
-- PR #26 precisa ficar completamente verde antes de restringir a Etapa 4 às seis ligas em produção.
+- Em 19/09, o teste real Tottenham x Aston Villa revelou uma falha de identidade de competição: algumas fixtures das seis ligas estão ligadas ao registro canônico 5Dollar, enquanto os IDs API-Football podem estar em um registro irmão da mesma liga. A função de escopo deve reconhecer ambas as identidades de provedor. A correção está sendo versionada em migration própria e deve reabrir apenas jobs prospectivos que foram mortos por esse bug.
 - A lógica de agregação de **titularidades (starts)** da view prospectiva ainda precisa ser reconciliada com sports_fixture_lineups; não considerar esse ponto resolvido.
 - A Etapa 4 só deve ser encerrada após pelo menos uma partida real completar automaticamente o fluxo de coleta detalhada.
 - Depois disso, executar a auditoria da Agenda/Programação (Etapa 4.5).

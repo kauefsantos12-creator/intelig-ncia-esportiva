@@ -28,3 +28,17 @@ Dados individuais permanecem em `sports_fixture_player_stats`; escalações em `
 ## Operação
 
 O worker mantém fila, lease/fencing, idempotência, retries e quota-aware mode existentes. Jobs de detalhamento fora das seis ligas devem ser encerrados antes de qualquer chamada ao provider. Nenhuma chamada em massa ou backfill é autorizado por esta etapa.
+
+
+## Reconciliação de identidade entre provedores
+
+O teste real com Tottenham x Aston Villa expôs uma diferença de identidade entre provedores. Algumas fixtures das seis ligas usam o registro de competição da 5Dollar, enquanto a cobertura de elencos/API-Football pode existir em outro registro da mesma liga.
+
+Consequência observada: uma fixture válida da Premier League foi marcada como fora do escopo apenas porque o registro da competição da fixture tinha `api_football_league_id = NULL`, embora seu `five_dollar_league_id` fosse o da Premier League.
+
+A regra correta é reconhecer as seis ligas por qualquer uma das identidades canônicas aceitas:
+
+- API-Football: 39, 61, 71, 78, 135, 140;
+- 5Dollar: 4160026622, 3614399544, 3118717965, 686337048, 3405541143, 4212821298.
+
+A reconciliação deve reabrir somente jobs prospectivos que tenham sido terminalizados especificamente pelo erro de escopo anterior, preservando histórico e respeitando tentativas/backoff.
