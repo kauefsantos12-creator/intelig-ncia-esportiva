@@ -1,23 +1,19 @@
 # Motor de Inteligência Esportiva — estado canônico
 
-> Atualizado: 16/09/2026  
-> Repositório: `kauefsantos12-creator/quant-football-insights`  
-> Lovable canônico: `28664075-8af4-4155-9ee9-8ed86021681a`  
-> Produção: `https://quant-football-insights.lovable.app`
+> Atualizado: 19/09/2026  
+> Repositório: kauefsantos12-creator/quant-football-insights  
+> Lovable canônico: 28664075-8af4-4155-9ee9-8ed86021681a  
+> Produção: https://quant-football-insights.lovable.app
 
-Este documento registra o estado vigente do produto. Auditorias e migrations antigas preservam a trilha histórica, mas não representam o runtime atual quando contradizem o `main` ou o estado vivo do Lovable Cloud.
+Este documento registra o estado vigente do produto. Auditorias e migrations antigas preservam a trilha histórica, mas não representam o runtime atual quando contradizem o main ou o estado vivo do Lovable Cloud.
 
 ## Fontes de verdade
 
-- **GitHub `main`**: código, testes, migrations, contratos e documentação versionados.
+- **GitHub main**: código, testes, migrations, contratos e documentação versionados.
 - **Lovable Cloud**: banco/runtime e estado operacional vivos.
 - **Lovable**: aplicação canônica ligada a este repositório.
 
-Regra obrigatória:
-
-```text
-implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção
-```
+Regra obrigatória: implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção.
 
 ## Produto vigente
 
@@ -32,163 +28,84 @@ Superfícies atuais:
 5. **Analytics 2026/27** — times, competições, elenco, jogadores e recortes por torneio.
 6. **Conta/Privacidade** — autenticação single-user e controles de privacidade.
 
-## Estado das sete fases
+## Duas numerações que não devem ser confundidas
 
-| Fase | Estado |
-| --- | --- |
-| 1. Fundação | concluída |
-| 2. Elo | concluída |
-| 3. Hoje | concluída |
-| 4. Anotações | concluída |
-| 5. Analytics 26/27 | concluída |
-| 6. Noticiário | concluída |
-| 7. Corte do produto anterior | concluída |
+Existem dois conjuntos de etapas documentados no repositório:
 
-Cada fase passou pelo fluxo de branch/PR/gates antes do merge quando exigiu alteração de código.
+- **Fases 1–7 do reescopo de produto (15–16/09):** fundação, Elo, Hoje, Anotações, Analytics, Noticiário e corte do runtime antigo. Essas sete fases estão concluídas e representam a transformação do produto.
+- **Etapas operacionais atuais de dados (19/09 em diante):** sequência de consolidação de elencos, coleta prospectiva por partida, agenda e analytics vivos.
+
+Portanto, quando este documento disser **Etapa 3** abaixo, significa **elencos**, não a antiga Fase 3 = Hoje.
+
+## Estado operacional atual de dados
+
+### Etapa 3 — Elencos
+
+**Concluída e validada: 116/116 clubes com elenco fresco.**
+
+| Liga | Clubes |
+| --- | ---: |
+| Premier League | 20 |
+| Ligue 1 | 18 |
+| Brasileirão Série A | 20 |
+| Bundesliga | 18 |
+| Serie A italiana | 20 |
+| La Liga | 20 |
+| **Total** | **116** |
+
+A API-Football é a camada de jogador/elenco. Não há necessidade de detalhamento individual para competições sem elenco carregado nesta etapa.
+
+### Etapa 4 — Dia Zero prospectivo
+
+Objetivo: construir histórico próprio daqui para frente, sem backfill histórico.
+
+Regras canônicas:
+
+- apenas fixtures com kickoff posterior ao Dia Zero persistido;
+- coleta detalhada via API-Football somente nas seis ligas da Etapa 3;
+- pipeline por fixture: reconciliação → lineups → fixtures/players → persistência em sports_fixture_player_stats;
+- estatísticas gerais de equipe continuam no fluxo canônico da 5Dollar;
+- endpoint player-season é utilitário legado, não caminho primário do worker;
+- copas, continentais, segundas divisões e demais torneios podem permanecer na agenda/base geral, mas não consomem o detalhamento individual desta Etapa 4.
+
+A migration de restrição de escopo está no PR #26 enquanto este documento é atualizado; só pode ser considerada ativa após gates verdes, merge, sincronização e validação no Lovable Cloud.
+
+### Etapa 4.5 — Agenda/Programação
+
+Depois que a primeira partida real da Etapa 4 atravessar o pipeline completo, auditar:
+
+- completude dos jogos do escopo acompanhado;
+- horário e data em America/Sao_Paulo;
+- adiamentos, cancelamentos e mudança de horário;
+- duplicidades;
+- mandante/visitante, competição e ordenação cronológica;
+- transição entre agendado/ao vivo/encerrado;
+- camada de transmissão separada da fonte de agenda.
+
+A agenda oficial vem de sports_fixtures/catálogo canônico. Evidência de transmissão fica em sports_broadcast_evidence. FutNaTV é fonte editorial de transmissão, não fonte de verdade para existência ou horário da partida.
+
+### Etapa 5 — Analytics
+
+Somente depois da validação da coleta prospectiva e da agenda: consolidar participação, minutos, titularidades, notas, forma recente, comparações e demais indicadores para as superfícies analíticas.
 
 ## Backend e dados
 
-O Lovable Cloud contém o domínio esportivo canônico, incluindo:
+O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas, jogadores, elencos, lineups, transmissões, fact packs, analytics, reviews pessoais, jobs e Elo. Integrações esportivas permanecem normalizadas e server-side. Jobs usam idempotência, leases/retries e proteção contra processamento duplicado.
 
-- competições, equipes e fixtures;
-- eventos e estatísticas de partidas;
-- jogadores, elencos, lineups e estatísticas individuais;
-- evidências de transmissão;
-- fact packs e briefings;
-- analytics de temporada;
-- reviews pessoais e ratings pessoais;
-- marcações pessoais do campinho;
-- jobs, sync state e infraestrutura operacional;
-- Elo de clubes e ligas.
+## Limitações e pendências conhecidas
 
-Integrações esportivas permanecem normalizadas e server-side. Jobs usam idempotência, leases/retries e proteção contra processamento duplicado.
-
-## Elo
-
-O Elo preservado é parte do produto atual. A aplicação oferece:
-
-- rating global de clubes;
-- rating de ligas com hierarquia entre divisões;
-- comparação cross-league;
-- histórico point-in-time;
-- ranking com filtros geográficos;
-- sincronização protegida no backend.
-
-A UI não recalcula Elo no cliente.
-
-## Anotações pessoais
-
-A superfície `/anotacoes` está funcional.
-
-Fluxo:
-
-- partidas encerradas elegíveis entram na fila via `enqueue_finished_sports_reviews`;
-- usuário marca assistiu/não assistiu;
-- pode escrever comentário geral;
-- pode atribuir notas de 0 a 10 em passos de 0,5 a jogadores que participaram;
-- pode registrar marcações no campinho com coordenadas relativas e jogador opcional;
-- pode finalizar o review;
-- dados pessoais nunca alteram estatísticas, eventos, lineup ou rating oficial.
-
-Segurança:
-
-- ownership validado server-side;
-- RLS owner-scoped;
-- `anon` sem acesso;
-- `sports_review_field_marks` possui quatro policies por proprietário.
-
-## Corte do produto anterior
-
-A migration `20260916013000_sports_intelligence_legacy_cleanup.sql` descomissionou o runtime anterior sem reescrever a história do banco.
-
-Foram retirados do ambiente ativo:
-
-- jobs exclusivos de análise/apostas;
-- tabelas de analysis runs, picks/seleções, odds, banca, value e tracking de apostas;
-- RPCs do funil antigo;
-- capacidades e métricas exclusivamente financeiras/de aposta;
-- rotas e módulos executáveis legados.
-
-Preservados:
-
-- migrations históricas;
-- auditorias históricas;
-- Elo;
-- autenticação, RLS, privacidade e governança;
-- infraestrutura esportiva e de provedores;
-- push genérico;
-- telemetria e performance.
-
-Contratos automatizados impedem reintroduzir superfícies de apostas no frontend ativo e verificam a ausência de módulos legados do runtime.
-
-## CI obrigatório
-
-Antes de merge de código, a cadeia cobre:
-
-```text
-lint + typecheck + architecture boundaries
-→ dependency vulnerability gate
-→ secret scan
-→ server secret boundary
-→ governance documentation gate
-→ versioned route tree
-→ rebuild das migrations
-→ regressões sports_intelligence / RLS
-→ unit tests
-→ build
-→ bundle performance budget
-→ concurrent load smoke
-→ Chromium + Firefox + WebKit
-→ responsividade + acessibilidade
-```
-
-## Estado validado em 16/09/2026
-
-### GitHub
-
-- `main` após a conclusão funcional de Anotações: `5a8dd49e68731eb39d61a2c4422843e512092610`.
-- PR #12, **feat: complete post-match notes workflow**, mergeada por squash após:
-  - Static diagnostics #15: success;
-  - Database Security #4: success;
-  - CI #18: success.
-
-### Lovable
-
-- projeto canônico sincronizado no mesmo commit `5a8dd49e68731eb39d61a2c4422843e512092610` antes deste PR documental;
-- aplicação publicada e reportada como `ready`;
-- screenshot atual mostra a identidade **Motor de Inteligência Esportiva** e autenticação privada.
-
-### Lovable Cloud
-
-Validação viva confirmou:
-
-- `sports_match_reviews`: presente;
-- `sports_player_personal_ratings`: presente;
-- `sports_review_field_marks`: presente;
-- migration `20260916220000_sports_review_field_marks`: registrada;
-- RLS de `sports_review_field_marks`: habilitado;
-- quatro policies owner-scoped: presentes;
-- índice `sports_review_field_marks_review_idx`: presente;
-- FKs para review e jogador: presentes;
-- checks de `x_percent`/`y_percent` entre 0 e 100: presentes;
-- `analysis_runs`: ausente;
-- `experimental_bet_tracking`: ausente;
-- `user_odds`: ausente.
-
-A migration do campinho foi aplicada ao Lovable Cloud após o deploy porque a publicação de código não a havia propagado automaticamente. O SQL aplicado foi exatamente o arquivo versionado `20260916220000_sports_review_field_marks.sql`, e a versão foi registrada no histórico de migrations na mesma transação.
-
-## Limitações de validação
-
-- A tela pública de autenticação foi validada por estado/screenshot do Lovable.
-- O fluxo autenticado completo não foi navegado manualmente com uma sessão Google humana nesta execução; sua estrutura foi coberta por CI, testes de banco, contratos e validação viva do schema.
-- O nome/descrição internos do projeto no editor Lovable ainda podem exibir o rótulo histórico `Value Bet Finder`; isso não corresponde ao código nem à UI publicada e não altera o runtime.
+- PR #26 precisa ficar completamente verde antes de restringir a Etapa 4 às seis ligas em produção.
+- A lógica de agregação de **titularidades (starts)** da view prospectiva ainda precisa ser reconciliada com sports_fixture_lineups; não considerar esse ponto resolvido.
+- A Etapa 4 só deve ser encerrada após pelo menos uma partida real completar automaticamente o fluxo de coleta detalhada.
+- Depois disso, executar a auditoria da Agenda/Programação (Etapa 4.5).
 
 ## Protocolo para continuidade
 
-1. consultar `main` e este documento;
+1. consultar main, README e este documento;
 2. consultar o commit atual no Lovable;
 3. consultar o Lovable Cloud para banco/jobs/dados;
-4. não assumir sincronização ou execução de automações;
-5. para código: branch → alteração → PR → gates verdes → merge;
-6. depois do merge: confirmar sincronização, publicar se necessário e validar produção;
-7. manter migrations/auditorias antigas como trilha histórica, sem tratá-las como arquitetura ativa.
+4. antes de qualquer status da Etapa 3, fazer consulta fresca dos 116 elencos;
+5. não assumir sincronização ou execução de automações;
+6. para código: branch → alteração → PR → gates verdes → merge;
+7. depois do merge: confirmar sincronização, publicar se necessário e validar produção;
+8. manter migrations/auditorias antigas como trilha histórica, sem tratá-las como arquitetura ativa.

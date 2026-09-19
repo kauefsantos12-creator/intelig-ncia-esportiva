@@ -4,7 +4,20 @@ A Etapa 3 foi validada com 116/116 clubes das seis ligas prioritárias com elenc
 
 ## Regra de coleta
 
-Não há backfill histórico nesta etapa. Apenas fixtures com `kickoff_at >= day_zero_at` pertencem à janela prospectiva. O pipeline existente continua vinculando a fixture à API-Football e usa coleta por fixture: lineups, estatísticas de time já persistidas no fluxo canônico e `fixtures/players` para estatísticas individuais.
+Não há backfill histórico nesta etapa. Apenas fixtures com `kickoff_at >= day_zero_at` pertencem à janela prospectiva.
+
+O enriquecimento detalhado via API-Football é restrito exclusivamente às seis competições que tiveram os elencos carregados e validados na Etapa 3:
+
+- Premier League — API-Football league 39;
+- Ligue 1 — 61;
+- Brasileirão Série A — 71;
+- Bundesliga — 78;
+- Serie A italiana — 135;
+- La Liga — 140.
+
+Copas, competições continentais, segundas divisões e qualquer outra competição ficam fora do detalhamento individual da Etapa 4. Elas podem continuar existindo no catálogo e receber dados gerais pela fonte primária, mas não devem gerar `API_FOOTBALL_LINK` ou `API_FOOTBALL_FIXTURE_DATA` ativos.
+
+Para as seis ligas, o pipeline vincula a fixture à API-Football e usa coleta por fixture: lineups, estatísticas de time já persistidas no fluxo canônico e `fixtures/players` para estatísticas individuais.
 
 O endpoint individual player-season permanece disponível como utilitário legado, mas não é o caminho primário da Etapa 4 nem é executado pelo worker.
 
@@ -14,4 +27,4 @@ Dados individuais permanecem em `sports_fixture_player_stats`; escalações em `
 
 ## Operação
 
-O worker mantém fila, lease/fencing, idempotência, retries e quota-aware mode existentes. Nenhuma chamada em massa ou backfill é autorizado por esta etapa.
+O worker mantém fila, lease/fencing, idempotência, retries e quota-aware mode existentes. Jobs de detalhamento fora das seis ligas devem ser encerrados antes de qualquer chamada ao provider. Nenhuma chamada em massa ou backfill é autorizado por esta etapa.

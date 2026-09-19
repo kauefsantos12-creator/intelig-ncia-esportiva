@@ -2,119 +2,75 @@
 
 > Plataforma full-stack de inteligência esportiva para futebol, com dados canônicos, Elo hierárquico, agenda, análises, noticiário e anotações pós-jogo.
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111)
-![TanStack Start](https://img.shields.io/badge/TanStack-Start-FF4154?logo=reactquery&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/Lovable_Cloud-PostgreSQL-3FCF8E)
-![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
-
-O **Motor de Inteligência Esportiva** consolida dados de futebol em uma aplicação autenticada voltada a acompanhamento, exploração e leitura esportiva. O produto atual não possui fluxo de apostas, odds, banca, picks ou execução financeira.
+O produto atual não possui fluxo de apostas, odds, banca, picks ou execução financeira.
 
 ## Produto atual
 
 - **Noticiário** — resenha diária, fatos de partidas e movimentos relevantes de Elo.
-- **Hoje** — agenda de jogos, transmissões e sinais pré-jogo baseados em dados canônicos.
+- **Hoje** — agenda de jogos, transmissões e contexto pré-jogo.
 - **Elo** — ranking de clubes e ligas, filtros geográficos e histórico point-in-time.
 - **Analytics 2026/27** — recortes por time, competição, elenco e jogadores.
-- **Anotações** — fila pós-jogo, assistiu/não assistiu, comentários, notas pessoais de jogadores e campinho persistente.
-
-## Stack
-
-- React 19 + TanStack Start
-- TypeScript
-- Lovable / Lovable Cloud
-- PostgreSQL com migrations versionadas e RLS
-- integração com provedores esportivos
-- Vitest + pgTAP/Supabase CLI + Playwright
-- GitHub Actions
+- **Anotações** — fila pós-jogo, assistiu/não assistiu, comentários, notas pessoais e campinho persistente.
 
 ## Identidade canônica
 
 | Item | Valor |
 | --- | --- |
-| Repositório | `kauefsantos12-creator/quant-football-insights` |
-| Lovable project ID | `28664075-8af4-4155-9ee9-8ed86021681a` |
-| Workspace Lovable | `IgC7Z3MS5vlDXWjvizgE` |
-| Produção | `https://quant-football-insights.lovable.app` |
-| Banco/runtime | **Lovable Cloud** |
-| Timezone operacional | `America/Sao_Paulo` |
+| Repositório | kauefsantos12-creator/quant-football-insights |
+| Lovable project ID | 28664075-8af4-4155-9ee9-8ed86021681a |
+| Workspace Lovable | IgC7Z3MS5vlDXWjvizgE |
+| Produção | https://quant-football-insights.lovable.app |
+| Banco/runtime | Lovable Cloud |
+| Timezone operacional | America/Sao_Paulo |
 
 Não criar um projeto Lovable paralelo para continuar este produto.
 
 ## Fontes de verdade
 
-- **GitHub `main`** — código, testes, migrations, contratos e documentação versionados.
+- **GitHub main** — código, testes, migrations, contratos e documentação versionados.
 - **Lovable Cloud** — banco e estado operacional vivos.
 - **Lovable** — aplicação ligada ao repositório canônico.
 
 Nunca tratar estes estados como equivalentes:
 
-```text
 implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção
-```
-
-## Arquitetura resumida
-
-```text
-Provedores esportivos
-        ↓
-normalização / jobs idempotentes
-        ↓
-Lovable Cloud
-  ├─ catálogo esportivo
-  ├─ fixtures / eventos / estatísticas
-  ├─ jogadores / lineups / transmissões
-  ├─ Elo hierárquico
-  ├─ analytics de temporada
-  ├─ briefings / fact packs
-  └─ anotações pessoais owner-scoped
-        ↓
-TanStack Start server functions
-        ↓
-React UI autenticada
-```
-
-Acesso privilegiado ao banco permanece server-side. Dados pessoais de Anotações são isolados por `owner_id` e RLS e não alteram estatísticas oficiais.
-
-## Qualidade e segurança
-
-O CI obrigatório cobre, entre outros:
-
-- lint, typecheck e boundaries de arquitetura;
-- auditoria de dependências e secret scan;
-- server secret boundary;
-- governança documental e árvore de rotas;
-- rebuild completo das migrations;
-- regressões `sports_intelligence` e RLS;
-- unit tests e contratos de superfície;
-- build e orçamento de bundle;
-- smoke de carga;
-- Chromium, Firefox e WebKit;
-- responsividade e acessibilidade automatizada.
 
 ## Reescopo do produto
 
-O projeto nasceu a partir de um motor quantitativo ligado a apostas. Em 16/09/2026, esse runtime foi descomissionado de forma governada: jobs, tabelas e RPCs exclusivos do produto antigo foram removidos do ambiente ativo, enquanto migrations e documentos históricos foram preservados como trilha de auditoria.
+O projeto nasceu a partir de um motor quantitativo ligado a apostas. Em 16/09/2026, esse runtime foi descomissionado de forma governada. Migrations e documentos históricos foram preservados como trilha de auditoria.
 
-O código executável atual possui contratos que impedem a reintrodução dessas superfícies no frontend e no runtime.
+## Estado operacional atual — trilha de dados esportivos
 
-## Estado atual
+A numeração abaixo é **operacional da coleta de dados atual** e não substitui as sete fases históricas do reescopo do produto.
 
-As sete fases do reescopo para Inteligência Esportiva estão implementadas no `main`. O estado operacional detalhado e as validações vivas ficam em [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md).
+- **Etapa 3 — Elencos:** concluída e validada em 19/09/2026 com **116/116 clubes** das seis ligas prioritárias: Premier League (20), Ligue 1 (18), Brasileirão Série A (20), Bundesliga (18), Serie A italiana (20) e La Liga (20).
+- **Etapa 4 — Dia Zero prospectivo:** coleta detalhada por fixture a partir do Dia Zero, sem backfill histórico. O detalhamento via API-Football é exclusivo dessas seis ligas e inclui vínculo da fixture, lineups e fixtures/players, com persistência de estatísticas individuais.
+- **Etapa 4.5 — Agenda/Programação:** próxima validação operacional depois da primeira coleta real da Etapa 4; auditar completude da agenda, horários em America/Sao_Paulo, adiamentos/cancelamentos, duplicidades, ordenação e camada separada de transmissão.
+- **Etapa 5 — Analytics:** consolidar os dados prospectivos em leitura de forma, participação, minutos, desempenho e demais superfícies analíticas.
 
-Documentação adicional:
+A agenda geral continua baseada no catálogo canônico de fixtures. O detalhamento individual da Etapa 4 não define quais jogos existem na agenda; ele apenas enriquece partidas das seis ligas com elencos validados.
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-- [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md)
-- [`docs/governance/SPORTS_INTELLIGENCE_RESCOPE_2026-09-15.md`](docs/governance/SPORTS_INTELLIGENCE_RESCOPE_2026-09-15.md)
-- [`docs/governance/SPORTS_INTELLIGENCE_IMPLEMENTATION_PHASES_2026-09-15.md`](docs/governance/SPORTS_INTELLIGENCE_IMPLEMENTATION_PHASES_2026-09-15.md)
+## Qualidade e segurança
+
+O CI obrigatório cobre lint, typecheck, arquitetura, vulnerabilidades, secret scan, governança documental, rebuild completo das migrations, regressões sports_intelligence/RLS, unit tests, build, performance, browsers, responsividade e acessibilidade.
+
+## Documentação canônica
+
+- docs/PROJECT_STATE.md
+- docs/ARCHITECTURE.md
+- docs/GOVERNANCE.md
+- docs/governance/SPORTS_INTELLIGENCE_RESCOPE_2026-09-15.md
+- docs/governance/SPORTS_INTELLIGENCE_IMPLEMENTATION_PHASES_2026-09-15.md
+- docs/governance/STAGE4_PROSPECTIVE_FIXTURE_COLLECTION_2026-09-19.md
+- docs/governance/TODAY_SURFACE_2026-09-16.md
 
 ## Protocolo para próximos trabalhos
 
-1. consultar o `main` atual;
-2. ler este README e `docs/PROJECT_STATE.md`;
+1. consultar o main atual;
+2. ler este README e docs/PROJECT_STATE.md;
 3. consultar o projeto Lovable canônico e seu commit atual;
 4. consultar o Lovable Cloud quando a tarefa envolver banco, dados, jobs ou migrations;
-5. para alteração de código: **branch → alteração → PR → gates verdes → merge**;
-6. nunca fazer merge com gate pendente ou falhando;
-7. depois do merge, confirmar sincronização, publicar se necessário e validar produção.
+5. distinguir as sete fases históricas do reescopo das etapas operacionais atuais de dados;
+6. para alteração de código: branch → alteração → PR → gates verdes → merge;
+7. nunca fazer merge com gate pendente ou falhando;
+8. depois do merge, confirmar sincronização, publicar se necessário e validar produção.

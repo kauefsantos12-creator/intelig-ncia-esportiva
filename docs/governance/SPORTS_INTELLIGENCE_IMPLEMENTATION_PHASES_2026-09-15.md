@@ -1,8 +1,10 @@
 # Fases de implementação — Motor de Inteligência Esportiva
 
-Atualizado em 16/09/2026.
+Atualizado em 19/09/2026.
 
-| Fase | Entrega | Estado |
+> **Importante:** este documento registra as **sete fases históricas do reescopo de produto** concluídas em 15–16/09/2026. Ele não usa a mesma numeração das etapas operacionais de dados iniciadas depois. Na trilha operacional atual, por exemplo, **Etapa 3 = elencos (116/116)** e **Etapa 4 = coleta prospectiva por fixture**. O estado vivo dessas etapas fica em docs/PROJECT_STATE.md.
+
+| Fase histórica | Entrega | Estado |
 | --- | --- | --- |
 | 1 | Fundação: cálculos determinísticos, acesso Elo e camada de dados de jogadores | concluída |
 | 2 | Elo: clubes/ligas, filtros e histórico point-in-time | concluída |
@@ -14,18 +16,19 @@ Atualizado em 16/09/2026.
 
 ## Critério de conclusão
 
-Conclusão de fase não significa apenas código escrito. O protocolo do projeto distingue:
+Conclusão de fase não significa apenas código escrito:
 
-```text
 implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção
-```
 
 Mudanças de código seguem **branch → PR → gates verdes → merge → sincronização Lovable → publicação quando necessária → validação viva**.
 
-## Situação em 16/09/2026
+## Continuidade operacional após o reescopo
 
-As sete fases funcionais do reescopo estão materializadas no produto atual. O frontend ativo não expõe superfícies de apostas, e o Lovable Cloud validado não contém `analysis_runs`, `experimental_bet_tracking` ou `user_odds`.
+A evolução atual usa outra trilha:
 
-A superfície de Anotações foi a última lacuna funcional fechada: PR #12 mergeada após CI, Static diagnostics e Database Security verdes. A tabela `sports_review_field_marks` foi posteriormente reconciliada no Lovable Cloud com a migration versionada `20260916220000_sports_review_field_marks.sql` e validada com RLS, quatro policies owner-scoped, índice, FKs e constraints.
+- **Etapa 3 — Elencos:** 116/116 clubes das seis ligas prioritárias validados;
+- **Etapa 4 — Dia Zero prospectivo:** lineups e estatísticas individuais por fixture somente nessas seis ligas;
+- **Etapa 4.5 — Agenda/Programação:** auditoria de jogos e horários após o primeiro fluxo real da Etapa 4;
+- **Etapa 5 — Analytics:** consolidação do histórico prospectivo em inteligência esportiva.
 
-O estado operacional detalhado está em `docs/PROJECT_STATE.md`.
+Consultar docs/PROJECT_STATE.md e docs/governance/STAGE4_PROSPECTIVE_FIXTURE_COLLECTION_2026-09-19.md para o estado atual.
