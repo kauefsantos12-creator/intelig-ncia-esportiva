@@ -25,9 +25,13 @@ export type BroadcastSyncStatus = {
   error: string | null;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function record(value: unknown): Record<string, unknown> | null {
-  if (!Array.isArray(value) || typeof value[0] !== "object" || value[0] === null || Array.isArray(value[0])) return null;
-  return value[0] as Record<string, unknown>;
+  if (!Array.isArray(value) || !isRecord(value[0])) return null;
+  return value[0];
 }
 
 function text(value: unknown) {
@@ -44,7 +48,7 @@ export const getBroadcastSyncStatus = createServerFn({ method: "GET" })
     const db = (await adminDb()) as unknown as Db;
     const result = await db
       .from("sports_sync_state")
-      .select("last_attempt_at,last_success_at,last_error")
+      .select("last_attempt_at,last_success_at,last_error,metadata")
       .eq("provider", "futnatv")
       .eq("domain", "broadcasts")
       .eq("season", "2026/27")
@@ -68,6 +72,8 @@ export const getBroadcastSyncStatus = createServerFn({ method: "GET" })
     const lastAttemptAt = text(row["last_attempt_at"]);
     const lastSuccessAt = text(row["last_success_at"]);
     const error = text(row["last_error"]);
+    const metadata = isRecord(row["metadata"]) ? row["metadata"] : null;
+    const sourceName = metadata ? text(metadata["sourceName"]) ?? "FutNaTV" : "FutNaTV";
     const hasFreshFailure = Boolean(
       error
       && lastAttemptAt
@@ -76,7 +82,7 @@ export const getBroadcastSyncStatus = createServerFn({ method: "GET" })
 
     return {
       state: hasFreshFailure ? "ERROR" : lastSuccessAt ? "READY" : "NEVER",
-      sourceName: "FutNaTV",
+      sourceName,
       lastAttemptAt,
       lastSuccessAt,
       error: hasFreshFailure ? error : null,

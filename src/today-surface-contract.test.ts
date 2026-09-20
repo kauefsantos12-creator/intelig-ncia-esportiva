@@ -30,6 +30,20 @@ describe("Hoje sports intelligence contract", () => {
     expect(server).not.toContain("fetch(");
   });
 
+
+
+  it("keeps transmission resilient with explicit primary and fallback guide provenance", () => {
+    const sync = source("./lib/sports/futnatv-broadcast-sync.server.ts");
+    const status = source("./lib/broadcast-status.functions.ts");
+    expect(sync).toContain('const FUTNATV_URL = "https://futnatv.net/"');
+    expect(sync).toContain('const FUTEBOL_TV_URL = "https://futebol.tv.br/"');
+    expect(sync).toContain("parseFutebolTvListings");
+    expect(sync).toContain('sourceKind: "FUTNATV" | "AGGREGATOR"');
+    expect(sync).toContain('source_name: source.sourceName');
+    expect(status).toContain('select("last_attempt_at,last_success_at,last_error,metadata")');
+    expect(status).toContain('metadata["sourceName"]');
+  });
+
   it("renders one expandable row per fixture with explicit missing-data states", () => {
     const row = source("./components/TodayFixtureRow.tsx");
     expect(row).toContain("<details");

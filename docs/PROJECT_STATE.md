@@ -99,6 +99,14 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 - Implementação, testes e documentação versionados não equivalem a produção: considerar o segundo item concluído somente após gates verdes, merge e validação do runtime.
 
 
+### Auditoria incremental da aba Hoje — 20/09/2026
+
+- **Agenda viva:** snapshot com 259 fixtures no catálogo e 27 no escopo `always_track`; o limite atual de 300 não omitiu partidas prioritárias nesse snapshot.
+- **Transmissões:** problema operacional confirmado: `BROADCAST_SYNC` vinha esgotando cinco tentativas porque o FutNaTV não entregava agenda em formato reconhecível; `last_success_at` permanecia vazio e as 27 partidas acompanhadas estavam sem evidência de canal.
+- **Correção em auditoria:** FutNaTV permanece como guia primário e `futebol.tv.br` entra somente como fallback agregador, com `source_kind`, `source_name` e `source_url` explícitos.
+- **Riscos seguintes já mapeados:** mover o recorte `always_track` para antes do limite de agenda, restringir a forma recente às equipes relevantes antes do limite global e completar/fazer fallback dos escudos ausentes.
+- A frente de transmissão só é concluída depois de gates verdes, merge, sincronização e um `BROADCAST_SYNC` real bem-sucedido no Lovable Cloud.
+
 ## Limitações e pendências conhecidas
 
 - Em 19/09, o teste real Tottenham x Aston Villa revelou uma falha de identidade de competição: algumas fixtures das seis ligas estão ligadas ao registro canônico 5Dollar, enquanto os IDs API-Football podem estar em um registro irmão da mesma liga. A função de escopo deve reconhecer ambas as identidades de provedor. A correção está sendo versionada em migration própria e deve reabrir apenas jobs prospectivos que foram mortos por esse bug.
