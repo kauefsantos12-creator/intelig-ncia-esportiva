@@ -235,6 +235,10 @@ function normalizeName(value: string) {
     .toLocaleLowerCase("pt-BR")
     .replace(/&/g, " e ")
     .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\bathletico\b/g, "atletico")
+    .replace(/\bat\b/g, "atletico")
+    .replace(/\brb\b/g, "red bull")
+    .replace(/^o (?=[a-z0-9])/, "olympique ")
     .replace(/\s+/g, " ")
     .trim();
 }
