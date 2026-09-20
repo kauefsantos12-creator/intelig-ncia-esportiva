@@ -181,10 +181,10 @@ function EloPage() {
     return rows.slice().sort((a, b) => {
       if (sort === "RATING_DESC") return (b.global_rating ?? -Infinity) - (a.global_rating ?? -Infinity);
       if (sort === "RATING_ASC") return (a.global_rating ?? Infinity) - (b.global_rating ?? Infinity);
-      if (sort === "NAME_ASC") return a.team_name.localeCompare(b.team_name, "pt-BR");
+      if (sort === "NAME_ASC") return (a.team_name ?? "").localeCompare(b.team_name ?? "", "pt-BR");
       if (sort === "LEAGUE_ASC") {
-        return a.league_name.localeCompare(b.league_name, "pt-BR")
-          || a.team_name.localeCompare(b.team_name, "pt-BR");
+        return (a.league_name ?? "").localeCompare(b.league_name ?? "", "pt-BR")
+          || (a.team_name ?? "").localeCompare(b.team_name ?? "", "pt-BR");
       }
       if (sort === "MATCHES_DESC") {
         return (b.matches_processed ?? -1) - (a.matches_processed ?? -1)
