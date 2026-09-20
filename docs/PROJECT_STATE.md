@@ -92,6 +92,13 @@ Somente depois da validação da coleta prospectiva e da agenda: consolidar part
 
 O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas, jogadores, elencos, lineups, transmissões, fact packs, analytics, reviews pessoais, jobs e Elo. Integrações esportivas permanecem normalizadas e server-side. Jobs usam idempotência, leases/retries e proteção contra processamento duplicado.
 
+### Auditoria incremental do Noticiário — 20/09/2026
+
+- **Resultados recentes:** o recorte prioritário passou a ocorrer no banco antes do limite, e clubes reconciliados com API-Football fornecem escudos com fallback visual no frontend.
+- **Movimentos de Elo:** a correção em auditoria passa a consultar somente o Elo local canônico `elo-v1-w020`, aplicar `|delta| >= 2` e ordenar por impacto antes do limite de 8 movimentos. A superfície deixa explícito que este card é Elo local, enquanto `/elo` permanece a referência para Elo global/hierárquico.
+- Implementação, testes e documentação versionados não equivalem a produção: considerar o segundo item concluído somente após gates verdes, merge e validação do runtime.
+
+
 ## Limitações e pendências conhecidas
 
 - Em 19/09, o teste real Tottenham x Aston Villa revelou uma falha de identidade de competição: algumas fixtures das seis ligas estão ligadas ao registro canônico 5Dollar, enquanto os IDs API-Football podem estar em um registro irmão da mesma liga. A função de escopo deve reconhecer ambas as identidades de provedor. A correção está sendo versionada em migration própria e deve reabrir apenas jobs prospectivos que foram mortos por esse bug.

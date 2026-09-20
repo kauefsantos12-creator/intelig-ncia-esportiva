@@ -20,7 +20,7 @@ describe("Noticiário sports intelligence contract", () => {
     expect(server).toContain('.eq("status", "PUBLISHED")');
     expect(server).toContain('from("sports_briefing_items")');
     expect(server).toContain('rpc("get_recent_priority_results"');
-    expect(server).toContain('from("elo_fixture_history")');
+    expect(server).toContain('rpc("get_recent_elo_movements"');
     expect(server).not.toContain("fetch(");
     expect(server).not.toContain("parseSchedule");
     expect(server).toContain("parseSourceLinks");
@@ -36,11 +36,13 @@ describe("Noticiário sports intelligence contract", () => {
     expect(server).not.toContain("matchesTrackingRule");
   });
 
-  it("limits fallback context to a recent factual window", () => {
+  it("limits factual context to a recent window and ranks Elo in the backend before display limit", () => {
     const server = source("./lib/news-overview.functions.ts");
     expect(server).toContain("48 * 60 * 60 * 1000");
-    expect(server).toContain("Math.abs(movement.delta) >= 2");
-    expect(server).toContain(".slice(0, 8)");
+    expect(server).toContain('rpc("get_recent_elo_movements"');
+    expect(server).toContain("p_limit: 8");
+    expect(server).not.toContain('from("elo_fixture_history")');
+    expect(server).not.toContain("Math.abs(movement.delta) >= 2");
   });
 
   it("renders published editorial content separately from factual fallbacks", () => {
