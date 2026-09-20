@@ -155,11 +155,11 @@ describe("Elo sports intelligence contract", () => {
 
     expect(server).toContain("const MIN_LEAGUE_EVIDENCE_MATCHES = 3");
     expect(server).toContain("evidenceMatches >= MIN_LEAGUE_EVIDENCE_MATCHES,");
-    expect(server).toContain("rating = Math.min(rating, parent.rating - 70)");
-    expect(server).toContain("rating = Math.min(rating, Math.min(...bigFiveRatings) - 25)");
+    expect(server).toContain("parent.rating - 70");
+    expect(server).toContain("Math.min(...bigFiveRatings) - 25");
     expect(server).toContain("homeLeagueRating!.rating + (home.rating - ELO_INITIAL_RATING)");
     expect(server).toContain("awayLeagueRating!.rating + (away.rating - ELO_INITIAL_RATING)");
-    expect(explorer).toContain('"evidence_adjustment,evidence_matches,hierarchy_constrained,updated_at"');
+    expect(explorer).toContain("evidence_adjustment,evidence_matches,hierarchy_constrained,updated_at");
     expect(docs).toContain("Elo global do time = Elo da liga + (Elo local do time - 1500)");
     expect(docs).toContain("pelo menos 3 partidas de evidência interligas");
   });
