@@ -48,3 +48,18 @@ O Elo global continua:
 - auditoria diária hierárquica: `OK`;
 - 32/32 ligas domésticas sincronizadas;
 - 9/9 competições cross-league sincronizadas.
+
+## Validação pós-merge
+
+PR #58 passou pelos gates de CI, Database Security, Static diagnostics e Browser compatibility/accessibility e foi mergeado no commit `178415a18cd96bcb742df11a55e09f6c4c44c5fc`.
+
+Após sincronização do Lovable e aplicação da migration no banco vivo:
+
+- `elo_global_team_ratings`: 681 linhas;
+- clubes distintos: 681;
+- duplicidades por `team_id`: 0;
+- divergências da fórmula global: 0;
+- `elo_team_ratings`: 737 linhas preservadas para os mesmos 681 clubes;
+- cobertura da aba Hoje após a mudança: 54/54 equipes com Elo atual.
+
+Status: **concluído e validado em runtime**.
