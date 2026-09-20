@@ -190,3 +190,12 @@ Após a validação de produção mostrar bloqueio recorrente do Google News RSS
 ### Hardening final da Resenha — 20/09/2026
 
 O contrato retrospectivo fica fechado em três pontos adicionais. Primeiro, o payload editorial do Palmeiras não preserva mais qualquer próximo compromisso: somente partidas do dia anterior podem permanecer na Resenha. Segundo, os destaques de outros esportes passam por balanceamento por modalidade, com no máximo dois itens por esporte antes do limite global, evitando uma seção dominada por uma única cobertura. Terceiro, o frontend passa a exibir links das fontes jornalísticas persistidas nos itens editoriais; apenas URLs HTTPS gravadas na proveniência com papel `journalism_context` ou `other_sport_editorial` são expostas.
+
+
+### Refinamento editorial via Lovable AI Gateway — v10
+
+A Resenha passa a ter uma última etapa de edição após a publicação factual. Às 05:10 de Brasília, um endpoint server-side protegido envia ao Lovable AI Gateway somente o texto factual já persistido e as manchetes/fontes editoriais associadas. O modelo reescreve a abertura e os itens em português brasileiro natural, sem alterar placares, minutos, números, nomes ou criar fatos ausentes.
+
+O prompt editorial proíbe programação futura, onde assistir, próximos jogos, invenção de recordes/classificação/lesões/declarações e qualquer atribuição incorreta de fonte. Manchetes em espanhol, italiano, francês, inglês ou alemão devem ser traduzidas/parafraseadas; o identificador técnico `5DollarFootballAPI` não deve aparecer no texto final. A proveniência factual/jornalística continua persistida separadamente e os links de fonte permanecem clicáveis no frontend.
+
+O refinamento usa `LOVABLE_API_KEY` apenas no servidor, via `https://ai.gateway.lovable.dev/v1/chat/completions`, modelo `google/gemini-3.7-flash`. Para evitar respostas excessivamente grandes, os itens são processados em lotes de 12 com uma tentativa de retry por lote. Falha de IA não apaga nem invalida a Resenha factual: o briefing permanece publicado e registra `aiEditorialStatus=FAILED` para diagnóstico.

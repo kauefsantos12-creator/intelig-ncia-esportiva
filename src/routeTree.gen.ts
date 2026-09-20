@@ -17,6 +17,7 @@ import { Route as EloRouteImport } from './routes/elo'
 import { Route as HojeRouteImport } from './routes/hoje'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as ApiEloSyncRouteImport } from './routes/api.elo-sync'
+import { Route as ApiEditorialAiRefineRouteImport } from './routes/api.editorial-ai-refine'
 import { Route as ApiEditorialSourceSyncRouteImport } from './routes/api.editorial-source-sync'
 import { Route as ApiSofascoreEditorialSyncRouteImport } from './routes/api.sofascore-editorial-sync'
 import { Route as ApiSportsApiMaintenanceRouteImport } from './routes/api.sports-api-maintenance'
@@ -63,6 +64,11 @@ const ApiEloSyncRoute = ApiEloSyncRouteImport.update({
   path: '/api/elo-sync',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEditorialAiRefineRoute = ApiEditorialAiRefineRouteImport.update({
+  id: '/api/editorial-ai-refine',
+  path: '/api/editorial-ai-refine',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEditorialSourceSyncRoute = ApiEditorialSourceSyncRouteImport.update({
   id: '/api/editorial-source-sync',
   path: '/api/editorial-source-sync',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/hoje': typeof HojeRoute
   '/privacidade': typeof PrivacidadeRoute
   '/api/elo-sync': typeof ApiEloSyncRoute
+  '/api/editorial-ai-refine': typeof ApiEditorialAiRefineRoute
   '/api/editorial-source-sync': typeof ApiEditorialSourceSyncRoute
   '/api/sofascore-editorial-sync': typeof ApiSofascoreEditorialSyncRoute
   '/api/sports-api-maintenance': typeof ApiSportsApiMaintenanceRoute
@@ -145,6 +152,7 @@ export interface FileRouteTypes {
     | '/hoje'
     | '/privacidade'
     | '/api/elo-sync'
+    | '/api/editorial-ai-refine'
     | '/api/editorial-source-sync'
     | '/api/sofascore-editorial-sync'
     | '/api/sports-api-maintenance'
@@ -189,6 +197,7 @@ export interface RootRouteChildren {
   HojeRoute: typeof HojeRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   ApiEloSyncRoute: typeof ApiEloSyncRoute
+  ApiEditorialAiRefineRoute: typeof ApiEditorialAiRefineRoute
   ApiEditorialSourceSyncRoute: typeof ApiEditorialSourceSyncRoute
   ApiSofascoreEditorialSyncRoute: typeof ApiSofascoreEditorialSyncRoute
   ApiSportsApiMaintenanceRoute: typeof ApiSportsApiMaintenanceRoute
@@ -254,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiEloSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/editorial-ai-refine': {
+      id: '/api/editorial-ai-refine'
+      path: '/api/editorial-ai-refine'
+      fullPath: '/api/editorial-ai-refine'
+      preLoaderRoute: typeof ApiEditorialAiRefineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/editorial-source-sync': {
       id: '/api/editorial-source-sync'
       path: '/api/editorial-source-sync'
@@ -301,6 +317,7 @@ const rootRouteChildren: RootRouteChildren = {
   HojeRoute: HojeRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   ApiEloSyncRoute: ApiEloSyncRoute,
+  ApiEditorialAiRefineRoute: ApiEditorialAiRefineRoute,
   ApiEditorialSourceSyncRoute: ApiEditorialSourceSyncRoute,
   ApiSofascoreEditorialSyncRoute: ApiSofascoreEditorialSyncRoute,
   ApiSportsApiMaintenanceRoute: ApiSportsApiMaintenanceRoute,
