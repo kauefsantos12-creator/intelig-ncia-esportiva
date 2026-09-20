@@ -32,11 +32,11 @@
 
 When working on the `/elo` surface, preserve this execution order:
 
-1. **Current ranking uniqueness and correctness**
+1. **Current ranking uniqueness and correctness — DONE**
    - expose only one current row per club in `elo_global_team_ratings`;
    - preserve historical league-local rows in `elo_team_ratings`;
    - verify promotion/relegation continuity without duplicating clubs in the current ranking.
-2. **Freshness and temporal reference**
+2. **Freshness and temporal reference — DONE**
    - validate daily sync/finalize state, last processed fixture and visible update/reference timestamps;
    - keep current snapshots distinct from point-in-time history.
 3. **Table filters and navigation**
