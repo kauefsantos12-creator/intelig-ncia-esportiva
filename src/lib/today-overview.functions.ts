@@ -348,7 +348,10 @@ export const getTodayOverview = createServerFn({ method: "GET" })
       p_limit: 300,
     });
 
-    if (fixturesResult.error) throw new BackendError("INTERNAL_ERROR", "Falha ao carregar a agenda do dia.", 500);
+    if (fixturesResult.error) {
+      console.error("[today-overview] get_today_tracked_fixtures failed", fixturesResult.error);
+      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar a agenda do dia.", 500);
+    }
 
     const trackedFixtures = records(fixturesResult.data)
       .map(parseFixture)

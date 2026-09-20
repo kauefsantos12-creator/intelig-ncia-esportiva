@@ -2807,7 +2807,15 @@ export type Database = {
         }
         Returns: string
       }
+      apply_previous_day_editorial_context: {
+        Args: { p_date: string }
+        Returns: Json
+      }
       apply_sports_editorial_evidence: {
+        Args: { p_date: string }
+        Returns: number
+      }
+      apply_sports_editorial_provider_stats: {
         Args: { p_date: string }
         Returns: number
       }
@@ -2980,6 +2988,10 @@ export type Database = {
         }
         Returns: string
       }
+      finalize_previous_day_review_contract: {
+        Args: { p_date: string }
+        Returns: Json
+      }
       get_owner_home_metrics: {
         Args: { p_owner_id: string }
         Returns: {
@@ -3007,7 +3019,77 @@ export type Database = {
           raw_value: Json
         }[]
       }
+      get_recent_elo_movements: {
+        Args: { p_limit?: number; p_since: string }
+        Returns: {
+          delta: number
+          fixture_id: number
+          goals_against: number
+          goals_for: number
+          kickoff_at: string
+          league_name: string
+          opponent_id: number
+          opponent_name: string
+          rating_after: number
+          rating_before: number
+          team_id: number
+          team_name: string
+        }[]
+      }
+      get_recent_priority_results: {
+        Args: { p_limit?: number; p_since: string }
+        Returns: {
+          away_goals: number
+          away_team: string
+          away_team_id: string
+          away_team_logo: string
+          competition: string
+          competition_id: string
+          competition_kind: string
+          country_code: string
+          division_level: number
+          fixture_id: string
+          home_goals: number
+          home_team: string
+          home_team_id: string
+          home_team_logo: string
+          kickoff_at: string
+          region: string
+        }[]
+      }
+      get_today_tracked_fixtures: {
+        Args: { p_end: string; p_limit?: number; p_start: string }
+        Returns: {
+          away_five_dollar_team_id: number
+          away_goals: number
+          away_team_id: string
+          away_team_logo: string
+          away_team_name: string
+          competition_id: string
+          competition_kind: string
+          competition_name: string
+          country_code: string
+          division_level: number
+          fixture_id: string
+          home_five_dollar_team_id: number
+          home_goals: number
+          home_team_id: string
+          home_team_logo: string
+          home_team_name: string
+          kickoff_at: string
+          region: string
+          status: string
+        }[]
+      }
       is_approved_app_user: { Args: never; Returns: boolean }
+      kick_editorial_ai_refinement: {
+        Args: { p_day_offset?: number }
+        Returns: Json
+      }
+      kick_editorial_source_sync: {
+        Args: { p_day_offset?: number }
+        Returns: Json
+      }
       kick_push_delivery_dispatcher: { Args: never; Returns: number }
       kick_sofascore_editorial_sync: {
         Args: { p_day_offset?: number }
@@ -3019,6 +3101,10 @@ export type Database = {
       mark_external_api_rate_limited: {
         Args: { p_provider: string; p_retry_after_seconds: number }
         Returns: undefined
+      }
+      prepare_sports_daily_briefing: {
+        Args: { p_date?: string }
+        Returns: string
       }
       publish_sports_daily_briefing: {
         Args: { p_date?: string }
@@ -3042,6 +3128,10 @@ export type Database = {
       }
       reconcile_automation_runs: {
         Args: { p_timeout_minutes?: number }
+        Returns: Json
+      }
+      release_sports_daily_briefing: {
+        Args: { p_date?: string }
         Returns: Json
       }
       renew_sports_job_lease: {
