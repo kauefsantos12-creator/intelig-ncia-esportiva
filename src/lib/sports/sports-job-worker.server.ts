@@ -245,6 +245,8 @@ async function executeJob(job: SportsJobRow) {
       leagueId: result.leagueId,
       targetTeams: result.targetTeams,
       fetchedFixtures: result.fetchedFixtures,
+      supplementalTeams: result.supplementalTeams,
+      supplementalFixtures: result.supplementalFixtures,
       selectedFixtures: result.selectedFixtures,
       persistedFixtures: result.persistedFixtures,
       fetches: result.fetches,
