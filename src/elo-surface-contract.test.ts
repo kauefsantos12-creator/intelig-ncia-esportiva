@@ -23,6 +23,25 @@ describe("Elo sports intelligence contract", () => {
     expect(migration).toContain("l.rating + (t.local_rating - 1500::numeric)");
   });
 
+  it("exposes the real daily snapshot reference instead of treating page load as Elo generation time", () => {
+    const server = source("./lib/elo-explorer.functions.ts");
+    const route = source("./routes/elo.tsx");
+
+    expect(server).toContain('from("elo_sync_state")');
+    expect(server).toContain('"last_completed_at,last_status,details"');
+    expect(server).toContain("latestTeamFixture");
+    expect(server).toContain('cadence: "DAILY_0505_AMERICA_SAO_PAULO"');
+    expect(server).toContain("requestedAt: new Date().toISOString()");
+    expect(server).not.toContain("generatedAt: new Date().toISOString()");
+
+    expect(route).toContain('aria-label="Referência temporal do Elo"');
+    expect(route).toContain("Snapshot fechado");
+    expect(route).toContain("Partidas consideradas até");
+    expect(route).toContain("Cobertura da rodada");
+    expect(route).toContain("Fechamento diário · 05:05");
+    expect(route).toContain("Jogos encerrados depois do fechamento entram no próximo processamento das 05:05 de Brasília.");
+  });
+
   it("prioritizes the ranking before summary metrics", () => {
     const route = source("./routes/elo.tsx");
     expect(route.indexOf('title={mode === "TEAMS" ? "Ranking de clubes" : "Ranking de ligas"}')).toBeGreaterThan(-1);
