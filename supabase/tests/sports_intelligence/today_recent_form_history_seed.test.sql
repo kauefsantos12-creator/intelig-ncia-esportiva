@@ -24,9 +24,9 @@ select ok(
 );
 
 select ok(
-  position('interval ''90 days''' in pg_get_functiondef('public.enqueue_today_recent_form_backfill(date)'::regprocedure)) > 0
+  position('interval ''365 days''' in pg_get_functiondef('public.enqueue_today_recent_form_backfill(date)'::regprocedure)) > 0
   and position('< 5' in pg_get_functiondef('public.enqueue_today_recent_form_backfill(date)'::regprocedure)) > 0,
-  'enqueuer only targets teams without five stored recent matches'
+  'enqueuer only targets teams without five stored matches in the operational lookback'
 );
 
 select ok(
