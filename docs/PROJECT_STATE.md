@@ -107,6 +107,8 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 - **Validação runtime pós-merge:** 681 linhas atuais / 681 clubes distintos / 0 duplicidades / 0 divergências da fórmula; a aba Hoje permaneceu com 54/54 equipes com Elo atual.
 - **Fórmula preservada:** `global_rating = league_rating + (local_rating - 1500)`.
 - **Item 1 do plano Elo:** concluído e validado.
+- **Item 2 — referência temporal:** auditoria runtime confirmou fechamento diário às 05:05 de Brasília, 32/32 ligas domésticas + 9/9 cross-league concluídas e lag de 0 minuto entre a última fixture elegível antes do fechamento e a última fixture Elo processada.
+- **Correção do item 2 em auditoria:** `getEloDirectory()` passa a ler `elo_sync_state` e a UI mostra o horário real do snapshot, a última partida considerada e a cobertura da rodada. O horário de carregamento da página deixa de ser apresentado como geração do modelo.
 
 ### Auditoria incremental da aba Hoje — 20/09/2026
 
