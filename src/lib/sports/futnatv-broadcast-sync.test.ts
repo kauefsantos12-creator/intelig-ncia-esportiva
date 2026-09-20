@@ -51,6 +51,12 @@ describe("FutNaTV team matching", () => {
   it("does not confuse unrelated clubs", () => {
     expect(teamNameScore("Real Betis", "Real Sociedad")).toBeLessThan(0.7);
   });
+
+  it("normalizes common guide abbreviations without weakening the match threshold", () => {
+    expect(teamNameScore("At. Paranaense", "Athletico Paranaense")).toBeGreaterThanOrEqual(0.7);
+    expect(teamNameScore("RB Bragantino", "Red Bull Bragantino")).toBeGreaterThanOrEqual(0.7);
+    expect(teamNameScore("O. Marseille", "Olympique Marseille")).toBeGreaterThanOrEqual(0.7);
+  });
 });
 
 
