@@ -190,14 +190,6 @@ function nextDateKey(dateKey: string) {
 }
 
 function parseFixture(row: Record<string, unknown>): RawFixture | null {
-  const competition = relation(row["competition"]);
-  const home = relation(row["home_team"]);
-  const away = relation(row["away_team"]);
-  const id = text(row["id"]);
-  const kickoffAt = text(row["kickoff_at"]);
-  const status = text(row["status"]);
-  const competitionId = competition ? text(competition["id"]) : null;
-  cfunction parseFixture(row: Record<string, unknown>): RawFixture | null {
   const id = text(row["fixture_id"]);
   const kickoffAt = text(row["kickoff_at"]);
   const status = text(row["status"]);
@@ -209,7 +201,18 @@ function parseFixture(row: Record<string, unknown>): RawFixture | null {
   const awayId = text(row["away_team_id"]);
   const awayName = text(row["away_team_name"]);
 
-  if (!id || !kickoffAt || !status || !competitionId || !competitionName || !competitionKind || !homeId || !homeName || !awayId || !awayName) {
+  if (
+    !id ||
+    !kickoffAt ||
+    !status ||
+    !competitionId ||
+    !competitionName ||
+    !competitionKind ||
+    !homeId ||
+    !homeName ||
+    !awayId ||
+    !awayName
+  ) {
     return null;
   }
 
