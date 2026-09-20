@@ -55,7 +55,9 @@ describe("Noticiário sports intelligence contract", () => {
 
   it("keeps the briefing as the primary reading surface and renders the editorial hierarchy as an article", () => {
     const route = source("./routes/index.tsx");
-    expect(route).toContain('briefing?`Resenha de ${formatDate(briefing.date)}`:"Resenha esportiva"');
+    expect(route).toContain("function briefingTitle");
+    expect(route).toContain("Resenha de ontem —");
+    expect(route).toContain('title={briefing?briefingTitle(briefing.date,overview.observedAt):"Resenha esportiva"}');
     expect(route.indexOf('description="Leitura editorial diária')).toBeGreaterThan(-1);
     expect(route.indexOf('title="Resultados recentes"')).toBeGreaterThan(-1);
     expect(route.indexOf('title="Movimentos de Elo"')).toBeGreaterThan(-1);

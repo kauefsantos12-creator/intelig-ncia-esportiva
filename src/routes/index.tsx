@@ -25,6 +25,12 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_
 function formatDate(value: string) { const d = new Date(value.length === 10 ? `${value}T12:00:00-03:00` : value); return Number.isNaN(d.getTime()) ? value : dateFormatter.format(d); }
 function formatTime(value: string) { const d = new Date(value); return Number.isNaN(d.getTime()) ? "—" : timeFormatter.format(d); }
 function localDateKey(value: string | Date) { const d = value instanceof Date ? value : new Date(value); return Number.isNaN(d.getTime()) ? "unknown" : dateKeyFormatter.format(d); }
+function briefingTitle(date: string, observedAt: string) {
+  const todayKey = localDateKey(observedAt);
+  const todayNoon = new Date(`${todayKey}T12:00:00-03:00`);
+  const yesterdayKey = Number.isNaN(todayNoon.getTime()) ? "" : localDateKey(new Date(todayNoon.getTime() - 86_400_000));
+  return date === yesterdayKey ? `Resenha de ontem — ${formatDate(date)}` : `Resenha de ${formatDate(date)}`;
+}
 
 function ResultTeam({ name, logo, goals }: { name: string; logo: string | null; goals: number }) {
   const initial = name.trim().charAt(0).toLocaleUpperCase("pt-BR") || "•";
@@ -77,7 +83,7 @@ function NewsPage() {
     <ProductPageHeader eyebrow="Noticiário" title="O que aconteceu e o que mudou" description="A resenha é a leitura principal do dia; placares e Elo permanecem como contexto factual." aside={<div className="flex items-center gap-2">{overview?<StatusBadge tone="neutral">Atualizado {formatTime(overview.observedAt)}</StatusBadge>:null}<button type="button" onClick={()=>void refresh()} disabled={loading} className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border/70 bg-secondary/30 px-3 type-meta font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"><RefreshCw className={`size-4 ${loading?"animate-spin":""}`} aria-hidden /><span className="hidden sm:inline">Atualizar</span></button></div>} />
     {loading&&!overview?<LoadingState rows={5} label="Carregando Noticiário" />:null}{error&&!overview?<ErrorState description={error} onRetry={()=>void refresh()} />:null}
     {overview?<div className="space-y-4">
-      <SurfaceCard icon={Newspaper} title={briefing?`Resenha de ${formatDate(briefing.date)}`:"Resenha esportiva"} description="Leitura editorial diária, sustentada por fatos persistidos e proveniência." actions={briefing?.footballSummary?<StatusBadge tone="success">Publicada</StatusBadge>:<StatusBadge tone="neutral">Aguardando publicação</StatusBadge>}>
+      <SurfaceCard icon={Newspaper} title={briefing?briefingTitle(briefing.date,overview.observedAt):"Resenha esportiva"} description="Leitura editorial diária, sustentada por fatos persistidos e proveniência." actions={briefing?.footballSummary?<StatusBadge tone="success">Publicada</StatusBadge>:<StatusBadge tone="neutral">Aguardando publicação</StatusBadge>}>
         {briefing?.footballSummary?<div className="space-y-8">
           <section aria-label="Abertura da resenha"><p className="max-w-[72ch] whitespace-pre-line text-lg leading-8 text-foreground/95">{briefing.footballSummary}</p></section>
           {palmeirasItem?<section className="border-t border-border/55 pt-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Palmeiras</h2>{palmeirasItem.body?<p className="mt-3 max-w-[72ch] whitespace-pre-line type-body leading-7 text-foreground/90">{palmeirasItem.body}</p>:null}</section>:null}

@@ -1,5 +1,5 @@
 begin;
-select plan(45);
+select plan(46);
 
 select ok(to_regclass('public.sports_jobs') is not null, 'sports job queue exists');
 select ok(to_regprocedure('public.enqueue_sports_job(text,text,uuid,jsonb,integer)') is not null, 'enqueue RPC exists');
@@ -21,12 +21,16 @@ select ok(
   'sports worker wake cron is active once per minute'
 );
 select ok(
-  exists(select 1 from cron.job where jobname='sports-daily-sync-yesterday' and active and schedule='20 8 * * *'),
-  'daily producer closes yesterday at 08:20 UTC'
+  exists(select 1 from cron.job where jobname='sports-daily-sync-yesterday' and active and schedule='20 7 * * *'),
+  'daily producer closes yesterday at 07:20 UTC before the briefing'
 );
 select ok(
-  exists(select 1 from cron.job where jobname='sports-daily-sync-today' and active and schedule='40 8 * * *'),
-  'daily producer loads today at 08:40 UTC'
+  exists(select 1 from cron.job where jobname='sports-daily-sync-today' and active and schedule='35 7 * * *'),
+  'daily producer loads today at 07:35 UTC before the briefing'
+);
+select ok(
+  exists(select 1 from cron.job where jobname='sports-daily-sync-tomorrow' and active and schedule='50 7 * * *'),
+  'daily producer preloads tomorrow at 07:50 UTC before the briefing'
 );
 select ok(
   exists(select 1 from cron.job where jobname='elo-daily-finalize' and active and schedule='5 8 * * *'),

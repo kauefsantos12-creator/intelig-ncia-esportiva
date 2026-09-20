@@ -134,3 +134,10 @@ A v4 transforma o scaffold factual da v3 em uma leitura editorial estruturada se
 A seção **Palmeiras** é fixa e deriva do catálogo canônico: registra jogos do dia e o próximo compromisso disponível nos sete dias seguintes. A seção **Ontem após 21h** usa a hora local de Brasília registrada na fixture. A **Programação de hoje** é filtrada pelo mesmo escopo editorial usado na resenha, evitando despejar ligas irrelevantes; evidências de transmissão vêm de `sports_broadcast_evidence` e o estado da fonte FutNaTV é exposto como READY, ERROR ou NEVER, sem interpretar ausência de evidência como ausência de transmissão.
 
 O frontend recebe apenas uma projeção tipada e serializável do `editorial_payload` (agenda + estado da fonte), preservando a fronteira server-side. Conteúdo jornalístico externo, recordes, declarações, repercussão e outros esportes continuam bloqueados até existir ingestão com URL e horário de consulta persistidos.
+
+
+## Orquestração v5 — dados prontos antes das 05:05
+
+O fechamento das 05:05 passa a depender de três pré-cargas 5Dollar executadas antes da publicação: dia anterior às 04:20, dia corrente às 04:35 e dia seguinte às 04:50 (America/Sao_Paulo). Isso corrige a ordem anterior, na qual o briefing podia rodar antes do refresh de resultados e agenda. A pré-carga de amanhã garante que o próximo compromisso do Palmeiras já possa ser resolvido no fechamento, sem depender de uma sincronização manual.
+
+No frontend, quando a publicação corresponde exatamente ao dia anterior observado em Brasília, o título passa a usar **“Resenha de ontem — <data por extenso>”**; publicações históricas continuam usando “Resenha de <data>”.
