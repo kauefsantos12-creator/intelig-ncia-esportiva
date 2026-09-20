@@ -1,7 +1,8 @@
 import { sportsDb } from "./sports-db.server";
 import { SportsJobExecutionError } from "./sports-job-policy";
 
-const SOURCE_URL = "https://futnatv.net/";
+const FUTNATV_URL = "https://futnatv.net/";
+const FUTEBOL_TV_URL = "https://futebol.tv.br/";
 const TIME_ZONE = "America/Sao_Paulo";
 const SEASON = "2026/27";
 
@@ -25,6 +26,8 @@ type FixtureCandidate = {
 export type FutNaTvBroadcastSyncResult = {
   date: string;
   sourceUrl: string;
+  sourceName: string;
+  sourceKind: "FUTNATV" | "AGGREGATOR";
   parsedListings: number;
   matchedFixtures: number;
   insertedEvidence: number;
@@ -192,6 +195,39 @@ export function parseFutNaTvListings(html: string): FutNaTvListing[] {
   return listings;
 }
 
+
+export function parseFutebolTvListings(html: string): FutNaTvListing[] {
+  const listings: FutNaTvListing[] = [];
+  const articles = html.match(/<article\\b[^>]*class=["'][^"']*fixture-row[^"']*["'][^>]*>[\\s\\S]*?<\\/article>/gi) ?? [];
+
+  for (const article of articles) {
+    const labelMatch = article.match(/aria-label=["']Ver detalhes de\\s+([^"']+?)\\s+x\\s+([^"']+?)["']/i);
+    const timeMatch = article.match(/<time\\b[^>]*datetime=["']([^"']+)["']/i);
+    if (!labelMatch || !timeMatch) continue;
+
+    const home = decodeHtml(labelMatch[1] ?? "").replace(/\\s+/g, " ").trim();
+    const away = decodeHtml(labelMatch[2] ?? "").replace(/\\s+/g, " ").trim();
+    const kickoffIso = timeMatch[1] ?? "";
+    const kickoffLabel = kickoffIso.match(/T(\\d{2}):(\\d{2})/)?.slice(1).join("h") ?? null;
+
+    const broadcasters = [...article.matchAll(/<span\\b[^>]*class=["'][^"']*channel-pill[^"']*["'][^>]*>(?:\\s*<span\\b[^>]*>[\\s\\S]*?<\\/span>)?\\s*([^<]+?)\\s*<\\/span>/gi)]
+      .map((match) => decodeHtml(match[1] ?? "").replace(/^[▻▶►]\\s*/, "").replace(/\\s+/g, " ").trim())
+      .filter(Boolean)
+      .filter((item, index, all) => all.findIndex((candidate) => candidate.toLocaleLowerCase("pt-BR") === item.toLocaleLowerCase("pt-BR")) === index);
+
+    if (!home || !away || broadcasters.length === 0) continue;
+    listings.push({
+      home,
+      away,
+      kickoffLabel,
+      broadcastRaw: broadcasters.join(", "),
+      broadcasters,
+    });
+  }
+
+  return listings;
+}
+
 function normalizeName(value: string) {
   return value
     .normalize("NFD")
@@ -259,6 +295,67 @@ function localDateKey(date: Date) {
   return `${value("year")}-${value("month")}-${value("day")}`;
 }
 
+
+type BroadcastSource = {
+  sourceUrl: string;
+  sourceName: string;
+  sourceKind: "FUTNATV" | "AGGREGATOR";
+  listings: FutNaTvListing[];
+};
+
+async function fetchHtml(url: string) {
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "MotorInteligenciaEsportiva/1.0 (+broadcast-sync)",
+      Accept: "text/html,application/xhtml+xml",
+    },
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.text();
+}
+
+async function loadBroadcastSource(): Promise<BroadcastSource> {
+  const errors: string[] = [];
+
+  try {
+    const html = await fetchHtml(FUTNATV_URL);
+    const listings = parseFutNaTvListings(html);
+    if (listings.length) {
+      return {
+        sourceUrl: FUTNATV_URL,
+        sourceName: "FutNaTV",
+        sourceKind: "FUTNATV",
+        listings,
+      };
+    }
+    errors.push("FutNaTV sem agenda reconhecível");
+  } catch (error) {
+    errors.push(`FutNaTV: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  try {
+    const html = await fetchHtml(FUTEBOL_TV_URL);
+    const listings = parseFutebolTvListings(html);
+    if (listings.length) {
+      return {
+        sourceUrl: FUTEBOL_TV_URL,
+        sourceName: "Futebol na TV",
+        sourceKind: "AGGREGATOR",
+        listings,
+      };
+    }
+    errors.push("Futebol na TV sem agenda reconhecível");
+  } catch (error) {
+    errors.push(`Futebol na TV: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  throw new SportsJobExecutionError(
+    "UPSTREAM_UNAVAILABLE",
+    errors.join(" | ") || "Nenhum guia de transmissão disponível.",
+  );
+}
+
 function parseFixture(row: Row): FixtureCandidate | null {
   const id = text(row["id"]);
   const kickoffAt = text(row["kickoff_at"]);
@@ -305,34 +402,15 @@ export async function syncFutNaTvBroadcasts(date: string): Promise<FutNaTvBroadc
 
   await markState({ date, success: false, error: null, metadata: { phase: "fetch" } });
 
-  let response: Response;
+  let source: BroadcastSource;
   try {
-    response = await fetch(SOURCE_URL, {
-      headers: {
-        "User-Agent": "MotorInteligenciaEsportiva/1.0 (+broadcast-sync)",
-        Accept: "text/html,application/xhtml+xml",
-      },
-      signal: AbortSignal.timeout(15_000),
-    });
+    source = await loadBroadcastSource();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await markState({ date, success: false, error: message, metadata: { phase: "fetch" } });
-    throw new SportsJobExecutionError("UPSTREAM_UNAVAILABLE", `FutNaTV indisponível: ${message}`);
+    throw error;
   }
-
-  if (!response.ok) {
-    const message = `FutNaTV respondeu HTTP ${response.status}.`;
-    await markState({ date, success: false, error: message, metadata: { phase: "fetch", status: response.status } });
-    throw new SportsJobExecutionError("UPSTREAM_UNAVAILABLE", message);
-  }
-
-  const html = await response.text();
-  const listings = parseFutNaTvListings(html);
-  if (!listings.length) {
-    const message = "FutNaTV não retornou partidas com transmissão em formato reconhecível.";
-    await markState({ date, success: false, error: message, metadata: { phase: "parse", htmlBytes: html.length } });
-    throw new SportsJobExecutionError("UPSTREAM_UNAVAILABLE", message);
-  }
+  const listings = source.listings;
 
   const db = await sportsDb();
   const bounds = dateBounds(date);
@@ -381,9 +459,9 @@ export async function syncFutNaTvBroadcasts(date: string): Promise<FutNaTvBroadc
         fixture_id: best.fixture.id,
         broadcaster,
         platform: null,
-        source_kind: "FUTNATV",
-        source_name: "FutNaTV",
-        source_url: SOURCE_URL,
+        source_kind: source.sourceKind,
+        source_name: source.sourceName,
+        source_url: source.sourceUrl,
         checked_at: checkedAt,
         confidence: Math.max(0.7, Math.min(0.99, Number((best.score * 0.97).toFixed(2)))),
         is_primary: index === 0,
@@ -401,7 +479,11 @@ export async function syncFutNaTvBroadcasts(date: string): Promise<FutNaTvBroadc
 
   const fixtureIds = fixtures.map((fixture) => fixture.id);
   if (fixtureIds.length) {
-    const deletion = await db.from("sports_broadcast_evidence").delete().eq("source_kind", "FUTNATV").in("fixture_id", fixtureIds);
+    const deletion = await db
+      .from("sports_broadcast_evidence")
+      .delete()
+      .in("source_name", ["FutNaTV", "Futebol na TV"])
+      .in("fixture_id", fixtureIds);
     if (deletion.error) {
       await markState({ date, success: false, error: deletion.error.message, metadata: { phase: "replace" } });
       throw new Error(`Falha ao substituir evidências FutNaTV: ${deletion.error.message}`);
@@ -418,7 +500,9 @@ export async function syncFutNaTvBroadcasts(date: string): Promise<FutNaTvBroadc
 
   const result: FutNaTvBroadcastSyncResult = {
     date,
-    sourceUrl: SOURCE_URL,
+    sourceUrl: source.sourceUrl,
+    sourceName: source.sourceName,
+    sourceKind: source.sourceKind,
     parsedListings: listings.length,
     matchedFixtures: matchedFixtureIds.size,
     insertedEvidence: evidence.length,
