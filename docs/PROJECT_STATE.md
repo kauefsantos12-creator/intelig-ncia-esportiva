@@ -102,10 +102,11 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 ### Auditoria incremental da aba Hoje — 20/09/2026
 
 - **Transmissões:** concluídas em produção. O FutNaTV permanece como guia primário e `futebol.tv.br` atua como fallback agregador com proveniência explícita. O teste real pós-merge gravou 123 evidências em 74 fixtures; 26/27 jogos prioritários do snapshot tinham transmissão, e Norwich x Bolton permaneceu corretamente como “ainda não confirmada”.
-- **Agenda viva:** snapshot com 259 fixtures no catálogo e 27 no escopo `always_track`. Embora nenhum jogo prioritário estivesse sendo omitido, a implementação aplicava o limite de 300 antes do recorte.
-- **Correção de agenda em auditoria:** `get_today_tracked_fixtures(...)` passa a aplicar `always_track` no banco antes da ordenação/limite, preservando `sports_fixtures` como fonte canônica.
-- **Riscos seguintes já mapeados:** restringir a forma recente às equipes relevantes antes do limite global e completar/fazer fallback dos escudos ausentes.
-- A frente de agenda só é concluída depois de gates verdes, merge, sincronização e validação da RPC no Lovable Cloud.
+- **Agenda viva:** concluída em produção. `get_today_tracked_fixtures(...)` aplica `always_track` no banco antes da ordenação/limite e retornou os 27 jogos prioritários do snapshot.
+- **Forma recente:** a janela auditada tinha 531 jogos encerrados, ainda abaixo do antigo limite global de 600, mas o desenho poderia cortar histórico de uma equipe relevante quando o catálogo crescesse.
+- **Correção de forma em auditoria:** `get_recent_team_fixtures(...)` recebe apenas as equipes presentes na agenda, ranqueia jogos por equipe e limita depois desse recorte, mantendo os mesmos últimos 5 jogos usados pela interface.
+- **Risco seguinte já mapeado:** completar/fazer fallback dos quatro escudos sem reconciliação de API-Football.
+- A frente de forma recente só é concluída depois de gates verdes, merge, sincronização e validação da RPC no Lovable Cloud.
 
 ## Limitações e pendências conhecidas
 
