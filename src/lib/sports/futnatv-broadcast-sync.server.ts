@@ -198,22 +198,37 @@ export function parseFutNaTvListings(html: string): FutNaTvListing[] {
 
 export function parseFutebolTvListings(html: string): FutNaTvListing[] {
   const listings: FutNaTvListing[] = [];
-  const articles = html.match(/<article\\b[^>]*class=["'][^"']*fixture-row[^"']*["'][^>]*>[\\s\\S]*?<\\/article>/gi) ?? [];
+  const articles =
+    html.match(/<article\b[^>]*class=["'][^"']*fixture-row[^"']*["'][^>]*>[\s\S]*?<\/article>/gi) ?? [];
 
   for (const article of articles) {
-    const labelMatch = article.match(/aria-label=["']Ver detalhes de\\s+([^"']+?)\\s+x\\s+([^"']+?)["']/i);
-    const timeMatch = article.match(/<time\\b[^>]*datetime=["']([^"']+)["']/i);
+    const labelMatch = article.match(/aria-label=["']Ver detalhes de\s+([^"']+?)\s+x\s+([^"']+?)["']/i);
+    const timeMatch = article.match(/<time\b[^>]*datetime=["']([^"']+)["']/i);
     if (!labelMatch || !timeMatch) continue;
 
-    const home = decodeHtml(labelMatch[1] ?? "").replace(/\\s+/g, " ").trim();
-    const away = decodeHtml(labelMatch[2] ?? "").replace(/\\s+/g, " ").trim();
+    const home = decodeHtml(labelMatch[1] ?? "").replace(/\s+/g, " ").trim();
+    const away = decodeHtml(labelMatch[2] ?? "").replace(/\s+/g, " ").trim();
     const kickoffIso = timeMatch[1] ?? "";
-    const kickoffLabel = kickoffIso.match(/T(\\d{2}):(\\d{2})/)?.slice(1).join("h") ?? null;
+    const kickoffLabel = kickoffIso.match(/T(\d{2}):(\d{2})/)?.slice(1).join("h") ?? null;
 
-    const broadcasters = [...article.matchAll(/<span\\b[^>]*class=["'][^"']*channel-pill[^"']*["'][^>]*>(?:\\s*<span\\b[^>]*>[\\s\\S]*?<\\/span>)?\\s*([^<]+?)\\s*<\\/span>/gi)]
-      .map((match) => decodeHtml(match[1] ?? "").replace(/^[▻▶►]\\s*/, "").replace(/\\s+/g, " ").trim())
+    const broadcasters = [
+      ...article.matchAll(
+        /<span\b[^>]*class=["'][^"']*channel-pill[^"']*["'][^>]*>(?:\s*<span\b[^>]*>[\s\S]*?<\/span>)?\s*([^<]+?)\s*<\/span>/gi,
+      ),
+    ]
+      .map((match) =>
+        decodeHtml(match[1] ?? "")
+          .replace(/^[▻▶►]\s*/, "")
+          .replace(/\s+/g, " ")
+          .trim(),
+      )
       .filter(Boolean)
-      .filter((item, index, all) => all.findIndex((candidate) => candidate.toLocaleLowerCase("pt-BR") === item.toLocaleLowerCase("pt-BR")) === index);
+      .filter(
+        (item, index, all) =>
+          all.findIndex(
+            (candidate) => candidate.toLocaleLowerCase("pt-BR") === item.toLocaleLowerCase("pt-BR"),
+          ) === index,
+      );
 
     if (!home || !away || broadcasters.length === 0) continue;
     listings.push({
