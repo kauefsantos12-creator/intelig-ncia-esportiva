@@ -40,3 +40,9 @@ O normalizador compartilhado passa a reconhecer explicitamente:
 ## Critério de conclusão
 
 A frente só é concluída após gates verdes, merge, sincronização no Lovable, execução dos dois jobs reais e validação de 54/54 equipes com escudo na agenda do dia.
+
+## Ajuste do guard de escopo
+
+Na primeira execução real, o trigger `guard_api_football_job_scope()` terminalizou os dois jobs de mídia porque a regra anterior abrangia qualquer `API_FOOTBALL_%` ligado a fixture fora das seis ligas detalhadas.
+
+A correção versionada cria uma exceção **somente** para `API_FOOTBALL_TEAM_MEDIA_LINK`. `API_FOOTBALL_LINK` e `API_FOOTBALL_FIXTURE_DATA` continuam bloqueados fora do escopo da Etapa 4. Os dois jobs de mídia terminalizados pelo guard anterior são reabertos automaticamente pela migration.
