@@ -46,6 +46,15 @@ describe("Hoje sports intelligence contract", () => {
 
 
 
+  it("keeps Today fixture status fresh throughout the active match window", () => {
+    const migration = source("../supabase/migrations/20260920183000_today_intraday_status_refresh.sql");
+    expect(migration).toContain("'sports-today-refresh-day'");
+    expect(migration).toContain("'*/15 9-23 * * *'");
+    expect(migration).toContain("'sports-today-refresh-late'");
+    expect(migration).toContain("'*/15 0-2 * * *'");
+    expect(migration).toContain("'select public.kick_sports_daily_sync(0);'");
+  });
+
   it("keeps transmission resilient with explicit primary and fallback guide provenance", () => {
     const sync = source("./lib/sports/futnatv-broadcast-sync.server.ts");
     const status = source("./lib/broadcast-status.functions.ts");
