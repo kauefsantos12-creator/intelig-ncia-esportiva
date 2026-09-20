@@ -21,7 +21,7 @@ A 5Dollar já expõe histórico de fixtures por liga. As 54 equipes do snapshot 
 
 O seed usa primeiro essa camada por liga para minimizar chamadas. Depois, somente para equipes que ainda ficaram com menos de 5 partidas, usa o endpoint histórico do próprio time para completar jogos de outras competições.
 
-No snapshot inicial, as 54 equipes estavam distribuídas em sete ligas. Após o seed por liga, 30/54 equipes já tinham 5 jogos completos e 24 ainda precisavam de complemento entre competições.
+No snapshot inicial, as 54 equipes estavam distribuídas em sete ligas. Após o seed por liga, 30/54 equipes já tinham 5 jogos completos e 24 ainda precisavam de complemento entre competições. Após o complemento por time, 48/54 tinham 5 jogos dentro de 90 dias; as seis restantes tinham exatamente quatro porque o quinto jogo disponível na 5Dollar era de maio. A superfície foi então alinhada para uma guarda operacional de 365 dias, preservando o conceito real de últimos 5 jogos.
 
 ## Regra operacional
 
@@ -30,7 +30,7 @@ A função `enqueue_today_recent_form_backfill(date)` roda diariamente às 04:40
 Ela:
 
 1. lê as equipes de `get_today_tracked_fixtures(...)`;
-2. identifica apenas times com menos de 5 partidas encerradas persistidas nos 90 dias anteriores;
+2. identifica apenas times com menos de 5 partidas encerradas persistidas nos 365 dias anteriores;
 3. agrupa esses times por `five_dollar_league_id`;
 4. cria um job `FIVE_DOLLAR_RECENT_FORM_LEAGUE` por liga deficiente.
 
