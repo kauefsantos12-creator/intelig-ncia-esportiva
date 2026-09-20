@@ -1,4 +1,4 @@
-import { fiveDollarGet } from "@/lib/adapters/five_dollar.server";
+import { fiveDollarGet, fiveDollarLeagueHistory } from "@/lib/adapters/five_dollar.server";
 import {
   parseFixtures,
   teamRelativeStats,
@@ -269,6 +269,143 @@ async function persistFixture(db: Awaited<ReturnType<typeof sportsDb>>, fixture:
   }
 
   return { sportsFixtureId, stats, events, status };
+}
+
+export function selectRecentFormFixtures(
+  fixtures: FiveDollarFixture[],
+  teamIds: number[],
+  perTeam = 5,
+): FiveDollarFixture[] {
+  const targets = new Set(teamIds);
+  const selected = new Map<number, FiveDollarFixture>();
+  const limit = Math.max(1, Math.min(perTeam, 10));
+
+  for (const teamId of targets) {
+    fixtures
+      .filter((fixture) => fixture.homeTeamId === teamId || fixture.awayTeamId === teamId)
+      .sort((a, b) => (b.startTimestamp ?? 0) - (a.startTimestamp ?? 0))
+      .slice(0, limit)
+      .forEach((fixture) => selected.set(fixture.eventId, fixture));
+  }
+
+  return [...selected.values()].sort((a, b) => (b.startTimestamp ?? 0) - (a.startTimestamp ?? 0));
+}
+
+async function persistRecentFormFixtureBasic(
+  db: Awaited<ReturnType<typeof sportsDb>>,
+  fixture: FiveDollarFixture,
+  fetchedAt: string,
+) {
+  const competition = await upsertCompetition(db, fixture);
+  const homeTeamId = await upsertTeam(
+    db,
+    fixture.homeTeamId,
+    fixture.homeName,
+    competition.countryCode,
+    competition.region,
+  );
+  const awayTeamId = await upsertTeam(
+    db,
+    fixture.awayTeamId,
+    fixture.awayName,
+    competition.countryCode,
+    competition.region,
+  );
+  const kickoffAt =
+    fixture.kickoffIso ??
+    (fixture.startTimestamp ? new Date(fixture.startTimestamp * 1000).toISOString() : null);
+  if (!kickoffAt) throw new Error(`Fixture ${fixture.eventId} sem kickoff.`);
+
+  const { error } = await db.from("sports_fixtures").upsert(
+    {
+      canonical_key: `five-dollar:${fixture.eventId}`,
+      primary_provider: "five_dollar",
+      primary_fixture_id: String(fixture.eventId),
+      five_dollar_fixture_id: fixture.eventId,
+      competition_id: competition.id,
+      season: SEASON,
+      kickoff_at: kickoffAt,
+      status: normalizeFixtureStatus(fixture.statusType),
+      home_team_id: homeTeamId,
+      away_team_id: awayTeamId,
+      home_goals: fixture.homeScore,
+      away_goals: fixture.awayScore,
+      source_fetched_at: fetchedAt,
+    },
+    { onConflict: "canonical_key" },
+  );
+  if (error) {
+    throw new Error(`Falha ao persistir fixture histórica ${fixture.eventId}: ${error.message}`);
+  }
+}
+
+export interface FiveDollarRecentFormLeagueSyncResult {
+  leagueId: number;
+  targetTeams: number;
+  fetchedFixtures: number;
+  selectedFixtures: number;
+  persistedFixtures: number;
+  failed: Array<{ fixtureId: number; error: string }>;
+  fetches: number;
+  fetchedAt: string | null;
+}
+
+export async function syncFiveDollarRecentFormLeague(
+  leagueId: number,
+  teamIds: number[],
+  predictionAtIso: string,
+  lookbackDays = 90,
+): Promise<FiveDollarRecentFormLeagueSyncResult> {
+  if (!Number.isInteger(leagueId) || leagueId <= 0) throw new Error("leagueId inválido.");
+  const targets = [...new Set(teamIds.filter((id) => Number.isInteger(id) && id > 0))];
+  if (targets.length === 0) throw new Error("Nenhum time 5Dollar válido para recent form.");
+  if (!Number.isFinite(Date.parse(predictionAtIso))) throw new Error("predictionAtIso inválido.");
+
+  const history = await fiveDollarLeagueHistory(leagueId, targets, predictionAtIso, lookbackDays);
+  const failedFetch = history.fetches.find((fetch) => fetch.status !== "OK");
+  if (failedFetch) {
+    throw new Error(
+      failedFetch.errorMessage ?? `5Dollar indisponível para histórico da liga ${leagueId}.`,
+    );
+  }
+
+  const selected = selectRecentFormFixtures(history.fixtures, targets, 5);
+  const fetchedAt = history.fetches[0]?.fetchedAt ?? null;
+  const db = await sportsDb();
+  let persistedFixtures = 0;
+  const failed: FiveDollarRecentFormLeagueSyncResult["failed"] = [];
+
+  for (const fixture of selected) {
+    try {
+      await persistRecentFormFixtureBasic(db, fixture, fetchedAt ?? new Date().toISOString());
+      persistedFixtures += 1;
+    } catch (error) {
+      failed.push({
+        fixtureId: fixture.eventId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  if (failed.length > 0) {
+    throw new Error(
+      `Falha ao persistir ${failed.length}/${selected.length} fixtures históricas da liga ${leagueId}: ${failed
+        .slice(0, 5)
+        .map((item) => item.fixtureId)
+        .join(", ")}`,
+    );
+  }
+
+  return {
+    leagueId,
+    targetTeams: targets.length,
+    fetchedFixtures: history.fixtures.length,
+    selectedFixtures: selected.length,
+    persistedFixtures,
+    failed,
+    fetches: history.fetches.length,
+    fetchedAt,
+  };
 }
 
 export interface FiveDollarDaySyncResult {
