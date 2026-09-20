@@ -28,8 +28,19 @@ describe("Hoje sports intelligence contract", () => {
     const server = source("./lib/today-overview.functions.ts");
     expect(server).toContain('from("sports_broadcast_evidence")');
     expect(server).toContain('from("elo_global_team_ratings")');
-    expect(server).toContain('.eq("status", "FINISHED")');
+    expect(server).toContain('db.rpc("get_recent_team_fixtures"');
+    expect(server).not.toContain(".limit(600)");
     expect(server).not.toContain("fetch(");
+  });
+
+  it("scopes recent form to Today teams before applying the per-team limit", () => {
+    const server = source("./lib/today-overview.functions.ts");
+    const migration = source("../supabase/migrations/20260920161500_today_recent_form_scope_v1.sql");
+    expect(server).toContain("p_team_ids: sportsTeamIds");
+    expect(server).toContain("p_per_team: 5");
+    expect(migration).toContain("partition by tt.team_id");
+    expect(migration).toContain("recent_rank<=");
+    expect(migration).toContain("distinct on (fixture_id)");
   });
 
 
