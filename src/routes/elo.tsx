@@ -24,6 +24,14 @@ type EloDirectory = Awaited<ReturnType<typeof getEloDirectory>>;
 type RankingMode = "TEAMS" | "LEAGUES";
 
 const ratingFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+const snapshotFormatter = new Intl.DateTimeFormat("pt-BR", {
+  timeZone: "America/Sao_Paulo",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 const regionLabels: Record<string, string> = {
   EUROPE: "Europa",
   SOUTH_AMERICA: "América do Sul",
@@ -35,6 +43,10 @@ const regionLabels: Record<string, string> = {
 
 function formatRating(value: number | null | undefined) {
   return typeof value === "number" ? ratingFormatter.format(value) : "—";
+}
+
+function formatSnapshotMoment(value: string | null | undefined) {
+  return value ? snapshotFormatter.format(new Date(value)) : "—";
 }
 
 function EloPage() {
@@ -130,6 +142,14 @@ function EloPage() {
   const hierarchyConstrained = directory?.leagues.filter((league) => league.hierarchy_constrained).length ?? 0;
   const visibleCount = mode === "TEAMS" ? filteredTeams.length : filteredLeagues.length;
   const totalCount = mode === "TEAMS" ? directory?.teams.length ?? 0 : directory?.leagues.length ?? 0;
+  const snapshotHealthy = directory?.snapshot.status === "OK";
+  const snapshotCoverage = directory
+    && directory.snapshot.domesticCurrent !== null
+    && directory.snapshot.domesticTargets !== null
+    && directory.snapshot.crossCurrent !== null
+    && directory.snapshot.crossTargets !== null
+      ? `${directory.snapshot.domesticCurrent}/${directory.snapshot.domesticTargets} ligas · ${directory.snapshot.crossCurrent}/${directory.snapshot.crossTargets} cross`
+      : "Cobertura indisponível";
 
   return (
     <AppShell stage="elo">
@@ -138,7 +158,14 @@ function EloPage() {
           eyebrow="Elo"
           title="Força relativa, com contexto"
           description="Compare o ranking atual, refine por região ou país e abra o histórico point-in-time de cada clube sem recalcular o modelo no navegador."
-          meta={directory ? <StatusBadge tone="info">Modelo atual</StatusBadge> : undefined}
+          meta={directory ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone={snapshotHealthy ? "success" : "warning"}>
+                {snapshotHealthy ? "Snapshot diário OK" : `Snapshot ${directory.snapshot.status}`}
+              </StatusBadge>
+              <StatusBadge tone="neutral">Fechamento diário · 05:05</StatusBadge>
+            </div>
+          ) : undefined}
           aside={(
             <button
               type="button"
@@ -158,6 +185,27 @@ function EloPage() {
           <ErrorState description={error} onRetry={() => void refresh()} />
         ) : directory ? (
           <>
+            <div
+              className="grid gap-3 rounded-2xl border border-border/70 bg-secondary/20 px-4 py-4 sm:grid-cols-3"
+              aria-label="Referência temporal do Elo"
+            >
+              <div>
+                <p className="type-caption uppercase tracking-[0.06em] text-muted-foreground">Snapshot fechado</p>
+                <p className="mt-1 type-label text-foreground">{formatSnapshotMoment(directory.snapshot.completedAt)}</p>
+              </div>
+              <div>
+                <p className="type-caption uppercase tracking-[0.06em] text-muted-foreground">Partidas consideradas até</p>
+                <p className="mt-1 type-label text-foreground">{formatSnapshotMoment(directory.snapshot.latestTeamFixtureAt)}</p>
+              </div>
+              <div>
+                <p className="type-caption uppercase tracking-[0.06em] text-muted-foreground">Cobertura da rodada</p>
+                <p className="mt-1 type-label text-foreground">{snapshotCoverage}</p>
+              </div>
+              <p className="type-caption text-muted-foreground sm:col-span-3">
+                O ranking Elo é um snapshot diário. Jogos encerrados depois do fechamento entram no próximo processamento das 05:05 de Brasília.
+              </p>
+            </div>
+
             <SurfaceCard
               icon={mode === "TEAMS" ? ListOrdered : GitCompareArrows}
               title={mode === "TEAMS" ? "Ranking de clubes" : "Ranking de ligas"}

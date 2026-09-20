@@ -21,6 +21,16 @@ Estado operacional validado em 11/09/2026:
 
 Existe também um job histórico de bootstrap desativado; ele não participa da rotina diária.
 
+### Referência temporal exposta na interface
+
+A aba `/elo` deve distinguir claramente:
+
+- **horário de abertura/requisição da tela**;
+- **horário real do último `elo_finalize_daily()`**;
+- **última fixture efetivamente incorporada ao snapshot**.
+
+O ranking não é intradiário. Jogos encerrados depois do fechamento das 05:05 de Brasília entram na rodada seguinte. O frontend deve ler essa referência de `elo_sync_state` e nunca usar o horário de carregamento da página como se fosse o horário de geração do Elo.
+
 ## Endpoint HTTP
 
 `POST /api/elo-sync` permanece apenas como **fallback administrativo protegido** para uma sincronização explícita server-side.

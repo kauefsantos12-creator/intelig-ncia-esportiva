@@ -10,6 +10,23 @@ const historyInputSchema = z.object({
   days: z.number().int().min(7).max(180).default(60),
 });
 
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as JsonRecord)
+    : null;
+}
+
+function asNumber(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function asString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
 export const getEloDirectory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -18,7 +35,7 @@ export const getEloDirectory = createServerFn({ method: "GET" })
     }
 
     const db = await adminDb();
-    const [teamsResult, leaguesResult] = await Promise.all([
+    const [teamsResult, leaguesResult, syncResult] = await Promise.all([
       db
         .from("elo_global_team_ratings")
         .select(
@@ -33,6 +50,11 @@ export const getEloDirectory = createServerFn({ method: "GET" })
         )
         .order("rating", { ascending: false })
         .limit(500),
+      db
+        .from("elo_sync_state")
+        .select("last_completed_at,last_status,details")
+        .eq("id", "main")
+        .maybeSingle(),
     ]);
 
     if (teamsResult.error) {
@@ -40,6 +62,9 @@ export const getEloDirectory = createServerFn({ method: "GET" })
     }
     if (leaguesResult.error) {
       throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o ranking Elo de ligas.", 500);
+    }
+    if (syncResult.error) {
+      throw new BackendError("INTERNAL_ERROR", "Falha ao carregar a referência temporal do Elo.", 500);
     }
 
     const leagueById = new Map(
@@ -56,10 +81,30 @@ export const getEloDirectory = createServerFn({ method: "GET" })
       };
     });
 
+    const syncDetails = asRecord(syncResult.data?.details);
+    const audit = asRecord(syncDetails?.["audit"]);
+    const summary = asRecord(audit?.["summary"]);
+    const latestFixtureFromTeams = teams.reduce<string | null>((latest, team) => {
+      const candidate = team.last_fixture_at;
+      if (!candidate) return latest;
+      if (!latest || Date.parse(candidate) > Date.parse(latest)) return candidate;
+      return latest;
+    }, null);
+
     return {
       teams,
       leagues: leaguesResult.data ?? [],
-      generatedAt: new Date().toISOString(),
+      requestedAt: new Date().toISOString(),
+      snapshot: {
+        status: syncResult.data?.last_status ?? "UNKNOWN",
+        completedAt: syncResult.data?.last_completed_at ?? null,
+        latestTeamFixtureAt: asString(summary?.["latestTeamFixture"]) ?? latestFixtureFromTeams,
+        domesticCurrent: asNumber(syncDetails?.["domesticCurrent"]),
+        domesticTargets: asNumber(syncDetails?.["domesticTargets"]),
+        crossCurrent: asNumber(syncDetails?.["crossCurrent"]),
+        crossTargets: asNumber(syncDetails?.["crossTargets"]),
+        cadence: "DAILY_0505_AMERICA_SAO_PAULO" as const,
+      },
       definitions: {
         currentTeamRating: "global_rating = local_rating + ajuste da força da liga em relação ao baseline do modelo.",
         historyScope: "O histórico por partida abaixo usa o rating local da equipe registrado em elo_fixture_history.",
