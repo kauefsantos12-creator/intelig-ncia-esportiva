@@ -19,15 +19,9 @@ Portanto, a forma recente continuaria incompleta mesmo com a RPC correta se o si
 
 A 5Dollar já expõe histórico de fixtures por liga. As 54 equipes do snapshot estavam distribuídas em apenas 7 ligas acompanhadas.
 
-O seed usa essa camada por liga, não uma chamada por time:
+O seed usa primeiro essa camada por liga para minimizar chamadas. Depois, somente para equipes que ainda ficaram com menos de 5 partidas, usa o endpoint histórico do próprio time para completar jogos de outras competições.
 
-- Brasileirão Série A;
-- Championship;
-- Premier League;
-- Ligue 1;
-- Bundesliga;
-- Serie A italiana;
-- La Liga.
+No snapshot inicial, as 54 equipes estavam distribuídas em sete ligas. Após o seed por liga, 30/54 equipes já tinham 5 jogos completos e 24 ainda precisavam de complemento entre competições.
 
 ## Regra operacional
 
@@ -40,7 +34,7 @@ Ela:
 3. agrupa esses times por `five_dollar_league_id`;
 4. cria um job `FIVE_DOLLAR_RECENT_FORM_LEAGUE` por liga deficiente.
 
-O worker usa o histórico por liga da 5Dollar, seleciona apenas os últimos 5 jogos necessários por equipe e deduplica confrontos compartilhados.
+O worker usa o histórico por liga da 5Dollar, seleciona os jogos necessários por equipe e deduplica confrontos compartilhados. Em seguida identifica somente os times ainda abaixo de 5 partidas e consulta `/teams/{id}/fixtures` para completar a forma com jogos de copas ou outras competições. No snapshot, isso reduz o complemento de 54 para 24 chamadas de time.
 
 ## Limite de escopo
 
@@ -76,4 +70,4 @@ A frente só é concluída quando:
 3. migration ativa no Lovable Cloud;
 4. enqueuer real gerar os jobs das ligas deficientes;
 5. jobs concluírem com sucesso;
-6. `get_recent_team_fixtures(...)` mostrar cobertura de até 5 jogos para cada equipe cujo provedor disponha desse histórico.
+6. `get_recent_team_fixtures(...)` mostrar 5 jogos para cada equipe cujo histórico esteja disponível na 5Dollar, independentemente da competição.
