@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { FiveDollarFixture } from "@/lib/adapters/five_dollar.parse";
-import { selectRecentFormFixtures } from "./five-dollar-sports-sync.server";
+import {
+  selectRecentFormFixtures,
+  teamsNeedingRecentFormSupplement,
+} from "./five-dollar-sports-sync.server";
 
 function fixture(
   eventId: number,
@@ -32,6 +35,22 @@ describe("recent-form history selection", () => {
     const selected = selectRecentFormFixtures(fixtures, [10, 20], 2);
 
     expect(selected.map((item) => item.eventId)).toEqual([7, 6, 5]);
+  });
+
+  it("identifies only teams that still need cross-competition supplementation", () => {
+    const fixtures = [
+      fixture(1, 100, 10, 21),
+      fixture(2, 200, 10, 22),
+      fixture(3, 300, 10, 23),
+      fixture(4, 400, 10, 24),
+      fixture(5, 500, 10, 25),
+      fixture(6, 600, 20, 31),
+      fixture(7, 700, 20, 32),
+      fixture(8, 800, 20, 33),
+      fixture(9, 900, 20, 34),
+    ];
+
+    expect(teamsNeedingRecentFormSupplement(fixtures, [10, 20], 5)).toEqual([20]);
   });
 
   it("bounds the per-team request to at most ten fixtures", () => {
