@@ -35,7 +35,7 @@ export const getEloDirectory = createServerFn({ method: "GET" })
     }
 
     const db = await adminDb();
-    const [teamsResult, leaguesResult, syncResult] = await Promise.all([
+    const [teamsResult, leaguesResult, syncResult, teamMediaResult] = await Promise.all([
       db
         .from("elo_global_team_ratings")
         .select(
@@ -55,6 +55,10 @@ export const getEloDirectory = createServerFn({ method: "GET" })
         .select("last_completed_at,last_status,details")
         .eq("id", "main")
         .maybeSingle(),
+      db
+        .from("sports_teams")
+        .select("five_dollar_team_id,logo_url")
+        .limit(3000),
     ]);
 
     if (teamsResult.error) {
@@ -70,6 +74,15 @@ export const getEloDirectory = createServerFn({ method: "GET" })
     const leagueById = new Map(
       (leaguesResult.data ?? []).map((league) => [league.league_id, league] as const),
     );
+    const logoByTeamId = new Map<number, string>();
+    if (!teamMediaResult.error) {
+      for (const row of teamMediaResult.data ?? []) {
+        if (row.five_dollar_team_id === null || !row.logo_url) continue;
+        if (!logoByTeamId.has(row.five_dollar_team_id)) {
+          logoByTeamId.set(row.five_dollar_team_id, row.logo_url);
+        }
+      }
+    }
 
     const teams = (teamsResult.data ?? []).map((team) => {
       const league = team.league_id === null ? undefined : leagueById.get(team.league_id);
@@ -78,6 +91,7 @@ export const getEloDirectory = createServerFn({ method: "GET" })
         countryCode: league?.country_code ?? null,
         region: league?.region ?? null,
         divisionLevel: league?.division_level ?? null,
+        logoUrl: team.team_id === null ? null : logoByTeamId.get(team.team_id) ?? null,
       };
     });
 

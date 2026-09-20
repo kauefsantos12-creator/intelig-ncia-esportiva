@@ -97,6 +97,31 @@ describe("Elo sports intelligence contract", () => {
     expect(route).toContain("Resultados ${pageStart + 1}–${pageEnd} de ${visibleCount}");
   });
 
+  it("enriches the ranking with available team identity without making crests mandatory", () => {
+    const server = source("./lib/elo-explorer.functions.ts");
+    const route = source("./routes/elo.tsx");
+
+    expect(server).toContain('from("sports_teams")');
+    expect(server).toContain('"five_dollar_team_id,logo_url"');
+    expect(server).toContain("if (!teamMediaResult.error)");
+    expect(server).toContain("logoUrl:");
+
+    expect(route).toContain("function TeamCrest");
+    expect(route).toContain("onError={() => setLogoFailed(true)}");
+    expect(route).toContain("initials || \"•\"");
+    expect(route).toContain("function RankBadge");
+    expect(route).toContain("Posição global ${rank}");
+  });
+
+  it("adds ranking context to selected clubs and mobile rows", () => {
+    const route = source("./routes/elo.tsx");
+    expect(route).toContain("jogos processados");
+    expect(route).toContain("<TeamCrest team={selectedTeam} size=\"selected\" />");
+    expect(route).toContain("<TeamCrest team={team} />");
+    expect(route).toContain("team.matches_processed ?? 0");
+    expect(route).toContain("ring-1 ring-inset ring-primary/20");
+  });
+
   it("gives the selected team a direct path to its point-in-time history", () => {
     const route = source("./routes/elo.tsx");
     expect(route).toContain("Clube selecionado");
@@ -108,7 +133,7 @@ describe("Elo sports intelligence contract", () => {
 
   it("keeps mobile rows touchable and exposes an accessible selection label", () => {
     const route = source("./routes/elo.tsx");
-    expect(route).toContain("min-h-12 w-full");
+    expect(route).toContain("min-h-14 w-full");
     expect(route).toContain("aria-label={`Selecionar ${team.team_name} para consultar o histórico Elo`}");
   });
 });

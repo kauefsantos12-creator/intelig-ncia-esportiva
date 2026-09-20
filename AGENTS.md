@@ -52,7 +52,7 @@ When working on the `/elo` surface, preserve this execution order:
    - correct handling beyond the first 100 rows;
    - sorting by position, Elo, club, league and matches processed;
    - preserve the real global rank while filters/sorts are active.
-4. **Ranking UX**
+4. **Ranking UX — IN PROGRESS**
    - keep the table as the primary surface;
    - improve readability, density, hierarchy, crests/context and responsiveness without recalculating ratings client-side.
 5. **Point-in-time history**

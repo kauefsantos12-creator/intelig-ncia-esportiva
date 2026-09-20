@@ -21,6 +21,7 @@ export const Route = createFileRoute("/elo")({
 });
 
 type EloDirectory = Awaited<ReturnType<typeof getEloDirectory>>;
+type EloTeam = EloDirectory["teams"][number];
 type RankingMode = "TEAMS" | "LEAGUES";
 type EloSort =
   | "RANK"
@@ -58,6 +59,59 @@ function formatRating(value: number | null | undefined) {
 
 function formatSnapshotMoment(value: string | null | undefined) {
   return value ? snapshotFormatter.format(new Date(value)) : "—";
+}
+
+function TeamCrest({ team, size = "row" }: { team: EloTeam; size?: "row" | "selected" }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const name = team.team_name ?? "Clube";
+  const dimension = size === "selected" ? "size-11" : "size-9";
+
+  useEffect(() => {
+    setLogoFailed(false);
+  }, [team.logoUrl]);
+
+  if (team.logoUrl && !logoFailed) {
+    return (
+      <img
+        src={team.logoUrl}
+        alt=""
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        aria-hidden
+        onError={() => setLogoFailed(true)}
+        className={`${dimension} shrink-0 object-contain`}
+      />
+    );
+  }
+
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toLocaleUpperCase("pt-BR");
+
+  return (
+    <span
+      aria-hidden
+      className={`flex ${dimension} shrink-0 items-center justify-center rounded-xl border border-border/70 bg-white type-caption font-semibold text-muted-foreground shadow-sm`}
+    >
+      {initials || "•"}
+    </span>
+  );
+}
+
+function RankBadge({ rank }: { rank: number }) {
+  const podium = rank <= 3;
+  return (
+    <span
+      className={`inline-flex size-8 items-center justify-center rounded-xl border type-meta font-semibold ${podium ? "border-primary/30 bg-primary/10 text-primary" : "border-border/60 bg-secondary/25 text-muted-foreground"}`}
+      aria-label={`Posição global ${rank}`}
+    >
+      {rank}
+    </span>
+  );
 }
 
 function EloPage() {
@@ -405,12 +459,18 @@ function EloPage() {
                 </div>
 
                 {mode === "TEAMS" && selectedTeam ? (
-                  <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <p className="type-caption uppercase tracking-[0.06em] text-muted-foreground">Clube selecionado</p>
-                      <p className="mt-1 truncate type-label text-foreground">
-                        {selectedTeamRank ? `#${selectedTeamRank} · ` : ""}{selectedTeam.team_name} · Elo {formatRating(selectedTeam.global_rating)}
-                      </p>
+                  <div className="flex flex-col gap-3 rounded-2xl border border-primary/25 bg-primary/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <TeamCrest team={selectedTeam} size="selected" />
+                      <div className="min-w-0">
+                        <p className="type-caption uppercase tracking-[0.06em] text-muted-foreground">Clube selecionado</p>
+                        <p className="mt-1 truncate type-label text-foreground">
+                          {selectedTeamRank ? `#${selectedTeamRank} · ` : ""}{selectedTeam.team_name} · Elo {formatRating(selectedTeam.global_rating)}
+                        </p>
+                        <p className="mt-0.5 truncate type-caption text-muted-foreground">
+                          {selectedTeam.league_name ?? "Liga não identificada"} · {selectedTeam.matches_processed ?? 0} jogos processados
+                        </p>
+                      </div>
                     </div>
                     <a
                       href="#elo-history"
@@ -443,12 +503,17 @@ function EloPage() {
                               }}
                               aria-pressed={selected}
                               aria-label={`Selecionar ${team.team_name} para consultar o histórico Elo`}
-                              className={`grid min-h-12 w-full grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 text-left transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)_10rem_5rem_5.5rem] ${selected ? "bg-primary/10" : "hover:bg-secondary/25"} disabled:cursor-not-allowed disabled:opacity-60`}
+                              className={`grid min-h-14 w-full grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-2.5 text-left transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)_10rem_5rem_5.5rem] ${selected ? "bg-primary/10 ring-1 ring-inset ring-primary/20" : "hover:bg-secondary/25"} disabled:cursor-not-allowed disabled:opacity-60`}
                             >
-                              <span className="type-meta text-muted-foreground">{globalRank}</span>
-                              <div className="min-w-0">
-                                <p className="truncate type-label text-foreground">{team.team_name}</p>
-                                <p className="mt-0.5 truncate type-caption text-muted-foreground sm:hidden">{team.league_name}</p>
+                              <RankBadge rank={globalRank} />
+                              <div className="flex min-w-0 items-center gap-3">
+                                <TeamCrest team={team} />
+                                <div className="min-w-0">
+                                  <p className="truncate type-label text-foreground">{team.team_name}</p>
+                                  <p className="mt-0.5 truncate type-caption text-muted-foreground sm:hidden">
+                                    {team.league_name ?? "Liga não identificada"} · {team.matches_processed ?? 0} jogos
+                                  </p>
+                                </div>
                               </div>
                               <span className="hidden truncate type-caption text-muted-foreground sm:block">{team.league_name}</span>
                               <span className="hidden text-right type-meta text-muted-foreground sm:block">{team.matches_processed ?? "—"}</span>
@@ -470,8 +535,8 @@ function EloPage() {
                       {pagedLeagues.map((league, index) => {
                         const globalRank = leagueRankById.get(league.league_id) ?? index + 1;
                         return (
-                          <div key={`${league.model_version}:${league.league_id}`} className="grid min-h-12 grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 sm:grid-cols-[3.5rem_minmax(0,1fr)_7rem_6rem_5.5rem]">
-                            <span className="type-meta text-muted-foreground">{globalRank}</span>
+                          <div key={`${league.model_version}:${league.league_id}`} className="grid min-h-14 grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-2.5 transition-colors hover:bg-secondary/20 sm:grid-cols-[3.5rem_minmax(0,1fr)_7rem_6rem_5.5rem]">
+                            <RankBadge rank={globalRank} />
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
                                 <p className="truncate type-label text-foreground">{league.league_name}</p>
