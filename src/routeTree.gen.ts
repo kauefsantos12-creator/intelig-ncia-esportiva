@@ -16,9 +16,9 @@ import { Route as ContaRouteImport } from './routes/conta'
 import { Route as EloRouteImport } from './routes/elo'
 import { Route as HojeRouteImport } from './routes/hoje'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
-import { Route as ApiEloSyncRouteImport } from './routes/api.elo-sync'
 import { Route as ApiEditorialAiRefineRouteImport } from './routes/api.editorial-ai-refine'
 import { Route as ApiEditorialSourceSyncRouteImport } from './routes/api.editorial-source-sync'
+import { Route as ApiEloSyncRouteImport } from './routes/api.elo-sync'
 import { Route as ApiSofascoreEditorialSyncRouteImport } from './routes/api.sofascore-editorial-sync'
 import { Route as ApiSportsApiMaintenanceRouteImport } from './routes/api.sports-api-maintenance'
 import { Route as ApiSportsDailySyncRouteImport } from './routes/api.sports-daily-sync'
@@ -59,11 +59,6 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
   path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiEloSyncRoute = ApiEloSyncRouteImport.update({
-  id: '/api/elo-sync',
-  path: '/api/elo-sync',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiEditorialAiRefineRoute = ApiEditorialAiRefineRouteImport.update({
   id: '/api/editorial-ai-refine',
   path: '/api/editorial-ai-refine',
@@ -72,6 +67,11 @@ const ApiEditorialAiRefineRoute = ApiEditorialAiRefineRouteImport.update({
 const ApiEditorialSourceSyncRoute = ApiEditorialSourceSyncRouteImport.update({
   id: '/api/editorial-source-sync',
   path: '/api/editorial-source-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEloSyncRoute = ApiEloSyncRouteImport.update({
+  id: '/api/elo-sync',
+  path: '/api/elo-sync',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSofascoreEditorialSyncRoute =
@@ -104,9 +104,9 @@ export interface FileRoutesByFullPath {
   '/elo': typeof EloRoute
   '/hoje': typeof HojeRoute
   '/privacidade': typeof PrivacidadeRoute
-  '/api/elo-sync': typeof ApiEloSyncRoute
   '/api/editorial-ai-refine': typeof ApiEditorialAiRefineRoute
   '/api/editorial-source-sync': typeof ApiEditorialSourceSyncRoute
+  '/api/elo-sync': typeof ApiEloSyncRoute
   '/api/sofascore-editorial-sync': typeof ApiSofascoreEditorialSyncRoute
   '/api/sports-api-maintenance': typeof ApiSportsApiMaintenanceRoute
   '/api/sports-daily-sync': typeof ApiSportsDailySyncRoute
@@ -120,6 +120,8 @@ export interface FileRoutesByTo {
   '/elo': typeof EloRoute
   '/hoje': typeof HojeRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/api/editorial-ai-refine': typeof ApiEditorialAiRefineRoute
+  '/api/editorial-source-sync': typeof ApiEditorialSourceSyncRoute
   '/api/elo-sync': typeof ApiEloSyncRoute
   '/api/sofascore-editorial-sync': typeof ApiSofascoreEditorialSyncRoute
   '/api/sports-api-maintenance': typeof ApiSportsApiMaintenanceRoute
@@ -135,6 +137,8 @@ export interface FileRoutesById {
   '/elo': typeof EloRoute
   '/hoje': typeof HojeRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/api/editorial-ai-refine': typeof ApiEditorialAiRefineRoute
+  '/api/editorial-source-sync': typeof ApiEditorialSourceSyncRoute
   '/api/elo-sync': typeof ApiEloSyncRoute
   '/api/sofascore-editorial-sync': typeof ApiSofascoreEditorialSyncRoute
   '/api/sports-api-maintenance': typeof ApiSportsApiMaintenanceRoute
@@ -151,9 +155,9 @@ export interface FileRouteTypes {
     | '/elo'
     | '/hoje'
     | '/privacidade'
-    | '/api/elo-sync'
     | '/api/editorial-ai-refine'
     | '/api/editorial-source-sync'
+    | '/api/elo-sync'
     | '/api/sofascore-editorial-sync'
     | '/api/sports-api-maintenance'
     | '/api/sports-daily-sync'
@@ -167,6 +171,8 @@ export interface FileRouteTypes {
     | '/elo'
     | '/hoje'
     | '/privacidade'
+    | '/api/editorial-ai-refine'
+    | '/api/editorial-source-sync'
     | '/api/elo-sync'
     | '/api/sofascore-editorial-sync'
     | '/api/sports-api-maintenance'
@@ -181,6 +187,8 @@ export interface FileRouteTypes {
     | '/elo'
     | '/hoje'
     | '/privacidade'
+    | '/api/editorial-ai-refine'
+    | '/api/editorial-source-sync'
     | '/api/elo-sync'
     | '/api/sofascore-editorial-sync'
     | '/api/sports-api-maintenance'
@@ -196,9 +204,9 @@ export interface RootRouteChildren {
   EloRoute: typeof EloRoute
   HojeRoute: typeof HojeRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
-  ApiEloSyncRoute: typeof ApiEloSyncRoute
   ApiEditorialAiRefineRoute: typeof ApiEditorialAiRefineRoute
   ApiEditorialSourceSyncRoute: typeof ApiEditorialSourceSyncRoute
+  ApiEloSyncRoute: typeof ApiEloSyncRoute
   ApiSofascoreEditorialSyncRoute: typeof ApiSofascoreEditorialSyncRoute
   ApiSportsApiMaintenanceRoute: typeof ApiSportsApiMaintenanceRoute
   ApiSportsDailySyncRoute: typeof ApiSportsDailySyncRoute
@@ -256,13 +264,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/elo-sync': {
-      id: '/api/elo-sync'
-      path: '/api/elo-sync'
-      fullPath: '/api/elo-sync'
-      preLoaderRoute: typeof ApiEloSyncRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/editorial-ai-refine': {
       id: '/api/editorial-ai-refine'
       path: '/api/editorial-ai-refine'
@@ -275,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/api/editorial-source-sync'
       fullPath: '/api/editorial-source-sync'
       preLoaderRoute: typeof ApiEditorialSourceSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/elo-sync': {
+      id: '/api/elo-sync'
+      path: '/api/elo-sync'
+      fullPath: '/api/elo-sync'
+      preLoaderRoute: typeof ApiEloSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/sofascore-editorial-sync': {
@@ -316,9 +324,9 @@ const rootRouteChildren: RootRouteChildren = {
   EloRoute: EloRoute,
   HojeRoute: HojeRoute,
   PrivacidadeRoute: PrivacidadeRoute,
-  ApiEloSyncRoute: ApiEloSyncRoute,
   ApiEditorialAiRefineRoute: ApiEditorialAiRefineRoute,
   ApiEditorialSourceSyncRoute: ApiEditorialSourceSyncRoute,
+  ApiEloSyncRoute: ApiEloSyncRoute,
   ApiSofascoreEditorialSyncRoute: ApiSofascoreEditorialSyncRoute,
   ApiSportsApiMaintenanceRoute: ApiSportsApiMaintenanceRoute,
   ApiSportsDailySyncRoute: ApiSportsDailySyncRoute,
