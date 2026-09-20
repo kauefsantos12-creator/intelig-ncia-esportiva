@@ -1,5 +1,5 @@
 begin;
-select plan(9);
+select plan(10);
 
 insert into public.sports_teams(canonical_key,name,five_dollar_team_id)
 values
@@ -56,9 +56,11 @@ select is(public.sports_fixture_in_api_football_scope((select id from public.spo
 
 select public.enqueue_sports_job('test:scope:epl:five-dollar','API_FOOTBALL_LINK',(select id from public.sports_fixtures where canonical_key='test-scope-epl-five-dollar-fixture'),'{}'::jsonb,5);
 select public.enqueue_sports_job('test:scope:excluded','API_FOOTBALL_LINK',(select id from public.sports_fixtures where canonical_key='test-scope-excluded-fixture'),'{}'::jsonb,5);
+select public.enqueue_sports_job('test:scope:excluded:media','API_FOOTBALL_TEAM_MEDIA_LINK',(select id from public.sports_fixtures where canonical_key='test-scope-excluded-fixture'),'{}'::jsonb,5);
 
 select is((select status from public.sports_jobs where idempotency_key='test:scope:epl:five-dollar'),'PENDING','5Dollar-backed in-scope API-Football job remains claimable');
 select is((select status from public.sports_jobs where idempotency_key='test:scope:excluded'),'DEAD','out-of-scope API-Football job is terminal before any provider call');
+select is((select status from public.sports_jobs where idempotency_key='test:scope:excluded:media'),'PENDING','media-only API-Football reconciliation remains claimable outside detailed enrichment scope');
 select ok(
   coalesce((select last_error from public.sports_jobs where idempotency_key='test:scope:excluded'), '') like 'scope_excluded:%',
   'excluded job records scope reason'
