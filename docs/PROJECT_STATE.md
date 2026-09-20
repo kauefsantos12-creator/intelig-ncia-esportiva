@@ -99,6 +99,14 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 - Implementação, testes e documentação versionados não equivalem a produção: considerar o segundo item concluído somente após gates verdes, merge e validação do runtime.
 
 
+### Auditoria incremental da aba Elo — 20/09/2026
+
+- **Saúde do backend:** auditoria hierárquica diária `OK`; 32/32 ligas domésticas sincronizadas; 9/9 competições cross-league sincronizadas; 0 violações de hierarquia e 0 problemas de integridade no ledger.
+- **Ranking atual por clube:** o snapshot encontrou 737 linhas para 681 clubes únicos. 56 clubes tinham duas linhas por preservarem o rating local da divisão anterior após promoção/rebaixamento.
+- **Correção em auditoria:** `elo_global_team_ratings` passa a expor somente o contexto doméstico com `last_fixture_at` mais recente por `team_id`, mantendo todas as linhas históricas em `elo_team_ratings`.
+- **Fórmula preservada:** `global_rating = league_rating + (local_rating - 1500)`.
+- **Impacto:** corrige a duplicidade na aba Elo e também evita seleção ambígua do Elo atual em consumidores como a aba Hoje.
+
 ### Auditoria incremental da aba Hoje — 20/09/2026
 
 - **Transmissões:** concluídas em produção. O FutNaTV permanece como guia primário e `futebol.tv.br` atua como fallback agregador com proveniência explícita. O teste real pós-merge gravou 123 evidências em 74 fixtures; 26/27 jogos prioritários do snapshot tinham transmissão, e Norwich x Bolton permaneceu corretamente como “ainda não confirmada”.
