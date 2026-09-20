@@ -102,10 +102,11 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 ### Auditoria incremental da aba Elo — 20/09/2026
 
 - **Saúde do backend:** auditoria hierárquica diária `OK`; 32/32 ligas domésticas sincronizadas; 9/9 competições cross-league sincronizadas; 0 violações de hierarquia e 0 problemas de integridade no ledger.
-- **Ranking atual por clube:** o snapshot encontrou 737 linhas para 681 clubes únicos. 56 clubes tinham duas linhas por preservarem o rating local da divisão anterior após promoção/rebaixamento.
-- **Correção em auditoria:** `elo_global_team_ratings` passa a expor somente o contexto doméstico com `last_fixture_at` mais recente por `team_id`, mantendo todas as linhas históricas em `elo_team_ratings`.
+- **Ranking atual por clube — concluído em produção:** o snapshot inicial encontrou 737 linhas para 681 clubes únicos e 56 clubes duplicados por preservarem o rating local da divisão anterior após promoção/rebaixamento.
+- **Read-model atual:** `elo_global_team_ratings` agora expõe exatamente uma linha por `team_id`, escolhendo o contexto com `last_fixture_at` mais recente e preservando todas as 737 linhas históricas em `elo_team_ratings`.
+- **Validação runtime pós-merge:** 681 linhas atuais / 681 clubes distintos / 0 duplicidades / 0 divergências da fórmula; a aba Hoje permaneceu com 54/54 equipes com Elo atual.
 - **Fórmula preservada:** `global_rating = league_rating + (local_rating - 1500)`.
-- **Impacto:** corrige a duplicidade na aba Elo e também evita seleção ambígua do Elo atual em consumidores como a aba Hoje.
+- **Item 1 do plano Elo:** concluído e validado.
 
 ### Auditoria incremental da aba Hoje — 20/09/2026
 
