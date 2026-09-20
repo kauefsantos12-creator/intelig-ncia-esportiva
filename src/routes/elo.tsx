@@ -240,6 +240,11 @@ function EloPage() {
   const pageEnd = Math.min(pageStart + PAGE_SIZE, visibleCount);
   const pagedTeams = filteredTeams.slice(pageStart, pageEnd);
   const pagedLeagues = filteredLeagues.slice(pageStart, pageEnd);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   const snapshotHealthy = directory?.snapshot.status === "OK";
   const snapshotCoverage = directory
     && directory.snapshot.domesticCurrent !== null
