@@ -101,11 +101,11 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 
 ### Auditoria incremental da aba Hoje — 20/09/2026
 
-- **Agenda viva:** snapshot com 259 fixtures no catálogo e 27 no escopo `always_track`; o limite atual de 300 não omitiu partidas prioritárias nesse snapshot.
-- **Transmissões:** problema operacional confirmado: `BROADCAST_SYNC` vinha esgotando cinco tentativas porque o FutNaTV não entregava agenda em formato reconhecível; `last_success_at` permanecia vazio e as 27 partidas acompanhadas estavam sem evidência de canal.
-- **Correção em auditoria:** FutNaTV permanece como guia primário e `futebol.tv.br` entra somente como fallback agregador, com `source_kind`, `source_name` e `source_url` explícitos.
-- **Riscos seguintes já mapeados:** mover o recorte `always_track` para antes do limite de agenda, restringir a forma recente às equipes relevantes antes do limite global e completar/fazer fallback dos escudos ausentes.
-- A frente de transmissão só é concluída depois de gates verdes, merge, sincronização e um `BROADCAST_SYNC` real bem-sucedido no Lovable Cloud.
+- **Transmissões:** concluídas em produção. O FutNaTV permanece como guia primário e `futebol.tv.br` atua como fallback agregador com proveniência explícita. O teste real pós-merge gravou 123 evidências em 74 fixtures; 26/27 jogos prioritários do snapshot tinham transmissão, e Norwich x Bolton permaneceu corretamente como “ainda não confirmada”.
+- **Agenda viva:** snapshot com 259 fixtures no catálogo e 27 no escopo `always_track`. Embora nenhum jogo prioritário estivesse sendo omitido, a implementação aplicava o limite de 300 antes do recorte.
+- **Correção de agenda em auditoria:** `get_today_tracked_fixtures(...)` passa a aplicar `always_track` no banco antes da ordenação/limite, preservando `sports_fixtures` como fonte canônica.
+- **Riscos seguintes já mapeados:** restringir a forma recente às equipes relevantes antes do limite global e completar/fazer fallback dos escudos ausentes.
+- A frente de agenda só é concluída depois de gates verdes, merge, sincronização e validação da RPC no Lovable Cloud.
 
 ## Limitações e pendências conhecidas
 
