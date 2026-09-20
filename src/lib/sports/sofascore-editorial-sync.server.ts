@@ -66,7 +66,7 @@ function normalizeName(value: string) {
     .toLocaleLowerCase("pt-BR")
     .replace(/\b(fc|cf|ac|sc|ec|se|ssd|afc|club|clube|de|da|do|das|dos|the)\b/g, " ")
     .replace(/\bnew york\b/g, "ny")
-    .replace(/\bmunich\b/g, "munchen")
+    .replace(/\bmunchen\b/g, "munich")
     .replace(/[^a-z0-9]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();

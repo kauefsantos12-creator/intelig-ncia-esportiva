@@ -150,3 +150,8 @@ A resenha passa a aceitar números editoriais somente quando existe evidência p
 A publicação diária continua sendo gerada a partir do motor canônico. Depois da geração factual, `apply_sports_editorial_evidence(date)` acrescenta exclusivamente as métricas cuja proveniência SofaScore existe: xG, finalizações no alvo, posse, escanteios e total de finalizações quando disponíveis. Fact packs 5Dollar continuam úteis para placar e cronologia factual, mas não são rotulados como SofaScore.
 
 A coleta SofaScore roda às 04:42 de Brasília (07:42 UTC), depois do refresh canônico de ontem e antes da publicação das 05:05. O endpoint de sync é server-side, protegido pelo mesmo token de cron do motor e não é exposto a `anon` ou `authenticated`. Ausência, ambiguidade ou falha do provedor não produz números sintéticos: a resenha permanece sem a métrica correspondente.
+
+
+### Correção de matching — 20/09/2026
+
+O matching de clubes do sync SofaScore normaliza aliases comuns antes de comparar fixtures. Em particular, `München` e `Munich` passam a convergir para o mesmo nome canônico; `New York`/ `NY` e prefixos de clube como `FC`/ `SE` continuam normalizados. O teste exige equivalência exata nesses aliases e mantém rejeição de clubes diferentes.

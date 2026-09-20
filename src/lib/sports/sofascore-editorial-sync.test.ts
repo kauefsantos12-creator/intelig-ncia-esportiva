@@ -7,9 +7,9 @@ import {
 
 describe("SofaScore editorial sync", () => {
   it("matches common club-name variants conservatively", () => {
-    expect(sofaTeamNameScore("Bayern Munich", "FC Bayern München")).toBeGreaterThan(0.5);
-    expect(sofaTeamNameScore("NY Red Bulls", "New York Red Bulls")).toBeGreaterThan(0.5);
-    expect(sofaTeamNameScore("Palmeiras", "SE Palmeiras")).toBeGreaterThan(0.5);
+    expect(sofaTeamNameScore("Bayern Munich", "FC Bayern München")).toBe(1);
+    expect(sofaTeamNameScore("NY Red Bulls", "New York Red Bulls")).toBe(1);
+    expect(sofaTeamNameScore("Palmeiras", "SE Palmeiras")).toBe(1);
     expect(sofaTeamNameScore("Chelsea", "Arsenal")).toBeLessThan(0.5);
   });
 
