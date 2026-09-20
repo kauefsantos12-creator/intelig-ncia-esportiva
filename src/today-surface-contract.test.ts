@@ -82,6 +82,18 @@ describe("Hoje sports intelligence contract", () => {
     expect(basicPersist).not.toContain("enqueue_sports_job");
   });
 
+  it("repairs missing team crests through media-only API-Football reconciliation", () => {
+    const worker = source("./lib/sports/sports-job-worker.server.ts");
+    const sync = source("./lib/sports/api-football-sports-sync.server.ts");
+
+    expect(worker).toContain('job.job_type === "API_FOOTBALL_TEAM_MEDIA_LINK"');
+    expect(worker).toContain("enqueueFixtureData: false");
+    expect(sync).toContain("options: { enqueueFixtureData?: boolean } = {}");
+    expect(sync).toContain("if (options.enqueueFixtureData !== false)");
+    expect(sync).toContain("api_football_team_id");
+    expect(sync).toContain("media.api-sports.io/football/teams/");
+  });
+
   it("renders one expandable row per fixture with explicit missing-data states", () => {
     const row = source("./components/TodayFixtureRow.tsx");
     expect(row).toContain("<details");

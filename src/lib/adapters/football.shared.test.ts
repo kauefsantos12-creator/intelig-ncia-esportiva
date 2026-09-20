@@ -8,8 +8,12 @@ describe("football aliases", () => {
     expect(normalizeTeamName("Derby County")).toBe("derby");
     expect(normalizeTeamName("West Bromwich Albion")).toBe("west brom");
     expect(normalizeTeamName("Norwich City")).toBe("norwich");
+    expect(normalizeTeamName("Bolton Wanderers")).toBe("bolton");
+    expect(normalizeTeamName("Wolverhampton Wanderers")).toBe("wolves");
+    expect(normalizeTeamName("Wolves")).toBe("wolves");
     expect(normalizeTeamName("Birmingham City")).toBe("birmingham");
     expect(nameSimilarity("Charlton Athletic", "Charlton")).toBe(1);
+    expect(nameSimilarity("Wolverhampton", "Wolves")).toBe(1);
   });
 
   it("trata Atlético-MG e Atletico Mineiro como o mesmo clube", () => {

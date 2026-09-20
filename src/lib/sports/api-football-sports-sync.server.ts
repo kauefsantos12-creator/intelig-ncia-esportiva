@@ -74,7 +74,10 @@ export interface ApiFootballLinkResult {
   detail: string;
 }
 
-export async function linkApiFootballFixture(sportsFixtureId: string): Promise<ApiFootballLinkResult> {
+export async function linkApiFootballFixture(
+  sportsFixtureId: string,
+  options: { enqueueFixtureData?: boolean } = {},
+): Promise<ApiFootballLinkResult> {
   const context = await readFixtureContext(sportsFixtureId);
   const existing = nullableProviderNumber(context.fixture["api_football_fixture_id"]);
   if (existing !== null) {
@@ -118,13 +121,15 @@ export async function linkApiFootballFixture(sportsFixtureId: string): Promise<A
     if (apiLeagueId !== null) updates.push(context.db.from("sports_competitions").update({ api_football_league_id: apiLeagueId }).eq("id", String(context.competition["id"]))) as unknown as PromiseLike<unknown>;
     if (updates.length > 0) await Promise.all(updates);
 
-    await context.db.rpc("enqueue_sports_job", {
-      p_idempotency_key: sportsJobIdempotencyKey("api-football-fixture-data", String(context.fixture["canonical_key"])),
-      p_job_type: "API_FOOTBALL_FIXTURE_DATA",
-      p_fixture_id: sportsFixtureId,
-      p_payload: { fixtureId: sportsFixtureId, apiFixtureId: event.eventId },
-      p_max_attempts: 5,
-    });
+    if (options.enqueueFixtureData !== false) {
+      await context.db.rpc("enqueue_sports_job", {
+        p_idempotency_key: sportsJobIdempotencyKey("api-football-fixture-data", String(context.fixture["canonical_key"])),
+        p_job_type: "API_FOOTBALL_FIXTURE_DATA",
+        p_fixture_id: sportsFixtureId,
+        p_payload: { fixtureId: sportsFixtureId, apiFixtureId: event.eventId },
+        p_max_attempts: 5,
+      });
+    }
 
     return {
       fixtureId: sportsFixtureId,
