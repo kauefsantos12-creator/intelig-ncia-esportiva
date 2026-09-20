@@ -155,3 +155,12 @@ A coleta SofaScore roda às 04:42 de Brasília (07:42 UTC), depois do refresh ca
 ### Correção de matching — 20/09/2026
 
 O matching de clubes do sync SofaScore normaliza aliases comuns antes de comparar fixtures. Em particular, `München` e `Munich` passam a convergir para o mesmo nome canônico; `New York`/ `NY` e prefixos de clube como `FC`/ `SE` continuam normalizados. O teste exige equivalência exata nesses aliases e mantém rejeição de clubes diferentes.
+
+
+## Estatísticas editoriais por provedor v7
+
+O SofaScore deixa de ser dependência operacional obrigatória da Resenha. O backend detectou challenge HTTP 403 nos endpoints de estatísticas do provedor, então o cron automático SofaScore foi desativado para evitar falha recorrente. A infraestrutura de evidência permanece disponível para uso futuro ou ingestão assistida.
+
+A Resenha passa a usar estatísticas do 5DollarFootballAPI já persistidas nos fact packs como fallback operacional, sempre com atribuição explícita ao provedor. O conjunto aceito nesta etapa inclui finalizações no alvo, posse e escanteios; ataques e ataques perigosos permanecem disponíveis no payload para extensões futuras. xG não é inferido nem sintetizado: só aparece quando uma fonte persistida realmente o fornecer.
+
+A API-Football permanece como fonte complementar para estatísticas e detalhamento de fixtures já vinculadas, mas não é usada como dependência primária desta resenha devido à cota/minute rate limit já observada no runtime. A regra editorial fica: usar o melhor dado persistido disponível, identificar a fonte e nunca renomear um número de um provedor como se viesse de outro.

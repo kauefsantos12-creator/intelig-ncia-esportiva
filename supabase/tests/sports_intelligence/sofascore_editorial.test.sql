@@ -41,13 +41,12 @@ select ok(
 );
 
 select ok(
-  exists(
+  not exists(
     select 1 from cron.job
     where jobname='sports-sofascore-editorial-yesterday'
       and active
-      and schedule='42 7 * * *'
   ),
-  'SofaScore editorial sync runs at 07:42 UTC'
+  'SofaScore automatic sync stays disabled while the upstream endpoint is challenged'
 );
 
 select ok(
