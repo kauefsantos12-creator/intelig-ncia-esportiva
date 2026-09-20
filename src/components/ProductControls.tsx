@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import type { InputHTMLAttributes, ReactNode } from "react";
+import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
 
 export function FilterBar({
   label,
@@ -94,6 +94,30 @@ export function SearchField({
         aria-label={label}
         className="search-field min-h-11 w-full rounded-xl py-2 pl-9 pr-3 type-meta text-foreground outline-none placeholder:text-muted-foreground"
       />
+    </label>
+  );
+}
+
+export function SelectField({
+  label,
+  className = "",
+  children,
+  ...props
+}: {
+  label: string;
+  className?: string;
+  children: ReactNode;
+} & Omit<SelectHTMLAttributes<HTMLSelectElement>, "className" | "children">) {
+  return (
+    <label className={`block min-w-0 ${className}`}>
+      <span className="sr-only">{label}</span>
+      <select
+        {...props}
+        aria-label={label}
+        className="min-h-11 w-full rounded-xl border border-border/70 bg-background px-3 type-meta text-foreground outline-none focus:border-primary/50"
+      >
+        {children}
+      </select>
     </label>
   );
 }
