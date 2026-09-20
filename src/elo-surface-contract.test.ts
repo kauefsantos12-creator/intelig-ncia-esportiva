@@ -49,7 +49,7 @@ describe("Elo sports intelligence contract", () => {
     expect(route.indexOf('title={mode === "TEAMS" ? "Ranking de clubes" : "Ranking de ligas"}')).toBeLessThan(route.indexOf('aria-label="Resumo do universo Elo"'));
   });
 
-  it("preserves global positions when region, country or search filters are active", () => {
+  it("preserves real global positions while filters, sorting and pagination are active", () => {
     const route = source("./routes/elo.tsx");
     expect(route).toContain("const teamRankById = useMemo");
     expect(route).toContain("const leagueRankById = useMemo");
@@ -57,7 +57,31 @@ describe("Elo sports intelligence contract", () => {
     expect(route).toContain("const selectable = teamId !== null;");
     expect(route).toContain("selectable ? teamRankById.get(teamId)");
     expect(route).toContain("leagueRankById.get(league.league_id)");
-    expect(route).toContain("na ordem do ranking global");
+    expect(route).toContain('<option value="RANK">Posição global</option>');
+  });
+
+  it("supports the planned table filters and deterministic sorting", () => {
+    const route = source("./routes/elo.tsx");
+    expect(route).toContain('label="Filtrar por país"');
+    expect(route).toContain('label="Filtrar por liga"');
+    expect(route).toContain('label="Filtrar por divisão"');
+    expect(route).toContain('label="Ordenar ranking"');
+    expect(route).toContain('if (league !== "ALL" && String(team.league_id) !== league)');
+    expect(route).toContain('if (division !== "ALL" && String(team.divisionLevel) !== division)');
+    expect(route).toContain('sort === "MATCHES_DESC"');
+    expect(route).toContain('sort === "COUNTRY_ASC"');
+    expect(route).toContain('sort === "DIVISION_ASC"');
+  });
+
+  it("paginates the complete ranking instead of silently truncating after 100 rows", () => {
+    const route = source("./routes/elo.tsx");
+    expect(route).toContain("const PAGE_SIZE = 50");
+    expect(route).toContain("const pagedTeams = filteredTeams.slice(pageStart, pageEnd)");
+    expect(route).toContain("const pagedLeagues = filteredLeagues.slice(pageStart, pageEnd)");
+    expect(route).toContain('aria-label="Paginação do ranking Elo"');
+    expect(route).toContain("Página {currentPage} de {totalPages}");
+    expect(route).not.toContain("filteredTeams.slice(0, 100)");
+    expect(route).not.toContain("filteredLeagues.slice(0, 100)");
   });
 
   it("makes active filtering clear and offers an explicit reset", () => {
@@ -66,7 +90,11 @@ describe("Elo sports intelligence contract", () => {
     expect(route).toContain("Limpar filtros");
     expect(route).toContain('setRegion("ALL")');
     expect(route).toContain('setCountry("ALL")');
+    expect(route).toContain('setLeague("ALL")');
+    expect(route).toContain('setDivision("ALL")');
+    expect(route).toContain('setSort("RANK")');
     expect(route).toContain('setSearch("")');
+    expect(route).toContain("Resultados ${pageStart + 1}–${pageEnd} de ${visibleCount}");
   });
 
   it("gives the selected team a direct path to its point-in-time history", () => {
