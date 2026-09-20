@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { EloHistoryPanel } from "@/components/EloHistoryPanel";
-import { FilterBar, FilterChip, SearchField, SegmentedControl, StatusBadge } from "@/components/ProductControls";
+import { FilterBar, FilterChip, SearchField, SegmentedControl, SelectField, StatusBadge } from "@/components/ProductControls";
 import { MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
 import { getEloDirectory } from "@/lib/elo-explorer.functions";
@@ -22,6 +22,17 @@ export const Route = createFileRoute("/elo")({
 
 type EloDirectory = Awaited<ReturnType<typeof getEloDirectory>>;
 type RankingMode = "TEAMS" | "LEAGUES";
+type EloSort =
+  | "RANK"
+  | "RATING_DESC"
+  | "RATING_ASC"
+  | "NAME_ASC"
+  | "LEAGUE_ASC"
+  | "MATCHES_DESC"
+  | "COUNTRY_ASC"
+  | "DIVISION_ASC";
+
+const PAGE_SIZE = 50;
 
 const ratingFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 const snapshotFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -57,6 +68,10 @@ function EloPage() {
   const [mode, setMode] = useState<RankingMode>("TEAMS");
   const [region, setRegion] = useState("ALL");
   const [country, setCountry] = useState("ALL");
+  const [league, setLeague] = useState("ALL");
+  const [division, setDivision] = useState("ALL");
+  const [sort, setSort] = useState<EloSort>("RANK");
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
 
@@ -95,6 +110,41 @@ function EloPage() {
     if (country !== "ALL" && !countries.includes(country)) setCountry("ALL");
   }, [countries, country]);
 
+  const divisions = useMemo(() => {
+    if (!directory) return [];
+    return Array.from(new Set(
+      directory.leagues
+        .filter((item) => region === "ALL" || item.region === region)
+        .filter((item) => country === "ALL" || item.country_code === country)
+        .map((item) => item.division_level)
+        .filter((value): value is number => value !== null),
+    )).sort((a, b) => a - b);
+  }, [country, directory, region]);
+
+  const leagueOptions = useMemo(() => {
+    if (!directory) return [];
+    return directory.leagues
+      .filter((item) => region === "ALL" || item.region === region)
+      .filter((item) => country === "ALL" || item.country_code === country)
+      .filter((item) => division === "ALL" || String(item.division_level) === division)
+      .slice()
+      .sort((a, b) => a.league_name.localeCompare(b.league_name, "pt-BR"));
+  }, [country, directory, division, region]);
+
+  useEffect(() => {
+    if (division !== "ALL" && !divisions.includes(Number(division))) setDivision("ALL");
+  }, [division, divisions]);
+
+  useEffect(() => {
+    if (league !== "ALL" && !leagueOptions.some((item) => String(item.league_id) === league)) {
+      setLeague("ALL");
+    }
+  }, [league, leagueOptions]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [mode, region, country, league, division, sort, search]);
+
   const teamRankById = useMemo(() => {
     const ranks = new Map<number, number>();
     directory?.teams.forEach((team, index) => {
@@ -112,24 +162,61 @@ function EloPage() {
   const filteredTeams = useMemo(() => {
     if (!directory) return [];
     const term = search.trim().toLocaleLowerCase("pt-BR");
-    return directory.teams.filter((team) => {
+    const rows = directory.teams.filter((team) => {
       if (region !== "ALL" && team.region !== region) return false;
       if (country !== "ALL" && team.countryCode !== country) return false;
+      if (league !== "ALL" && String(team.league_id) !== league) return false;
+      if (division !== "ALL" && String(team.divisionLevel) !== division) return false;
       if (!term) return true;
-      return [team.team_name, team.league_name].some((value) => value?.toLocaleLowerCase("pt-BR").includes(term) ?? false);
+      return [team.team_name, team.league_name].some((value) =>
+        value?.toLocaleLowerCase("pt-BR").includes(term) ?? false
+      );
     });
-  }, [country, directory, region, search]);
+
+    return rows.slice().sort((a, b) => {
+      if (sort === "RATING_DESC") return (b.global_rating ?? -Infinity) - (a.global_rating ?? -Infinity);
+      if (sort === "RATING_ASC") return (a.global_rating ?? Infinity) - (b.global_rating ?? Infinity);
+      if (sort === "NAME_ASC") return a.team_name.localeCompare(b.team_name, "pt-BR");
+      if (sort === "LEAGUE_ASC") {
+        return a.league_name.localeCompare(b.league_name, "pt-BR")
+          || a.team_name.localeCompare(b.team_name, "pt-BR");
+      }
+      if (sort === "MATCHES_DESC") {
+        return (b.matches_processed ?? -1) - (a.matches_processed ?? -1)
+          || (b.global_rating ?? -Infinity) - (a.global_rating ?? -Infinity);
+      }
+      return (teamRankById.get(a.team_id ?? -1) ?? Number.MAX_SAFE_INTEGER)
+        - (teamRankById.get(b.team_id ?? -1) ?? Number.MAX_SAFE_INTEGER);
+    });
+  }, [country, directory, division, league, region, search, sort, teamRankById]);
 
   const filteredLeagues = useMemo(() => {
     if (!directory) return [];
     const term = search.trim().toLocaleLowerCase("pt-BR");
-    return directory.leagues.filter((league) => {
-      if (region !== "ALL" && league.region !== region) return false;
-      if (country !== "ALL" && league.country_code !== country) return false;
+    const rows = directory.leagues.filter((item) => {
+      if (region !== "ALL" && item.region !== region) return false;
+      if (country !== "ALL" && item.country_code !== country) return false;
+      if (division !== "ALL" && String(item.division_level) !== division) return false;
       if (!term) return true;
-      return league.league_name.toLocaleLowerCase("pt-BR").includes(term);
+      return item.league_name.toLocaleLowerCase("pt-BR").includes(term);
     });
-  }, [country, directory, region, search]);
+
+    return rows.slice().sort((a, b) => {
+      if (sort === "RATING_DESC") return (b.rating ?? -Infinity) - (a.rating ?? -Infinity);
+      if (sort === "RATING_ASC") return (a.rating ?? Infinity) - (b.rating ?? Infinity);
+      if (sort === "NAME_ASC") return a.league_name.localeCompare(b.league_name, "pt-BR");
+      if (sort === "COUNTRY_ASC") {
+        return (a.country_code ?? "").localeCompare(b.country_code ?? "", "pt-BR")
+          || a.league_name.localeCompare(b.league_name, "pt-BR");
+      }
+      if (sort === "DIVISION_ASC") {
+        return (a.division_level ?? Number.MAX_SAFE_INTEGER) - (b.division_level ?? Number.MAX_SAFE_INTEGER)
+          || a.league_name.localeCompare(b.league_name, "pt-BR");
+      }
+      return (leagueRankById.get(a.league_id) ?? Number.MAX_SAFE_INTEGER)
+        - (leagueRankById.get(b.league_id) ?? Number.MAX_SAFE_INTEGER);
+    });
+  }, [country, directory, division, leagueRankById, region, search, sort]);
 
   const selectedTeam = selectedTeamId === null
     ? null
@@ -142,6 +229,12 @@ function EloPage() {
   const hierarchyConstrained = directory?.leagues.filter((league) => league.hierarchy_constrained).length ?? 0;
   const visibleCount = mode === "TEAMS" ? filteredTeams.length : filteredLeagues.length;
   const totalCount = mode === "TEAMS" ? directory?.teams.length ?? 0 : directory?.leagues.length ?? 0;
+  const totalPages = Math.max(1, Math.ceil(visibleCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageEnd = Math.min(pageStart + PAGE_SIZE, visibleCount);
+  const pagedTeams = filteredTeams.slice(pageStart, pageEnd);
+  const pagedLeagues = filteredLeagues.slice(pageStart, pageEnd);
   const snapshotHealthy = directory?.snapshot.status === "OK";
   const snapshotCoverage = directory
     && directory.snapshot.domesticCurrent !== null
