@@ -185,3 +185,8 @@ Os feeds Google News restritos aos domínios editoriais responderam HTTP 503 qua
 ### Fontes diretas de RSS — 20/09/2026
 
 Após a validação de produção mostrar bloqueio recorrente do Google News RSS no egress do Lovable, o transporte editorial foi simplificado para feeds RSS diretos dos veículos: ge, Sky Sports, kicker, L'Équipe, AS e La Gazzetta dello Sport. Para outros esportes, ge, AS e Gazzetta fornecem feeds específicos de tênis, automobilismo/F1, basquete, vôlei e esportes variados. A aplicação usa descrição de feed apenas transitoriamente para matching; a evidência persistida/renderizada mantém manchete, fonte, URL e horários, sem republicar o corpo do artigo.
+
+
+### Hardening final da Resenha — 20/09/2026
+
+O contrato retrospectivo fica fechado em três pontos adicionais. Primeiro, o payload editorial do Palmeiras não preserva mais qualquer próximo compromisso: somente partidas do dia anterior podem permanecer na Resenha. Segundo, os destaques de outros esportes passam por balanceamento por modalidade, com no máximo dois itens por esporte antes do limite global, evitando uma seção dominada por uma única cobertura. Terceiro, o frontend passa a exibir links das fontes jornalísticas persistidas nos itens editoriais; apenas URLs HTTPS gravadas na proveniência com papel `journalism_context` ou `other_sport_editorial` são expostas.

@@ -20,6 +20,11 @@ interface NewsDb {
   from(table: string): NewsQuery;
 }
 
+export type NewsSourceLink = {
+  label: string;
+  url: string;
+};
+
 export type NewsBriefingItem = {
   id: string;
   fixtureId: string | null;
@@ -28,6 +33,7 @@ export type NewsBriefingItem = {
   body: string | null;
   priority: number;
   lateGame: boolean;
+  sources: NewsSourceLink[];
 };
 
 export type NewsBriefing = {
@@ -103,6 +109,23 @@ function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value : null;
 }
 
+function parseSourceLinks(value: unknown): NewsSourceLink[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const links: NewsSourceLink[] = [];
+  for (const entry of value) {
+    if (!isRecord(entry)) continue;
+    const role = text(entry["role"]);
+    if (role !== "journalism_context" && role !== "other_sport_editorial") continue;
+    const label = text(entry["source"]);
+    const url = text(entry["sourceUrl"]);
+    if (!label || !url || !/^https:\/\//i.test(url) || seen.has(url)) continue;
+    seen.add(url);
+    links.push({ label, url });
+  }
+  return links.slice(0, 3);
+}
+
 function numeric(value: unknown): number | null {
   const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
   return Number.isFinite(parsed) ? parsed : null;
@@ -125,6 +148,7 @@ function parseBriefingItem(row: Record<string, unknown>): NewsBriefingItem | nul
     body: text(row["body"]),
     priority: numeric(row["priority"]) ?? 0,
     lateGame: isRecord(row["facts"]) && row["facts"]["lateGame"] === true,
+    sources: parseSourceLinks(row["provenance"]),
   };
 }
 
@@ -295,7 +319,7 @@ export const getNewsOverview = createServerFn({ method: "GET" })
       if (id && date) {
         const itemsResult = await db
           .from("sports_briefing_items")
-          .select("id,briefing_id,fixture_id,item_kind,title,body,priority,facts")
+          .select("id,briefing_id,fixture_id,item_kind,title,body,priority,facts,provenance")
           .eq("briefing_id", id)
           .order("priority", { ascending: false })
           .order("created_at", { ascending: true })
