@@ -33,9 +33,11 @@ function briefingTitle(date: string, observedAt: string) {
 }
 
 function ResultTeam({ name, logo, goals }: { name: string; logo: string | null; goals: number }) {
-  const initial = name.trim().charAt(0).toLocaleUpperCase("pt-BR") || "•";
-  return <div className="grid min-w-0 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-2.5">
-    {logo ? <img src={logo} alt="" loading="lazy" aria-hidden className="size-7 shrink-0 object-contain" /> : <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-secondary/35 type-caption font-semibold text-muted-foreground" aria-hidden>{initial}</span>}
+  const [logoFailed,setLogoFailed]=useState(false);
+  const initial=name.trim().charAt(0).toLocaleUpperCase("pt-BR")||"•";
+  const showLogo=Boolean(logo&&!logoFailed);
+  return <div className="grid min-w-0 grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-2.5">
+    {showLogo?<span className="flex size-8 shrink-0 items-center justify-center"><img src={logo!} alt={`Escudo do ${name}`} loading="lazy" decoding="async" onError={()=>setLogoFailed(true)} className="max-h-8 max-w-8 object-contain" /></span>:<span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-secondary/35 type-caption font-semibold text-muted-foreground" aria-hidden>{initial}</span>}
     <p className="truncate type-label text-foreground">{name}</p><span className="type-metric min-w-6 text-right text-foreground">{goals}</span>
   </div>;
 }

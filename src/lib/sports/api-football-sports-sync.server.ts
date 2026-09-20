@@ -28,6 +28,14 @@ function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function apiFootballTeamPatch(team: Row, apiTeamId: number) {
+  return {
+    api_football_team_id: apiTeamId,
+    ...(text(team["logo_url"]) ? {} : { logo_url: `https://media.api-sports.io/football/teams/${apiTeamId}.png` }),
+  };
+}
+
+
 function nearbyIsoDates(iso: string): string[] {
   const center = new Date(iso);
   return [-1, 0, 1].map((offset) => {
@@ -46,7 +54,7 @@ async function readFixtureContext(sportsFixtureId: string) {
   const fixture = fixtureResult.data as Row;
   const ids = [String(fixture["home_team_id"]), String(fixture["away_team_id"])];
   const [teamsResult, competitionResult] = await Promise.all([
-    db.from("sports_teams").select("id,name,api_football_team_id").in("id", ids),
+    db.from("sports_teams").select("id,name,api_football_team_id,logo_url").in("id", ids),
     db.from("sports_competitions").select("id,name,api_football_league_id").eq("id", String(fixture["competition_id"])).single(),
   ]);
   if (teamsResult.error || !teamsResult.data || teamsResult.data.length !== 2) throw new Error("Equipes canônicas da fixture não foram encontradas.");
@@ -105,8 +113,8 @@ export async function linkApiFootballFixture(sportsFixtureId: string): Promise<A
     if (updateFixture.error) throw new Error(`Falha ao salvar vínculo API-Football: ${updateFixture.error.message}`);
 
     const updates: PromiseLike<unknown>[] = [];
-    if (event.homeTeamId !== null) updates.push(context.db.from("sports_teams").update({ api_football_team_id: event.homeTeamId }).eq("id", String(context.home["id"]))) as unknown as PromiseLike<unknown>;
-    if (event.awayTeamId !== null) updates.push(context.db.from("sports_teams").update({ api_football_team_id: event.awayTeamId }).eq("id", String(context.away["id"]))) as unknown as PromiseLike<unknown>;
+    if (event.homeTeamId !== null) updates.push(context.db.from("sports_teams").update(apiFootballTeamPatch(context.home, event.homeTeamId)).eq("id", String(context.home["id"]))) as unknown as PromiseLike<unknown>;
+    if (event.awayTeamId !== null) updates.push(context.db.from("sports_teams").update(apiFootballTeamPatch(context.away, event.awayTeamId)).eq("id", String(context.away["id"]))) as unknown as PromiseLike<unknown>;
     if (apiLeagueId !== null) updates.push(context.db.from("sports_competitions").update({ api_football_league_id: apiLeagueId }).eq("id", String(context.competition["id"]))) as unknown as PromiseLike<unknown>;
     if (updates.length > 0) await Promise.all(updates);
 

@@ -18,6 +18,7 @@ interface NewsQuery extends PromiseLike<DbResponse> {
 
 interface NewsDb {
   from(table: string): NewsQuery;
+  rpc(functionName: string, args?: Record<string, unknown>): PromiseLike<DbResponse>;
 }
 
 export type NewsSourceLink = {
@@ -83,26 +84,12 @@ export type NewsOverview = {
   observedAt: string;
 };
 
-type TrackingRule = {
-  competitionId: string | null;
-  countryCode: string | null;
-  region: string | null;
-  competitionKind: string | null;
-  divisionLevel: number | null;
-};
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function records(value: unknown): Record<string, unknown>[] {
   return Array.isArray(value) ? value.filter(isRecord) : [];
-}
-
-function relation(value: unknown): Record<string, unknown> | null {
-  if (isRecord(value)) return value;
-  if (Array.isArray(value) && isRecord(value[0])) return value[0];
-  return null;
 }
 
 function text(value: unknown): string | null {
@@ -153,56 +140,36 @@ function parseBriefingItem(row: Record<string, unknown>): NewsBriefingItem | nul
 }
 
 function parseResult(row: Record<string, unknown>): NewsResult | null {
-  const home = relation(row["home_team"]);
-  const away = relation(row["away_team"]);
-  const competition = relation(row["competition"]);
-  const id = text(row["id"]);
+  const id = text(row["fixture_id"]);
   const kickoffAt = text(row["kickoff_at"]);
-  const competitionId = competition ? text(competition["id"]) : null;
-  const competitionName = competition ? text(competition["name"]) : null;
-  const competitionKind = competition ? text(competition["competition_kind"]) : null;
-  const homeTeam = home ? text(home["name"]) : null;
-  const awayTeam = away ? text(away["name"]) : null;
+  const competitionId = text(row["competition_id"]);
+  const competition = text(row["competition"]);
+  const competitionKind = text(row["competition_kind"]);
+  const homeTeam = text(row["home_team"]);
+  const awayTeam = text(row["away_team"]);
   const homeGoals = numeric(row["home_goals"]);
   const awayGoals = numeric(row["away_goals"]);
-  if (!id || !kickoffAt || !competitionId || !competitionName || !competitionKind || !homeTeam || !awayTeam || homeGoals === null || awayGoals === null) return null;
+
+  if (!id || !kickoffAt || !competitionId || !competition || !competitionKind || !homeTeam || !awayTeam || homeGoals === null || awayGoals === null) {
+    return null;
+  }
 
   return {
     id,
     kickoffAt,
     competitionId,
-    competition: competitionName,
+    competition,
     competitionKind,
-    divisionLevel: competition ? numeric(competition["division_level"]) : null,
-    countryCode: competition ? text(competition["country_code"]) : null,
-    region: competition ? text(competition["region"]) : null,
+    divisionLevel: numeric(row["division_level"]),
+    countryCode: text(row["country_code"]),
+    region: text(row["region"]),
     homeTeam,
-    homeTeamLogo: home ? text(home["logo_url"]) : null,
+    homeTeamLogo: text(row["home_team_logo"]),
     awayTeam,
-    awayTeamLogo: away ? text(away["logo_url"]) : null,
+    awayTeamLogo: text(row["away_team_logo"]),
     homeGoals,
     awayGoals,
   };
-}
-
-function parseTrackingRule(row: Record<string, unknown>): TrackingRule {
-  return {
-    competitionId: text(row["competition_id"]),
-    countryCode: text(row["country_code"]),
-    region: text(row["region"]),
-    competitionKind: text(row["competition_kind"]),
-    divisionLevel: numeric(row["division_level"]),
-  };
-}
-
-function matchesTrackingRule(result: NewsResult, rule: TrackingRule) {
-  if (rule.competitionId) return rule.competitionId === result.competitionId;
-  return (
-    (!rule.countryCode || rule.countryCode === result.countryCode) &&
-    (!rule.region || rule.region === result.region) &&
-    (!rule.competitionKind || rule.competitionKind === result.competitionKind) &&
-    (rule.divisionLevel === null || rule.divisionLevel === result.divisionLevel)
-  );
 }
 
 function parseEloMovements(rows: Record<string, unknown>[]): EloMovement[] {
@@ -268,7 +235,7 @@ export const getNewsOverview = createServerFn({ method: "GET" })
     const observedAt = new Date();
     const since = new Date(observedAt.getTime() - 48 * 60 * 60 * 1000).toISOString();
 
-    const [briefingResult, resultsResult, trackingRulesResult, eloResult] = await Promise.all([
+    const [briefingResult, resultsResult, eloResult] = await Promise.all([
       db
         .from("sports_daily_briefings")
         .select("id,briefing_date,football_summary,other_sports_summary,facts_through,generated_at")
@@ -276,22 +243,10 @@ export const getNewsOverview = createServerFn({ method: "GET" })
         .order("briefing_date", { ascending: false })
         .limit(1)
         .maybeSingle(),
-      db
-        .from("sports_fixtures")
-        .select(
-          "id,kickoff_at,status,home_goals,away_goals,home_team:sports_teams!sports_fixtures_home_team_id_fkey(name,logo_url),away_team:sports_teams!sports_fixtures_away_team_id_fkey(name,logo_url),competition:sports_competitions!sports_fixtures_competition_id_fkey(id,name,country_code,region,competition_kind,division_level)",
-        )
-        .eq("status", "FINISHED")
-        .gte("kickoff_at", since)
-        .order("kickoff_at", { ascending: false })
-        .limit(100),
-      db
-        .from("sports_tracking_rules")
-        .select("competition_id,country_code,region,competition_kind,division_level,priority")
-        .eq("enabled", true)
-        .eq("always_track", true)
-        .order("priority", { ascending: false })
-        .limit(100),
+      db.rpc("get_recent_priority_results", {
+        p_since: since,
+        p_limit: 12,
+      }),
       db
         .from("elo_fixture_history")
         .select(
@@ -305,7 +260,7 @@ export const getNewsOverview = createServerFn({ method: "GET" })
     if (briefingResult.error) {
       throw new BackendError("INTERNAL_ERROR", "Falha ao carregar a resenha esportiva.", 500);
     }
-    if (resultsResult.error || trackingRulesResult.error) {
+    if (resultsResult.error) {
       throw new BackendError("INTERNAL_ERROR", "Falha ao carregar os resultados recentes.", 500);
     }
     if (eloResult.error) {
@@ -341,12 +296,9 @@ export const getNewsOverview = createServerFn({ method: "GET" })
       }
     }
 
-    const trackingRules = records(trackingRulesResult.data).map(parseTrackingRule);
     const recentResults = records(resultsResult.data)
       .map(parseResult)
-      .filter((result): result is NewsResult => result !== null)
-      .filter((result) => trackingRules.some((rule) => matchesTrackingRule(result, rule)))
-      .slice(0, 12);
+      .filter((result): result is NewsResult => result !== null);
 
     return {
       briefing,

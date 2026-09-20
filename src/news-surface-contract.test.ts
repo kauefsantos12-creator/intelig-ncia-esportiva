@@ -19,8 +19,7 @@ describe("Noticiário sports intelligence contract", () => {
     expect(server).toContain('from("sports_daily_briefings")');
     expect(server).toContain('.eq("status", "PUBLISHED")');
     expect(server).toContain('from("sports_briefing_items")');
-    expect(server).toContain('from("sports_fixtures")');
-    expect(server).toContain('.eq("status", "FINISHED")');
+    expect(server).toContain('rpc("get_recent_priority_results"');
     expect(server).toContain('from("elo_fixture_history")');
     expect(server).not.toContain("fetch(");
     expect(server).not.toContain("parseSchedule");
@@ -29,13 +28,12 @@ describe("Noticiário sports intelligence contract", () => {
     expect(server).toContain("other_sport_editorial");
   });
 
-  it("filters factual result fallbacks through canonical always-track rules", () => {
+  it("filters recent results in the backend before applying the display limit", () => {
     const server = source("./lib/news-overview.functions.ts");
-    expect(server).toContain('from("sports_tracking_rules")');
-    expect(server).toContain('.eq("enabled", true)');
-    expect(server).toContain('.eq("always_track", true)');
-    expect(server).toContain("matchesTrackingRule");
-    expect(server).toContain("trackingRules.some");
+    expect(server).toContain('rpc("get_recent_priority_results"');
+    expect(server).toContain("p_limit: 12");
+    expect(server).not.toContain('from("sports_tracking_rules")');
+    expect(server).not.toContain("matchesTrackingRule");
   });
 
   it("limits fallback context to a recent factual window", () => {
@@ -85,6 +83,9 @@ describe("Noticiário sports intelligence contract", () => {
     expect(route).toContain("result.homeTeamLogo");
     expect(route).toContain("result.awayTeamLogo");
     expect(route).toContain('loading="lazy"');
+    expect(route).toContain('decoding="async"');
+    expect(route).toContain("onError={()=>setLogoFailed(true)}");
+    expect(route).toContain("Escudo do");
     expect(route).toContain("groupedResults");
     expect(route).toContain('"Hoje"');
     expect(route).toContain('"Ontem"');

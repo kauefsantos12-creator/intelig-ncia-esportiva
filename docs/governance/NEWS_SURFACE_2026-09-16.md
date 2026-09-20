@@ -213,3 +213,10 @@ O fluxo diário deixa de depender do agendamento do ChatGPT para atualizar a apl
 A publicação das 05:05 tem fallback deliberado: se a IA estiver indisponível, mas existirem itens editoriais factuais válidos, a edição é publicada em modo `FACTUAL_FALLBACK` em vez de manter a interface desatualizada. Se não houver nenhum item editorial válido, o briefing é marcado `FAILED` e a edição anterior permanece como última publicação disponível.
 
 O cron legado `sports-daily-briefing-yesterday`, que publicava diretamente às 05:05 antes do refinamento, é removido. Isso elimina a janela em que o usuário poderia ver texto cru/estrangeiro antes da passagem pelo AI Gateway.
+
+
+### Resultados recentes — escopo antes do limite e escudos
+
+A vistoria de 20/09/2026 encontrou uma falha concreta no fallback de resultados: a consulta buscava os 100 jogos encerrados mais recentes de todas as competições e só depois aplicava as regras `always_track`. Em uma janela com centenas de partidas isso podia devolver menos de 12 jogos prioritários mesmo quando havia jogos elegíveis mais antigos dentro das 48 horas. O contrato passa a usar `get_recent_priority_results(since, limit)`, que aplica as regras canônicas no banco antes de ordenar e limitar.
+
+Os escudos usam `sports_teams.logo_url`; quando o clube já possui `api_football_team_id`, o backend completa a URL canônica do CDN da API-Football. O vínculo futuro com API-Football também grava o escudo quando ele ainda não existe. No frontend, falha de carregamento da imagem cai para a inicial do clube sem quebrar o card.
