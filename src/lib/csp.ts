@@ -16,7 +16,7 @@ export function buildContentSecurityPolicy(nonce: string): string {
     "script-src-attr 'none'",
     `style-src 'self' 'nonce-${nonce}'`,
     "style-src-attr 'none'",
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://media.api-sports.io",
     "font-src 'self' data:",
     "worker-src 'self'",
     "manifest-src 'self'",

@@ -20,6 +20,11 @@ describe("strict CSP", () => {
     expect(policy).not.toContain("unsafe-eval");
   });
 
+  it("allows only the canonical team crest host for remote images", () => {
+    const policy = buildContentSecurityPolicy("0123456789abcdef0123456789abcdef");
+    expect(policy).toContain("img-src 'self' data: blob: https://media.api-sports.io");
+  });
+
   it("adds the response nonce to framework-managed script and style tags", () => {
     const nonce = "0123456789abcdef0123456789abcdef";
     const html = '<html><head><style>body{margin:0}</style></head><body><script>window.__x=1</script><script src="/app.js"></script></body></html>';
