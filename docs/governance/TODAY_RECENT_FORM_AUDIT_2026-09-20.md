@@ -23,7 +23,7 @@ A RPC:
 - retorna no máximo os jogos necessários para a forma recente;
 - é executável somente por `service_role`.
 
-O cálculo exibido permanece igual: últimos 5 jogos anteriores ao kickoff da partida, com vitórias, empates, derrotas, gols pró/contra e sequência W/D/L.
+O cálculo exibido permanece igual: últimos 5 jogos anteriores ao kickoff da partida, com vitórias, empates, derrotas, gols pró/contra e sequência W/D/L. A busca usa uma guarda operacional de até 365 dias para não transformar “últimos 5” em “jogos dos últimos 90 dias”; o limite funcional continua sendo 5 por equipe.
 
 ## Critério de conclusão
 
