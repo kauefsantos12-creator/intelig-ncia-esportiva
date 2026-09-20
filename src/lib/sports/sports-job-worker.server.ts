@@ -190,6 +190,8 @@ async function executeJob(job: SportsJobRow) {
       unmatchedListings: result.unmatchedListings,
       ambiguousListings: result.ambiguousListings,
       sourceUrl: result.sourceUrl,
+      sourceName: result.sourceName,
+      sourceKind: result.sourceKind,
     });
     return {
       fixtureId: null,
