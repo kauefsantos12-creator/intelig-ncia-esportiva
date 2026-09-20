@@ -4,7 +4,7 @@ const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const AI_MODEL = "google/gemini-3.7-flash";
 const MAX_OTHER_SPORTS = 8;
 const BATCH_SIZE = 12;
-const REQUEST_TIMEOUT_MS = 90_000;
+const REQUEST_TIMEOUT_MS = 45_000;
 
 type Row = Record<string, unknown>;
 
@@ -341,15 +341,16 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
 
   const currentMetadata = isRecord(briefing?.["metadata"]) ? briefing?.["metadata"] : {};
   const batches = chunks(candidates, BATCH_SIZE);
+  const batchResults = await Promise.all(batches.map(async (batch) => {
+    let gateway = await callGateway(date, batch);
+    if (!gateway.output) gateway = await callGateway(date, batch);
+    return gateway;
+  }));
   const refinedItems: GatewayItem[] = [];
   let opening: string | null = null;
   const errors: string[] = [];
 
-  for (const batch of batches) {
-    let gateway = await callGateway(date, batch);
-    if (!gateway.output) {
-      gateway = await callGateway(date, batch);
-    }
+  for (const gateway of batchResults) {
     if (!gateway.output) {
       errors.push(gateway.reason ?? "Falha desconhecida no lote.");
       continue;
