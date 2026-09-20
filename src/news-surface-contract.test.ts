@@ -47,21 +47,23 @@ describe("Noticiário sports intelligence contract", () => {
     expect(route).toContain("A resenha ainda não foi publicada");
     expect(route).toContain("Resultados recentes");
     expect(route).toContain("Movimentos de Elo");
-    expect(route).toContain("Fatos até");
+    expect(route).toContain("Fatos verificados até");
     expect(route).not.toContain("Mandante × Visitante");
   });
 
-  it("keeps the briefing as the primary reading surface and progressively discloses editorial context", () => {
+  it("keeps the briefing as the primary reading surface and renders the editorial hierarchy as an article", () => {
     const route = source("./routes/index.tsx");
-    expect(route.indexOf('title="Resenha esportiva"')).toBeGreaterThan(-1);
+    expect(route).toContain('briefing?`Resenha de ${formatDate(briefing.date)}`:"Resenha esportiva"');
+    expect(route.indexOf('description="Leitura editorial diária')).toBeGreaterThan(-1);
     expect(route.indexOf('title="Resultados recentes"')).toBeGreaterThan(-1);
     expect(route.indexOf('title="Movimentos de Elo"')).toBeGreaterThan(-1);
-    expect(route.indexOf('title="Resenha esportiva"')).toBeLessThan(route.indexOf('title="Resultados recentes"'));
-    expect(route.indexOf('title="Resenha esportiva"')).toBeLessThan(route.indexOf('title="Movimentos de Elo"'));
-    expect(route).toContain("max-w-[78ch]");
-    expect(route).toContain("<CollapsiblePanel");
-    expect(route).toContain("Contextos e destaques da resenha");
-    expect(route).toContain("Abra para consultar os itens editoriais");
+    expect(route.indexOf('description="Leitura editorial diária')).toBeLessThan(route.indexOf('title="Resultados recentes"'));
+    expect(route).toContain("max-w-[72ch]");
+    expect(route).toContain("function EditorialItem");
+    expect(route).toContain("Contexto do dia");
+    expect(route).toContain("Destaques de ontem");
+    expect(route).toContain("Outros esportes de ontem");
+    expect(route).not.toContain("<CollapsiblePanel");
   });
 
   it("keeps recent results scannable with real team logos and local-day grouping", () => {
@@ -89,7 +91,7 @@ describe("Noticiário sports intelligence contract", () => {
     const route = source("./routes/index.tsx");
     expect(route).toContain("<LoadingState");
     expect(route).toContain("<ErrorState");
-    expect(route).toContain("onRetry={() => void refresh()}");
+    expect(route).toContain("onRetry={()=>void refresh()}");
     expect(route).toContain("Atualizar");
   });
 });

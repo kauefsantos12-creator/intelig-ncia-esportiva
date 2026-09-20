@@ -116,3 +116,12 @@ A migration executa uma primeira publicação para a data corrente. Automação 
 ## Automação v2 — 19/09/2026
 
 A publicação factual diária passa a executar automaticamente às 05:55 de Brasília para o dia anterior, depois do sync diário das 05:20. O escopo editorial inclui 1ª/2ª divisões de Inglaterra, Alemanha, França, Itália, Espanha e Brasil; continentais de Europa/América do Sul; primeira divisão argentina; MLS; liga saudita quando catalogada; copas nacionais prioritárias quando catalogadas; e partidas internacionais catalogadas. A seleção continua exigindo fixture FINISHED + fact pack persistido e mantém proveniência por item. A função permanece idempotente e recompõe a data antes de publicar.
+
+
+## Resenha editorial v3 — 19/09/2026
+
+A resenha passa a ter contrato estruturado em `sports_daily_briefings.editorial_payload`. O payload registra a política de fontes e as seções de abertura, Palmeiras, destaques, regra de jogos após 21h, outros esportes e programação do dia seguinte. O frontend apresenta a resenha como artigo, e não como placarão.
+
+A publicação automática continua estritamente factual: partidas só entram com fixture `FINISHED` e fact pack persistido. Conteúdo jornalístico externo, recordes, declarações e causalidade só podem entrar após ingestão com proveniência (URL + horário de consulta); a aplicação não inventa esses trechos. Estatísticas só são atribuídas a uma fonte específica quando essa proveniência estiver registrada. A seção Palmeiras consulta explicitamente o clube e a agenda usa fixtures do dia seguinte, anexando `sports_broadcast_evidence` quando disponível.
+
+O fechamento diário roda às 05:05 de Brasília via cron UTC 08:05. O campo `facts_through` passa a considerar apenas os fact packs efetivamente incluídos na resenha, eliminando o vazamento semântico de partidas fora do escopo editorial.
