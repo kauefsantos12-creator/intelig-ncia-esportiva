@@ -57,6 +57,28 @@ describe("Hoje sports intelligence contract", () => {
     expect(status).toContain('metadata["sourceName"]');
   });
 
+  it("keeps recent-form history seeding lightweight and outside detailed player backfill", () => {
+    const sync = source("./lib/sports/five-dollar-sports-sync.server.ts");
+    const worker = source("./lib/sports/sports-job-worker.server.ts");
+    const migration = source("../supabase/migrations/20260920163000_today_recent_form_history_seed.sql");
+    const basicStart = sync.indexOf("async function persistRecentFormFixtureBasic");
+    const basicEnd = sync.indexOf("export interface FiveDollarRecentFormLeagueSyncResult");
+
+    expect(sync).toContain("fiveDollarLeagueHistory");
+    expect(sync).toContain("selectRecentFormFixtures");
+    expect(worker).toContain('job.job_type === "FIVE_DOLLAR_RECENT_FORM_LEAGUE"');
+    expect(migration).toContain("'40 7 * * *'");
+    expect(basicStart).toBeGreaterThan(-1);
+    expect(basicEnd).toBeGreaterThan(basicStart);
+
+    const basicPersist = sync.slice(basicStart, basicEnd);
+    expect(basicPersist).not.toContain("persistStats");
+    expect(basicPersist).not.toContain("persistEvents");
+    expect(basicPersist).not.toContain("sports_match_fact_packs");
+    expect(basicPersist).not.toContain("API_FOOTBALL");
+    expect(basicPersist).not.toContain("enqueue_sports_job");
+  });
+
   it("renders one expandable row per fixture with explicit missing-data states", () => {
     const row = source("./components/TodayFixtureRow.tsx");
     expect(row).toContain("<details");

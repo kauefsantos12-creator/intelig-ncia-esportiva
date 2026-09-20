@@ -1,11 +1,14 @@
 import { randomUUID } from "node:crypto";
 
+import { saoPauloLocalDayUnixWindow } from "@/lib/sao-paulo-time";
+
 import { syncApiFootballFixtureDataQuotaAware } from "./api-football-quota-sync.server";
 import {
   syncNationalLeagueTeams,
   syncNationalTeamSquad,
 } from "./api-football-national-squads.server";
 import { linkApiFootballFixture } from "./api-football-sports-sync.server";
+import { syncFiveDollarRecentFormLeague } from "./five-dollar-sports-sync.server";
 import { syncFutNaTvBroadcasts } from "./futnatv-broadcast-sync.server";
 import { sportsDb } from "./sports-db.server";
 import {
@@ -92,6 +95,31 @@ function leagueIdFor(job: SportsJobRow): number {
   return leagueId;
 }
 
+function recentFormLeaguePayloadFor(job: SportsJobRow) {
+  const payload = asRecord(job.payload);
+  const leagueId = Number(payload?.["leagueId"]);
+  const date = payload?.["date"];
+  const rawTeamIds = payload?.["teamIds"];
+  const teamIds = Array.isArray(rawTeamIds)
+    ? rawTeamIds.map(Number).filter((id) => Number.isInteger(id) && id > 0)
+    : [];
+
+  if (
+    !Number.isInteger(leagueId) ||
+    leagueId <= 0 ||
+    typeof date !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    teamIds.length === 0
+  ) {
+    throw new SportsJobExecutionError(
+      "INVALID_PAYLOAD",
+      `Job ${job.id} sem leagueId/date/teamIds válidos para recent form.`,
+    );
+  }
+
+  return { leagueId, date, teamIds: [...new Set(teamIds)] };
+}
+
 function broadcastDateFor(job: SportsJobRow): string {
   const payload = asRecord(job.payload);
   const date = payload?.["date"];
@@ -102,6 +130,10 @@ function broadcastDateFor(job: SportsJobRow): string {
 function syncDescriptor(job: SportsJobRow) {
   if (job.job_type === "BROADCAST_SYNC") {
     return { provider: "futnatv", domain: "broadcasts", cursor: broadcastDateFor(job) };
+  }
+  if (job.job_type === "FIVE_DOLLAR_RECENT_FORM_LEAGUE") {
+    const payload = recentFormLeaguePayloadFor(job);
+    return { provider: "five_dollar", domain: "recent_form_history", cursor: String(payload.leagueId) };
   }
   if (job.job_type === "API_FOOTBALL_LEAGUE_TEAMS") {
     return { provider: "api_football", domain: "league_teams", cursor: String(leagueIdFor(job)) };
@@ -199,6 +231,31 @@ async function executeJob(job: SportsJobRow) {
     };
   }
 
+  if (job.job_type === "FIVE_DOLLAR_RECENT_FORM_LEAGUE") {
+    const payload = recentFormLeaguePayloadFor(job);
+    const { start } = saoPauloLocalDayUnixWindow(payload.date);
+    const predictionAtIso = new Date(start * 1000).toISOString();
+    const result = await syncFiveDollarRecentFormLeague(
+      payload.leagueId,
+      payload.teamIds,
+      predictionAtIso,
+      90,
+    );
+    await markSyncSuccess(job, {
+      leagueId: result.leagueId,
+      targetTeams: result.targetTeams,
+      fetchedFixtures: result.fetchedFixtures,
+      selectedFixtures: result.selectedFixtures,
+      persistedFixtures: result.persistedFixtures,
+      fetches: result.fetches,
+      fetchedAt: result.fetchedAt,
+    });
+    return {
+      fixtureId: null,
+      detail: `FIVE_DOLLAR_RECENT_FORM_LEAGUE: ${result.persistedFixtures} fixtures persistidas para ${result.targetTeams} times.`,
+    };
+  }
+
   if (job.job_type === "API_FOOTBALL_LEAGUE_TEAMS") {
     const result = await syncNationalLeagueTeams(leagueIdFor(job));
     await markSyncSuccess(job, {
@@ -262,7 +319,16 @@ async function executeJob(job: SportsJobRow) {
 }
 
 function fixtureIdForResult(job: SportsJobRow): string | null {
-  if (["BROADCAST_SYNC", "API_FOOTBALL_LEAGUE_TEAMS", "API_FOOTBALL_TEAM_SQUAD"].includes(job.job_type)) return null;
+  if (
+    [
+      "BROADCAST_SYNC",
+      "FIVE_DOLLAR_RECENT_FORM_LEAGUE",
+      "API_FOOTBALL_LEAGUE_TEAMS",
+      "API_FOOTBALL_TEAM_SQUAD",
+    ].includes(job.job_type)
+  ) {
+    return null;
+  }
   try { return fixtureIdFor(job); } catch { return job.fixture_id; }
 }
 
