@@ -100,3 +100,34 @@ O item 3 só é concluído após:
 4. merge;
 5. sincronização do Lovable;
 6. validação da tabela carregando resultados além do antigo limite de 100 e preservando posições globais.
+
+
+## Validação pós-merge
+
+PR #62 passou pelos gates:
+- Static diagnostics: sucesso;
+- CI/test-and-build: sucesso;
+- Database regressions: sucesso;
+- browser compatibility/accessibility: sucesso.
+
+Merge:
+- commit: `d6444f9cfeadf8c143e2a10903f6e1bcd041ec73`.
+
+Lovable:
+- `latest_commit_sha`: `d6444f9cfeadf8c143e2a10903f6e1bcd041ec73`;
+- projeto: `ready`;
+- `is_published=true`.
+
+Snapshot vivo pós-merge:
+- 681 linhas atuais;
+- 681 clubes distintos;
+- 32 ligas;
+- 22 países;
+- 4 regiões;
+- 2 divisões.
+
+O contrato de frontend confirmou ausência de `filteredTeams.slice(0, 100)` e `filteredLeagues.slice(0, 100)`, paginação de 50 resultados e preservação da posição global por mapas canônicos de ranking.
+
+A chamada manual de deploy retornou `pending` para o deployment `b1f187c1-a2a3-47dc-9105-9dedf70a83b0`; esse deployment específico não é classificado como concluído enquanto a API não confirmar.
+
+Status do item 3: **concluído e validado estruturalmente/runtime**.
