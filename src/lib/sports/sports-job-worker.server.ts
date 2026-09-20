@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import { saoPauloLocalDayUnixWindow } from "@/lib/sao-paulo-time";
+
 import { syncApiFootballFixtureDataQuotaAware } from "./api-football-quota-sync.server";
 import {
   syncNationalLeagueTeams,
@@ -231,7 +233,8 @@ async function executeJob(job: SportsJobRow) {
 
   if (job.job_type === "FIVE_DOLLAR_RECENT_FORM_LEAGUE") {
     const payload = recentFormLeaguePayloadFor(job);
-    const predictionAtIso = new Date(`${payload.date}T03:00:00.000Z`).toISOString();
+    const { start } = saoPauloLocalDayUnixWindow(payload.date);
+    const predictionAtIso = new Date(start * 1000).toISOString();
     const result = await syncFiveDollarRecentFormLeague(
       payload.leagueId,
       payload.teamIds,
