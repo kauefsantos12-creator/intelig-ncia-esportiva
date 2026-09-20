@@ -172,56 +172,32 @@ function parseResult(row: Record<string, unknown>): NewsResult | null {
   };
 }
 
-function parseEloMovements(rows: Record<string, unknown>[]): EloMovement[] {
-  const movements: EloMovement[] = [];
+function parseEloMovement(row: Record<string, unknown>): EloMovement | null {
+  const kickoffAt = text(row["kickoff_at"]);
+  const competition = text(row["league_name"]);
+  const team = text(row["team_name"]);
+  const opponent = text(row["opponent_name"]);
+  const fixtureId = numeric(row["fixture_id"]);
+  const ratingBefore = numeric(row["rating_before"]);
+  const ratingAfter = numeric(row["rating_after"]);
+  const delta = numeric(row["delta"]);
 
-  for (const row of rows) {
-    const kickoffAt = text(row["kickoff_at"]);
-    const competition = text(row["league_name"]);
-    const homeTeam = text(row["home_team_name"]);
-    const awayTeam = text(row["away_team_name"]);
-    const fixtureId = numeric(row["fixture_id"]);
-    const homeBefore = numeric(row["home_rating_before"]);
-    const homeAfter = numeric(row["home_rating_after"]);
-    const awayBefore = numeric(row["away_rating_before"]);
-    const awayAfter = numeric(row["away_rating_after"]);
-    const homeGoals = numeric(row["home_goals"]);
-    const awayGoals = numeric(row["away_goals"]);
-
-    if (!kickoffAt || !competition || !homeTeam || !awayTeam || homeBefore === null || homeAfter === null || awayBefore === null || awayAfter === null) {
-      continue;
-    }
-
-    movements.push({
-      fixtureId,
-      kickoffAt,
-      competition,
-      team: homeTeam,
-      opponent: awayTeam,
-      ratingBefore: homeBefore,
-      ratingAfter: homeAfter,
-      delta: homeAfter - homeBefore,
-      goalsFor: homeGoals,
-      goalsAgainst: awayGoals,
-    });
-    movements.push({
-      fixtureId,
-      kickoffAt,
-      competition,
-      team: awayTeam,
-      opponent: homeTeam,
-      ratingBefore: awayBefore,
-      ratingAfter: awayAfter,
-      delta: awayAfter - awayBefore,
-      goalsFor: awayGoals,
-      goalsAgainst: homeGoals,
-    });
+  if (!kickoffAt || !competition || !team || !opponent || ratingBefore === null || ratingAfter === null || delta === null) {
+    return null;
   }
 
-  return movements
-    .filter((movement) => Math.abs(movement.delta) >= 2)
-    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
-    .slice(0, 8);
+  return {
+    fixtureId,
+    kickoffAt,
+    competition,
+    team,
+    opponent,
+    ratingBefore,
+    ratingAfter,
+    delta,
+    goalsFor: numeric(row["goals_for"]),
+    goalsAgainst: numeric(row["goals_against"]),
+  };
 }
 
 export const getNewsOverview = createServerFn({ method: "GET" })
@@ -247,14 +223,10 @@ export const getNewsOverview = createServerFn({ method: "GET" })
         p_since: since,
         p_limit: 12,
       }),
-      db
-        .from("elo_fixture_history")
-        .select(
-          "fixture_id,kickoff_at,league_name,home_team_name,away_team_name,home_goals,away_goals,home_rating_before,home_rating_after,away_rating_before,away_rating_after",
-        )
-        .gte("kickoff_at", since)
-        .order("kickoff_at", { ascending: false })
-        .limit(100),
+      db.rpc("get_recent_elo_movements", {
+        p_since: since,
+        p_limit: 8,
+      }),
     ]);
 
     if (briefingResult.error) {
@@ -303,7 +275,9 @@ export const getNewsOverview = createServerFn({ method: "GET" })
     return {
       briefing,
       recentResults,
-      eloMovements: parseEloMovements(records(eloResult.data)),
+      eloMovements: records(eloResult.data)
+        .map(parseEloMovement)
+        .filter((movement): movement is EloMovement => movement !== null),
       observedAt: observedAt.toISOString(),
     };
   });
