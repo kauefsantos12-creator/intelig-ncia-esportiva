@@ -354,6 +354,9 @@ export const getTodayOverview = createServerFn({ method: "GET" })
       .map(parseFixture)
       .filter((fixture): fixture is RawFixture => fixture !== null);
     const fixtureIds = trackedFixtures.map((fixture) => fixture.id);
+    const sportsTeamIds = Array.from(
+      new Set(trackedFixtures.flatMap((fixture) => [fixture.home.id, fixture.away.id])),
+    );
     const providerTeamIds = Array.from(
       new Set(
         trackedFixtures.flatMap((fixture) => [fixture.home.fiveDollarTeamId, fixture.away.fiveDollarTeamId]).filter((id): id is number => id !== null),
@@ -380,14 +383,14 @@ export const getTodayOverview = createServerFn({ method: "GET" })
           .limit(500)
       : Promise.resolve({ data: [], error: null } satisfies DbResponse);
 
-    const recentPromise = db
-      .from("sports_fixtures")
-      .select("kickoff_at,home_team_id,away_team_id,home_goals,away_goals")
-      .eq("status", "FINISHED")
-      .gte("kickoff_at", recentSince)
-      .lt("kickoff_at", end.toISOString())
-      .order("kickoff_at", { ascending: false })
-      .limit(600);
+    const recentPromise = sportsTeamIds.length
+      ? db.rpc("get_recent_team_fixtures", {
+          p_team_ids: sportsTeamIds,
+          p_since: recentSince,
+          p_until: end.toISOString(),
+          p_per_team: 5,
+        })
+      : Promise.resolve({ data: [], error: null } satisfies DbResponse);
 
     const [broadcastsResult, eloResult, recentResult] = await Promise.all([broadcastsPromise, eloPromise, recentPromise]);
 
