@@ -117,6 +117,8 @@ describe("Hoje sports intelligence contract", () => {
     expect(row).toContain("function TeamLogo");
     expect(row).toContain("team.logoUrl");
     expect(row).toContain('loading="lazy"');
+    expect(row).toContain('referrerPolicy="no-referrer"');
+    expect(row).toContain("onError={() => setLogoFailed(true)}");
     expect(row).toContain("function MatchTeam");
     expect(row).toContain("score?.home");
     expect(row).toContain("score?.away");

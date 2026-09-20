@@ -1,4 +1,5 @@
 import { Activity, ChevronDown, Radio, Tv } from "lucide-react";
+import { useState } from "react";
 
 import { StatusBadge } from "@/components/ProductControls";
 import { EmptyState } from "@/components/SurfaceState";
@@ -30,13 +31,17 @@ function scoreLabel(fixture: TodayFixture) {
 }
 
 function TeamLogo({ team }: { team: TodayTeam }) {
-  if (team.logoUrl) {
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  if (team.logoUrl && !logoFailed) {
     return (
       <img
         src={team.logoUrl}
         alt=""
         className="size-8 shrink-0 object-contain"
         loading="lazy"
+        referrerPolicy="no-referrer"
+        onError={() => setLogoFailed(true)}
         aria-hidden
       />
     );

@@ -2961,6 +2961,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      enqueue_today_recent_form_backfill: {
+        Args: { p_date?: string }
+        Returns: Json
+      }
       erase_user_application_data: {
         Args: { p_user_id: string }
         Returns: Json
@@ -3055,6 +3059,22 @@ export type Database = {
           home_team_logo: string
           kickoff_at: string
           region: string
+        }[]
+      }
+      get_recent_team_fixtures: {
+        Args: {
+          p_per_team?: number
+          p_since: string
+          p_team_ids: string[]
+          p_until: string
+        }
+        Returns: {
+          away_goals: number
+          away_team_id: string
+          fixture_id: string
+          home_goals: number
+          home_team_id: string
+          kickoff_at: string
         }[]
       }
       get_today_tracked_fixtures: {
