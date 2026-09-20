@@ -175,3 +175,8 @@ O fechamento ganha uma camada editorial persistida antes das 05:05. Às 04:55 de
 Fontes configuradas nesta versão: ge para Brasil, Sky Sports para Inglaterra, kicker para Alemanha, L'Équipe para França, AS para Espanha e La Gazzetta dello Sport para Itália. Quando uma fonte não oferece um feed direto estável, a descoberta usa Google News RSS restrito ao domínio; a origem exibida continua sendo o veículo jornalístico. Falhas individuais são best effort e não impedem o fechamento factual.
 
 Outros esportes passam a ter evidência própria `OTHER_SPORT`, com cobertura de tênis, automobilismo, basquete e demais modalidades encontradas nos feeds configurados. A Resenha publica até oito destaques do dia anterior, sempre com fonte persistida. Ela não tenta transformar manchete em estatística nem inventa resultado ausente na evidência.
+
+
+### Ajuste de transporte editorial — 20/09/2026
+
+Os feeds Google News restritos aos domínios editoriais responderam HTTP 503 quando consultados com User-Agent de bot no Lovable Cloud. O transporte passa a usar headers compatíveis com navegador apenas para recuperar RSS público; matching, persistência, atribuição do veículo e escopo retrospectivo permanecem inalterados.
