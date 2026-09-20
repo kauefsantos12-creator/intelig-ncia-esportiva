@@ -57,18 +57,14 @@ export type EditorialSourceSyncResult = {
   fetchedAt: string;
 };
 
-function googleNewsRss(query: string, locale: { hl: string; gl: string; ceid: string }) {
-  return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=${encodeURIComponent(locale.hl)}&gl=${encodeURIComponent(locale.gl)}&ceid=${encodeURIComponent(locale.ceid)}`;
-}
-
 const FOOTBALL_FEEDS: EditorialFeed[] = [
   {
     key: "ge-br-football",
     sourceName: "ge",
     country: "BR",
     sport: "FOOTBALL",
-    url: googleNewsRss("site:ge.globo.com futebol when:2d", { hl: "pt-BR", gl: "BR", ceid: "BR:pt-419" }),
-    transport: "GOOGLE_NEWS_RSS",
+    url: "https://ge.globo.com/Esportes/Rss/0,,AS0-9825,00.xml",
+    transport: "DIRECT_RSS",
     priority: 100,
   },
   {
@@ -76,8 +72,8 @@ const FOOTBALL_FEEDS: EditorialFeed[] = [
     sourceName: "Sky Sports",
     country: "GB-ENG",
     sport: "FOOTBALL",
-    url: googleNewsRss("site:skysports.com football when:2d", { hl: "en-GB", gl: "GB", ceid: "GB:en" }),
-    transport: "GOOGLE_NEWS_RSS",
+    url: "https://www.skysports.com/rss/12040",
+    transport: "DIRECT_RSS",
     priority: 100,
   },
   {
@@ -85,8 +81,8 @@ const FOOTBALL_FEEDS: EditorialFeed[] = [
     sourceName: "kicker",
     country: "DE",
     sport: "FOOTBALL",
-    url: googleNewsRss("site:kicker.de fussball when:2d", { hl: "de", gl: "DE", ceid: "DE:de" }),
-    transport: "GOOGLE_NEWS_RSS",
+    url: "https://newsfeed.kicker.de/news/fussball",
+    transport: "DIRECT_RSS",
     priority: 100,
   },
   {
@@ -94,8 +90,8 @@ const FOOTBALL_FEEDS: EditorialFeed[] = [
     sourceName: "L'Équipe",
     country: "FR",
     sport: "FOOTBALL",
-    url: googleNewsRss("site:lequipe.fr football when:2d", { hl: "fr", gl: "FR", ceid: "FR:fr" }),
-    transport: "GOOGLE_NEWS_RSS",
+    url: "https://dwh.lequipe.fr/api/edito/rss?path=/Football/",
+    transport: "DIRECT_RSS",
     priority: 100,
   },
   {
@@ -120,16 +116,40 @@ const FOOTBALL_FEEDS: EditorialFeed[] = [
 
 const OTHER_SPORT_FEEDS: EditorialFeed[] = [
   {
-    key: "ge-br-other-sports",
+    key: "ge-br-tennis",
+    sourceName: "ge",
+    country: "BR",
+    sport: "TENNIS",
+    url: "https://ge.globo.com/Esportes/Rss/0,,AS0-15090,00.xml",
+    transport: "DIRECT_RSS",
+    priority: 110,
+  },
+  {
+    key: "ge-br-f1",
+    sourceName: "ge",
+    country: "BR",
+    sport: "MOTOR",
+    url: "https://ge.globo.com/servico/semantica/editorias/plantao/motor/formula-1/feed.rss",
+    transport: "DIRECT_RSS",
+    priority: 110,
+  },
+  {
+    key: "ge-br-basket",
+    sourceName: "ge",
+    country: "BR",
+    sport: "BASKET",
+    url: "https://ge.globo.com/Esportes/Rss/0,,AS0-15060,00.xml",
+    transport: "DIRECT_RSS",
+    priority: 105,
+  },
+  {
+    key: "ge-br-volley",
     sourceName: "ge",
     country: "BR",
     sport: "MULTISPORT",
-    url: googleNewsRss(
-      "site:ge.globo.com (tenis OR automobilismo OR formula 1 OR basquete OR nba OR volei OR judô OR judo OR ciclismo OR atletismo OR natação) when:2d",
-      { hl: "pt-BR", gl: "BR", ceid: "BR:pt-419" },
-    ),
-    transport: "GOOGLE_NEWS_RSS",
-    priority: 110,
+    url: "https://ge.globo.com/Esportes/Rss/0,,AS0-15080,00.xml",
+    transport: "DIRECT_RSS",
+    priority: 105,
   },
   {
     key: "as-es-tennis",
@@ -463,7 +483,7 @@ export async function syncEditorialSources(date: string): Promise<EditorialSourc
           source_event_id: `${feed.key}:${item.guid}`,
           evidence_type: "MATCH_CONTEXT",
           title: item.title,
-          body: item.description,
+          body: null,
           payload: {},
           published_at: item.publishedAt,
           fetched_at: fetchedAt,
@@ -497,7 +517,7 @@ export async function syncEditorialSources(date: string): Promise<EditorialSourc
         source_event_id: `${feed.key}:${item.guid}`,
         evidence_type: "OTHER_SPORT",
         title: item.title,
-        body: item.description,
+        body: null,
         payload: {},
         published_at: item.publishedAt,
         fetched_at: fetchedAt,

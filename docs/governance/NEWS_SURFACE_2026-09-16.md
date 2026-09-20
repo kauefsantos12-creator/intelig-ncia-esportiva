@@ -180,3 +180,8 @@ Outros esportes passam a ter evidência própria `OTHER_SPORT`, com cobertura de
 ### Ajuste de transporte editorial — 20/09/2026
 
 Os feeds Google News restritos aos domínios editoriais responderam HTTP 503 quando consultados com User-Agent de bot no Lovable Cloud. O transporte passa a usar headers compatíveis com navegador apenas para recuperar RSS público; matching, persistência, atribuição do veículo e escopo retrospectivo permanecem inalterados.
+
+
+### Fontes diretas de RSS — 20/09/2026
+
+Após a validação de produção mostrar bloqueio recorrente do Google News RSS no egress do Lovable, o transporte editorial foi simplificado para feeds RSS diretos dos veículos: ge, Sky Sports, kicker, L'Équipe, AS e La Gazzetta dello Sport. Para outros esportes, ge, AS e Gazzetta fornecem feeds específicos de tênis, automobilismo/F1, basquete, vôlei e esportes variados. A aplicação usa descrição de feed apenas transitoriamente para matching; a evidência persistida/renderizada mantém manchete, fonte, URL e horários, sem republicar o corpo do artigo.
