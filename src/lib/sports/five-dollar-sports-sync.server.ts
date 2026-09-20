@@ -291,6 +291,60 @@ export function selectRecentFormFixtures(
   return [...selected.values()].sort((a, b) => (b.startTimestamp ?? 0) - (a.startTimestamp ?? 0));
 }
 
+export function teamsNeedingRecentFormSupplement(
+  fixtures: FiveDollarFixture[],
+  teamIds: number[],
+  perTeam = 5,
+): number[] {
+  const limit = Math.max(1, Math.min(perTeam, 10));
+  return [...new Set(teamIds)].filter((teamId) => {
+    const matches = fixtures.filter(
+      (fixture) => fixture.homeTeamId === teamId || fixture.awayTeamId === teamId,
+    ).length;
+    return matches < limit;
+  });
+}
+
+async function fetchRecentTeamFixtures(
+  teamId: number,
+  predictionAtIso: string,
+  maxEvents = 5,
+): Promise<{ fixtures: FiveDollarFixture[]; fetchedAt: string; status: string; errorMessage: string | null }> {
+  const cutoff = Math.floor(Date.parse(predictionAtIso) / 1000) - 1;
+  const perPage = Math.max(1, Math.min(maxEvents, 10));
+  const response = await fiveDollarGet(
+    `/teams/${teamId}/fixtures?status=finished&end_time=${cutoff}&page=1&per_page=${perPage}`,
+    { cacheTtlMs: 15 * 60_000 },
+  );
+
+  if (response.status !== "OK" || response.payload === null) {
+    return {
+      fixtures: [],
+      fetchedAt: response.fetchedAt,
+      status: response.status,
+      errorMessage: response.errorMessage,
+    };
+  }
+
+  const fixtures = parseFixtures(response.payload)
+    .filter(
+      (fixture) =>
+        fixture.statusType === "finished" &&
+        fixture.startTimestamp !== null &&
+        fixture.startTimestamp * 1000 < Date.parse(predictionAtIso) &&
+        (fixture.homeTeamId === teamId || fixture.awayTeamId === teamId),
+    )
+    .sort((a, b) => (b.startTimestamp ?? 0) - (a.startTimestamp ?? 0))
+    .slice(0, perPage);
+
+  return {
+    fixtures,
+    fetchedAt: response.fetchedAt,
+    status: response.status,
+    errorMessage: null,
+  };
+}
+
 async function persistRecentFormFixtureBasic(
   db: Awaited<ReturnType<typeof sportsDb>>,
   fixture: FiveDollarFixture,
@@ -343,6 +397,8 @@ export interface FiveDollarRecentFormLeagueSyncResult {
   leagueId: number;
   targetTeams: number;
   fetchedFixtures: number;
+  supplementalTeams: number;
+  supplementalFixtures: number;
   selectedFixtures: number;
   persistedFixtures: number;
   failed: Array<{ fixtureId: number; error: string }>;
@@ -369,15 +425,41 @@ export async function syncFiveDollarRecentFormLeague(
     );
   }
 
-  const selected = selectRecentFormFixtures(history.fixtures, targets, 5);
-  const fetchedAt = history.fetches[0]?.fetchedAt ?? null;
+  const leagueSelected = selectRecentFormFixtures(history.fixtures, targets, 5);
+  const supplementalTargets = teamsNeedingRecentFormSupplement(leagueSelected, targets, 5);
+  const combinedFixtures = new Map<number, FiveDollarFixture>(
+    leagueSelected.map((fixture) => [fixture.eventId, fixture]),
+  );
+  let supplementalFetches = 0;
+  let latestFetchedAt = history.fetches[0]?.fetchedAt ?? null;
+
+  for (const teamId of supplementalTargets) {
+    const supplemental = await fetchRecentTeamFixtures(teamId, predictionAtIso, 5);
+    supplementalFetches += 1;
+    latestFetchedAt = supplemental.fetchedAt ?? latestFetchedAt;
+    if (supplemental.status !== "OK") {
+      throw new Error(
+        supplemental.errorMessage ??
+          `5Dollar indisponível para histórico do time ${teamId}.`,
+      );
+    }
+    for (const fixture of supplemental.fixtures) {
+      combinedFixtures.set(fixture.eventId, fixture);
+    }
+  }
+
+  const selected = selectRecentFormFixtures([...combinedFixtures.values()], targets, 5);
+  const leagueFixtureIds = new Set(leagueSelected.map((fixture) => fixture.eventId));
+  const supplementalFixtures = selected.filter(
+    (fixture) => !leagueFixtureIds.has(fixture.eventId),
+  ).length;
   const db = await sportsDb();
   let persistedFixtures = 0;
   const failed: FiveDollarRecentFormLeagueSyncResult["failed"] = [];
 
   for (const fixture of selected) {
     try {
-      await persistRecentFormFixtureBasic(db, fixture, fetchedAt ?? new Date().toISOString());
+      await persistRecentFormFixtureBasic(db, fixture, latestFetchedAt ?? new Date().toISOString());
       persistedFixtures += 1;
     } catch (error) {
       failed.push({
@@ -400,11 +482,13 @@ export async function syncFiveDollarRecentFormLeague(
     leagueId,
     targetTeams: targets.length,
     fetchedFixtures: history.fixtures.length,
+    supplementalTeams: supplementalTargets.length,
+    supplementalFixtures,
     selectedFixtures: selected.length,
     persistedFixtures,
     failed,
-    fetches: history.fetches.length,
-    fetchedAt,
+    fetches: history.fetches.length + supplementalFetches,
+    fetchedAt: latestFetchedAt,
   };
 }
 

@@ -66,6 +66,8 @@ describe("Hoje sports intelligence contract", () => {
 
     expect(sync).toContain("fiveDollarLeagueHistory");
     expect(sync).toContain("selectRecentFormFixtures");
+    expect(sync).toContain("teamsNeedingRecentFormSupplement");
+    expect(sync).toContain('/teams/${teamId}/fixtures?status=finished');
     expect(worker).toContain('job.job_type === "FIVE_DOLLAR_RECENT_FORM_LEAGUE"');
     expect(migration).toContain("'40 7 * * *'");
     expect(basicStart).toBeGreaterThan(-1);
