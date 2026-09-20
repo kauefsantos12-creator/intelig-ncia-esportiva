@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { EloHistoryPanel } from "@/components/EloHistoryPanel";
-import { FilterBar, FilterChip, SearchField, SegmentedControl, StatusBadge } from "@/components/ProductControls";
+import { FilterBar, FilterChip, SearchField, SegmentedControl, SelectField, StatusBadge } from "@/components/ProductControls";
 import { MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
 import { getEloDirectory } from "@/lib/elo-explorer.functions";
@@ -22,6 +22,17 @@ export const Route = createFileRoute("/elo")({
 
 type EloDirectory = Awaited<ReturnType<typeof getEloDirectory>>;
 type RankingMode = "TEAMS" | "LEAGUES";
+type EloSort =
+  | "RANK"
+  | "RATING_DESC"
+  | "RATING_ASC"
+  | "NAME_ASC"
+  | "LEAGUE_ASC"
+  | "MATCHES_DESC"
+  | "COUNTRY_ASC"
+  | "DIVISION_ASC";
+
+const PAGE_SIZE = 50;
 
 const ratingFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 const snapshotFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -57,6 +68,10 @@ function EloPage() {
   const [mode, setMode] = useState<RankingMode>("TEAMS");
   const [region, setRegion] = useState("ALL");
   const [country, setCountry] = useState("ALL");
+  const [league, setLeague] = useState("ALL");
+  const [division, setDivision] = useState("ALL");
+  const [sort, setSort] = useState<EloSort>("RANK");
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
 
@@ -95,6 +110,46 @@ function EloPage() {
     if (country !== "ALL" && !countries.includes(country)) setCountry("ALL");
   }, [countries, country]);
 
+  const divisions = useMemo(() => {
+    if (!directory) return [];
+    return Array.from(new Set(
+      directory.leagues
+        .filter((item) => region === "ALL" || item.region === region)
+        .filter((item) => country === "ALL" || item.country_code === country)
+        .map((item) => item.division_level)
+        .filter((value): value is number => value !== null),
+    )).sort((a, b) => a - b);
+  }, [country, directory, region]);
+
+  const leagueOptions = useMemo(() => {
+    if (!directory) return [];
+    return directory.leagues
+      .filter((item) => region === "ALL" || item.region === region)
+      .filter((item) => country === "ALL" || item.country_code === country)
+      .filter((item) => division === "ALL" || String(item.division_level) === division)
+      .slice()
+      .sort((a, b) => a.league_name.localeCompare(b.league_name, "pt-BR"));
+  }, [country, directory, division, region]);
+
+  useEffect(() => {
+    if (division !== "ALL" && !divisions.includes(Number(division))) setDivision("ALL");
+  }, [division, divisions]);
+
+  useEffect(() => {
+    if (league !== "ALL" && !leagueOptions.some((item) => String(item.league_id) === league)) {
+      setLeague("ALL");
+    }
+  }, [league, leagueOptions]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [mode, region, country, league, division, sort, search]);
+
+  useEffect(() => {
+    setSort("RANK");
+    setLeague("ALL");
+  }, [mode]);
+
   const teamRankById = useMemo(() => {
     const ranks = new Map<number, number>();
     directory?.teams.forEach((team, index) => {
@@ -112,24 +167,61 @@ function EloPage() {
   const filteredTeams = useMemo(() => {
     if (!directory) return [];
     const term = search.trim().toLocaleLowerCase("pt-BR");
-    return directory.teams.filter((team) => {
+    const rows = directory.teams.filter((team) => {
       if (region !== "ALL" && team.region !== region) return false;
       if (country !== "ALL" && team.countryCode !== country) return false;
+      if (league !== "ALL" && String(team.league_id) !== league) return false;
+      if (division !== "ALL" && String(team.divisionLevel) !== division) return false;
       if (!term) return true;
-      return [team.team_name, team.league_name].some((value) => value?.toLocaleLowerCase("pt-BR").includes(term) ?? false);
+      return [team.team_name, team.league_name].some((value) =>
+        value?.toLocaleLowerCase("pt-BR").includes(term) ?? false
+      );
     });
-  }, [country, directory, region, search]);
+
+    return rows.slice().sort((a, b) => {
+      if (sort === "RATING_DESC") return (b.global_rating ?? -Infinity) - (a.global_rating ?? -Infinity);
+      if (sort === "RATING_ASC") return (a.global_rating ?? Infinity) - (b.global_rating ?? Infinity);
+      if (sort === "NAME_ASC") return (a.team_name ?? "").localeCompare(b.team_name ?? "", "pt-BR");
+      if (sort === "LEAGUE_ASC") {
+        return (a.league_name ?? "").localeCompare(b.league_name ?? "", "pt-BR")
+          || (a.team_name ?? "").localeCompare(b.team_name ?? "", "pt-BR");
+      }
+      if (sort === "MATCHES_DESC") {
+        return (b.matches_processed ?? -1) - (a.matches_processed ?? -1)
+          || (b.global_rating ?? -Infinity) - (a.global_rating ?? -Infinity);
+      }
+      return (teamRankById.get(a.team_id ?? -1) ?? Number.MAX_SAFE_INTEGER)
+        - (teamRankById.get(b.team_id ?? -1) ?? Number.MAX_SAFE_INTEGER);
+    });
+  }, [country, directory, division, league, region, search, sort, teamRankById]);
 
   const filteredLeagues = useMemo(() => {
     if (!directory) return [];
     const term = search.trim().toLocaleLowerCase("pt-BR");
-    return directory.leagues.filter((league) => {
-      if (region !== "ALL" && league.region !== region) return false;
-      if (country !== "ALL" && league.country_code !== country) return false;
+    const rows = directory.leagues.filter((item) => {
+      if (region !== "ALL" && item.region !== region) return false;
+      if (country !== "ALL" && item.country_code !== country) return false;
+      if (division !== "ALL" && String(item.division_level) !== division) return false;
       if (!term) return true;
-      return league.league_name.toLocaleLowerCase("pt-BR").includes(term);
+      return item.league_name.toLocaleLowerCase("pt-BR").includes(term);
     });
-  }, [country, directory, region, search]);
+
+    return rows.slice().sort((a, b) => {
+      if (sort === "RATING_DESC") return (b.rating ?? -Infinity) - (a.rating ?? -Infinity);
+      if (sort === "RATING_ASC") return (a.rating ?? Infinity) - (b.rating ?? Infinity);
+      if (sort === "NAME_ASC") return a.league_name.localeCompare(b.league_name, "pt-BR");
+      if (sort === "COUNTRY_ASC") {
+        return (a.country_code ?? "").localeCompare(b.country_code ?? "", "pt-BR")
+          || a.league_name.localeCompare(b.league_name, "pt-BR");
+      }
+      if (sort === "DIVISION_ASC") {
+        return (a.division_level ?? Number.MAX_SAFE_INTEGER) - (b.division_level ?? Number.MAX_SAFE_INTEGER)
+          || a.league_name.localeCompare(b.league_name, "pt-BR");
+      }
+      return (leagueRankById.get(a.league_id) ?? Number.MAX_SAFE_INTEGER)
+        - (leagueRankById.get(b.league_id) ?? Number.MAX_SAFE_INTEGER);
+    });
+  }, [country, directory, division, leagueRankById, region, search, sort]);
 
   const selectedTeam = selectedTeamId === null
     ? null
@@ -142,6 +234,17 @@ function EloPage() {
   const hierarchyConstrained = directory?.leagues.filter((league) => league.hierarchy_constrained).length ?? 0;
   const visibleCount = mode === "TEAMS" ? filteredTeams.length : filteredLeagues.length;
   const totalCount = mode === "TEAMS" ? directory?.teams.length ?? 0 : directory?.leagues.length ?? 0;
+  const totalPages = Math.max(1, Math.ceil(visibleCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pageEnd = Math.min(pageStart + PAGE_SIZE, visibleCount);
+  const pagedTeams = filteredTeams.slice(pageStart, pageEnd);
+  const pagedLeagues = filteredLeagues.slice(pageStart, pageEnd);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   const snapshotHealthy = directory?.snapshot.status === "OK";
   const snapshotCoverage = directory
     && directory.snapshot.domesticCurrent !== null
@@ -241,21 +344,57 @@ function EloPage() {
                   ))}
                 </FilterBar>
 
-                {countries.length ? (
-                  <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filtrar por país">
-                    <FilterChip active={country === "ALL"} onClick={() => setCountry("ALL")}>Todos os países</FilterChip>
-                    {countries.map((value) => <FilterChip key={value} active={country === value} onClick={() => setCountry(value)}>{value}</FilterChip>)}
-                  </div>
-                ) : null}
+                <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Filtros detalhados do ranking Elo">
+                  <SelectField label="Filtrar por país" value={country} onChange={(event) => setCountry(event.target.value)}>
+                    <option value="ALL">Todos os países</option>
+                    {countries.map((value) => <option key={value} value={value}>{value}</option>)}
+                  </SelectField>
+
+                  {mode === "TEAMS" ? (
+                    <SelectField label="Filtrar por liga" value={league} onChange={(event) => setLeague(event.target.value)}>
+                      <option value="ALL">Todas as ligas</option>
+                      {leagueOptions.map((item) => (
+                        <option key={item.league_id} value={String(item.league_id)}>{item.league_name}</option>
+                      ))}
+                    </SelectField>
+                  ) : (
+                    <SelectField label="Filtro de liga indisponível no ranking de ligas" value="ALL" disabled>
+                      <option value="ALL">Ranking de ligas</option>
+                    </SelectField>
+                  )}
+
+                  <SelectField label="Filtrar por divisão" value={division} onChange={(event) => setDivision(event.target.value)}>
+                    <option value="ALL">Todas as divisões</option>
+                    {divisions.map((value) => <option key={value} value={String(value)}>Divisão {value}</option>)}
+                  </SelectField>
+
+                  <SelectField label="Ordenar ranking" value={sort} onChange={(event) => setSort(event.target.value as EloSort)}>
+                    <option value="RANK">Posição global</option>
+                    <option value="RATING_DESC">{mode === "TEAMS" ? "Elo: maior para menor" : "Rating: maior para menor"}</option>
+                    <option value="RATING_ASC">{mode === "TEAMS" ? "Elo: menor para maior" : "Rating: menor para maior"}</option>
+                    <option value="NAME_ASC">{mode === "TEAMS" ? "Clube: A–Z" : "Liga: A–Z"}</option>
+                    {mode === "TEAMS" ? <option value="LEAGUE_ASC">Liga: A–Z</option> : null}
+                    {mode === "TEAMS" ? <option value="MATCHES_DESC">Jogos processados</option> : null}
+                    {mode === "LEAGUES" ? <option value="COUNTRY_ASC">País: A–Z</option> : null}
+                    {mode === "LEAGUES" ? <option value="DIVISION_ASC">Divisão</option> : null}
+                  </SelectField>
+                </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-2 type-caption text-muted-foreground">
-                  <span>Exibindo {visibleCount} {mode === "TEAMS" ? "clubes" : "ligas"} na ordem do ranking global.</span>
-                  {(region !== "ALL" || country !== "ALL" || search) ? (
+                  <span>
+                    {visibleCount
+                      ? `Resultados ${pageStart + 1}–${pageEnd} de ${visibleCount} ${mode === "TEAMS" ? "clubes" : "ligas"} filtrados · ${totalCount} no universo`
+                      : `0 de ${totalCount} ${mode === "TEAMS" ? "clubes" : "ligas"}`}
+                  </span>
+                  {(region !== "ALL" || country !== "ALL" || league !== "ALL" || division !== "ALL" || sort !== "RANK" || search) ? (
                     <button
                       type="button"
                       onClick={() => {
                         setRegion("ALL");
                         setCountry("ALL");
+                        setLeague("ALL");
+                        setDivision("ALL");
+                        setSort("RANK");
                         setSearch("");
                       }}
                       className="touch-target inline-flex min-h-11 items-center rounded-xl px-3 type-meta font-medium text-primary hover:bg-primary/8"
@@ -285,15 +424,15 @@ function EloPage() {
                 {mode === "TEAMS" ? (
                   filteredTeams.length ? (
                     <div className="overflow-hidden rounded-2xl border border-border/70">
-                      <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] gap-3 bg-secondary/35 px-4 py-2.5 type-caption uppercase tracking-[0.06em] text-muted-foreground sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_5.5rem]">
-                        <span>#</span><span>Clube</span><span className="hidden sm:block">Liga</span><span className="text-right">Elo</span>
+                      <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] gap-3 bg-secondary/35 px-4 py-2.5 type-caption uppercase tracking-[0.06em] text-muted-foreground sm:grid-cols-[3.5rem_minmax(0,1fr)_10rem_5rem_5.5rem]">
+                        <span>#</span><span>Clube</span><span className="hidden sm:block">Liga</span><span className="hidden text-right sm:block">Jogos</span><span className="text-right">Elo</span>
                       </div>
                       <div className="divide-y divide-border/60">
-                        {filteredTeams.slice(0, 100).map((team, index) => {
+                        {pagedTeams.map((team, index) => {
                           const teamId = team.team_id;
                           const selectable = teamId !== null;
                           const selected = selectable && teamId === selectedTeamId;
-                          const globalRank = selectable ? teamRankById.get(teamId) ?? index + 1 : index + 1;
+                          const globalRank = selectable ? teamRankById.get(teamId) ?? pageStart + index + 1 : pageStart + index + 1;
                           return (
                             <button
                               key={`${team.team_model_version}:${team.team_id}`}
@@ -304,7 +443,7 @@ function EloPage() {
                               }}
                               aria-pressed={selected}
                               aria-label={`Selecionar ${team.team_name} para consultar o histórico Elo`}
-                              className={`grid min-h-12 w-full grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 text-left transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)_8rem_5.5rem] ${selected ? "bg-primary/10" : "hover:bg-secondary/25"} disabled:cursor-not-allowed disabled:opacity-60`}
+                              className={`grid min-h-12 w-full grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 text-left transition-colors sm:grid-cols-[3.5rem_minmax(0,1fr)_10rem_5rem_5.5rem] ${selected ? "bg-primary/10" : "hover:bg-secondary/25"} disabled:cursor-not-allowed disabled:opacity-60`}
                             >
                               <span className="type-meta text-muted-foreground">{globalRank}</span>
                               <div className="min-w-0">
@@ -312,6 +451,7 @@ function EloPage() {
                                 <p className="mt-0.5 truncate type-caption text-muted-foreground sm:hidden">{team.league_name}</p>
                               </div>
                               <span className="hidden truncate type-caption text-muted-foreground sm:block">{team.league_name}</span>
+                              <span className="hidden text-right type-meta text-muted-foreground sm:block">{team.matches_processed ?? "—"}</span>
                               <span className="text-right type-metric text-foreground">{formatRating(team.global_rating)}</span>
                             </button>
                           );
@@ -327,7 +467,7 @@ function EloPage() {
                       <span>#</span><span>Liga</span><span className="hidden sm:block">País</span><span className="hidden sm:block">Divisão</span><span className="text-right">Rating</span>
                     </div>
                     <div className="divide-y divide-border/60">
-                      {filteredLeagues.slice(0, 100).map((league, index) => {
+                      {pagedLeagues.map((league, index) => {
                         const globalRank = leagueRankById.get(league.league_id) ?? index + 1;
                         return (
                           <div key={`${league.model_version}:${league.league_id}`} className="grid min-h-12 grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-3 px-4 py-3 sm:grid-cols-[3.5rem_minmax(0,1fr)_7rem_6rem_5.5rem]">
@@ -350,6 +490,32 @@ function EloPage() {
                 ) : (
                   <EmptyState icon={search ? Search : GitCompareArrows} title="Nenhuma liga encontrada" description="Altere região, país ou busca para ampliar o ranking." />
                 )}
+
+                {visibleCount > PAGE_SIZE ? (
+                  <nav className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-3" aria-label="Paginação do ranking Elo">
+                    <p className="type-caption text-muted-foreground">
+                      Página {currentPage} de {totalPages} · {PAGE_SIZE} resultados por página
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={currentPage <= 1}
+                        onClick={() => setPage((value) => Math.max(1, value - 1))}
+                        className="touch-target min-h-11 rounded-xl border border-border/70 px-4 type-meta font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Anterior
+                      </button>
+                      <button
+                        type="button"
+                        disabled={currentPage >= totalPages}
+                        onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+                        className="touch-target min-h-11 rounded-xl border border-border/70 px-4 type-meta font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  </nav>
+                ) : null}
 
                 {error ? <p className="type-caption text-warning">A atualização mais recente falhou; exibindo a última leitura disponível.</p> : null}
               </div>

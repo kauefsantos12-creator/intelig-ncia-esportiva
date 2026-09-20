@@ -39,7 +39,7 @@ When working on the `/elo` surface, preserve this execution order:
 2. **Freshness and temporal reference — DONE**
    - validate daily sync/finalize state, last processed fixture and visible update/reference timestamps;
    - keep current snapshots distinct from point-in-time history.
-3. **Table filters and navigation**
+3. **Table filters and navigation — IN PROGRESS**
    - support search by club;
    - region;
    - country;

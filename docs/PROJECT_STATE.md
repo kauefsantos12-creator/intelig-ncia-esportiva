@@ -109,6 +109,7 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 - **Item 1 do plano Elo:** concluído e validado.
 - **Item 2 — referência temporal:** auditoria runtime confirmou fechamento diário às 05:05 de Brasília, 32/32 ligas domésticas + 9/9 cross-league concluídas e lag de 0 minuto entre a última fixture elegível antes do fechamento e a última fixture Elo processada.
 - **Item 2 — concluído e validado:** `getEloDirectory()` lê `elo_sync_state`; a UI mostra horário real do snapshot, última partida considerada e cobertura da rodada. Pós-merge, Lovable sincronizado no commit `7411b8d...`, runtime permaneceu `OK`, 32/32 domésticas + 9/9 cross-league e lag 0 minuto. A chamada manual de deploy foi disparada, mas a API ainda reportava `pending`.
+- **Item 3 — filtros e navegação em implementação:** o snapshot vivo possui 681 clubes, 32 ligas, 22 países, 4 regiões e 2 divisões. O frontend antigo truncava silenciosamente a renderização em 100 linhas. A correção adiciona filtro por liga/divisão, ordenações controladas e paginação de 50 resultados, preservando a posição global original.
 
 ### Auditoria incremental da aba Hoje — 20/09/2026
 
