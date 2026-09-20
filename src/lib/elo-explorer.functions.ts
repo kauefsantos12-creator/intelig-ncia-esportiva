@@ -144,6 +144,7 @@ export const getTeamEloHistory = createServerFn({ method: "GET" })
       .gte("kickoff_at", since)
       .or(`home_team_id.eq.${data.teamId},away_team_id.eq.${data.teamId}`)
       .order("kickoff_at", { ascending: true })
+      .order("fixture_id", { ascending: true })
       .limit(500);
 
     if (error) {
@@ -173,6 +174,23 @@ export const getTeamEloHistory = createServerFn({ method: "GET" })
       };
     });
 
+    const continuityBreaks = history.slice(1).flatMap((row, index) => {
+      const previous = history[index];
+      if (!previous || Math.abs(previous.ratingAfter - row.ratingBefore) < 0.0001) return [];
+      return [{
+        previousFixtureId: previous.fixtureId,
+        fixtureId: row.fixtureId,
+        previousRatingAfter: previous.ratingAfter,
+        ratingBefore: row.ratingBefore,
+      }];
+    });
+
+    const duplicateFixtureIds = [...new Set(
+      history
+        .map((row) => row.fixtureId)
+        .filter((fixtureId, index, fixtureIds) => fixtureIds.indexOf(fixtureId) !== index),
+    )];
+
     const current = history.at(-1)?.ratingAfter ?? null;
     const reference = history[0]?.ratingBefore ?? null;
     const ratings = history.flatMap((row) => [row.ratingBefore, row.ratingAfter]);
@@ -189,6 +207,10 @@ export const getTeamEloHistory = createServerFn({ method: "GET" })
         delta: current === null || reference === null ? null : current - reference,
         minimum: ratings.length ? Math.min(...ratings) : null,
         maximum: ratings.length ? Math.max(...ratings) : null,
+        firstKickoffAt: history[0]?.kickoffAt ?? null,
+        lastKickoffAt: history.at(-1)?.kickoffAt ?? null,
+        continuityBreaks,
+        duplicateFixtureIds,
       },
     };
   });

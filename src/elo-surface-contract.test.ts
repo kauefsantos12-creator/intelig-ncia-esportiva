@@ -131,6 +131,23 @@ describe("Elo sports intelligence contract", () => {
     expect(route).toContain("<EloHistoryPanel");
   });
 
+  it("keeps the 60-day point-in-time history deterministic, auditable and fully navigable", () => {
+    const server = source("./lib/elo-explorer.functions.ts");
+    const panel = source("./components/EloHistoryPanel.tsx");
+
+    expect(server).toContain('.order("kickoff_at", { ascending: true })');
+    expect(server).toContain('.order("fixture_id", { ascending: true })');
+    expect(server).toContain("continuityBreaks");
+    expect(server).toContain("duplicateFixtureIds");
+    expect(server).toContain("firstKickoffAt");
+    expect(server).toContain("lastKickoffAt");
+
+    expect(panel).toContain("const HISTORY_PAGE_SIZE = 12");
+    expect(panel).toMatch(/aria-label=["']Paginação do histórico Elo["']/);
+    expect(panel).toContain("visibleHistory.map");
+    expect(panel).not.toContain("reverse().slice(0, 12)");
+  });
+
   it("keeps mobile rows touchable and exposes an accessible selection label", () => {
     const route = source("./routes/elo.tsx");
     expect(route).toContain("min-h-14 w-full");

@@ -52,10 +52,10 @@ When working on the `/elo` surface, preserve this execution order:
    - correct handling beyond the first 100 rows;
    - sorting by position, Elo, club, league and matches processed;
    - preserve the real global rank while filters/sorts are active.
-4. **Ranking UX — IN PROGRESS**
+4. **Ranking UX — DONE**
    - keep the table as the primary surface;
    - improve readability, density, hierarchy, crests/context and responsiveness without recalculating ratings client-side.
-5. **Point-in-time history**
+5. **Point-in-time history — IN PROGRESS**
    - validate the 60-day history, delta, fixture ordering and temporal consistency.
 6. **League ranking and hierarchy**
    - validate league ratings, divisions, inter-league evidence and hierarchy constraints.

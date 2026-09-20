@@ -1,6 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowDownRight, ArrowUpRight, History, Minus, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { StatusBadge } from "@/components/ProductControls";
 import { MetricPreview, SurfaceCard } from "@/components/ProductSurface";
@@ -15,6 +15,8 @@ type EloHistoryPanelProps = {
 };
 
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+const HISTORY_PAGE_SIZE = 12;
+
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "America/Sao_Paulo",
   day: "2-digit",
@@ -45,6 +47,16 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
   const [history, setHistory] = useState<EloHistory | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+
+  const newestFirst = useMemo(() => [...(history?.history ?? [])].reverse(), [history]);
+  const totalPages = Math.max(1, Math.ceil(newestFirst.length / HISTORY_PAGE_SIZE));
+  const pageStart = (page - 1) * HISTORY_PAGE_SIZE;
+  const visibleHistory = newestFirst.slice(pageStart, pageStart + HISTORY_PAGE_SIZE);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   const refresh = useCallback(async () => {
     if (!teamId) {
@@ -57,6 +69,7 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
     setError(null);
     try {
       setHistory(await loadHistory({ data: { teamId, days: 60 } }));
+      setPage(1);
     } catch {
       setError("O histórico Elo desta equipe não pôde ser carregado agora.");
     } finally {
@@ -111,7 +124,7 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
               <span>Data</span><span>Partida</span><span>Δ Elo</span>
             </div>
             <div className="divide-y divide-border/60">
-              {[...history.history].reverse().slice(0, 12).map((row) => (
+              {visibleHistory.map((row) => (
                 <div key={row.fixtureId} className="grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3">
                   <span className="type-caption text-muted-foreground">{dateFormatter.format(new Date(row.kickoffAt))}</span>
                   <div className="min-w-0">
@@ -125,6 +138,24 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
               ))}
             </div>
           </div>
+
+          {totalPages > 1 ? (
+            <nav aria-label="Paginação do histórico Elo" className="flex flex-wrap items-center justify-between gap-3">
+              <p className="type-caption text-muted-foreground">
+                Partidas {pageStart + 1}–{Math.min(pageStart + HISTORY_PAGE_SIZE, newestFirst.length)} de {newestFirst.length} · página {page} de {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={page === 1} className="touch-target min-h-10 rounded-xl border border-border/70 px-3 type-meta font-medium disabled:opacity-40">Anterior</button>
+                <button type="button" onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={page === totalPages} className="touch-target min-h-10 rounded-xl border border-border/70 px-3 type-meta font-medium disabled:opacity-40">Próxima</button>
+              </div>
+            </nav>
+          ) : null}
+
+          {history.summary.continuityBreaks.length || history.summary.duplicateFixtureIds.length ? (
+            <p className="type-caption text-warning">
+              Atenção: foram detectadas inconsistências de continuidade no histórico point-in-time desta equipe.
+            </p>
+          ) : null}
 
           {error ? <p className="type-caption text-warning">A atualização mais recente falhou; exibindo a última leitura disponível.</p> : null}
         </div>
