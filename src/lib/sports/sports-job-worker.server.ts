@@ -141,6 +141,9 @@ function syncDescriptor(job: SportsJobRow) {
   if (job.job_type === "API_FOOTBALL_TEAM_SQUAD") {
     return { provider: "api_football", domain: "team_squad", cursor: teamPayloadFor(job).teamId };
   }
+  if (job.job_type === "API_FOOTBALL_TEAM_MEDIA_LINK") {
+    return { provider: "api_football", domain: "team_media_link", cursor: fixtureIdFor(job) };
+  }
   return {
     provider: "api_football",
     domain: job.job_type === "API_FOOTBALL_LINK" ? "fixture_link" : "fixture_data",
@@ -288,6 +291,18 @@ async function executeJob(job: SportsJobRow) {
   }
 
   const fixtureId = fixtureIdFor(job);
+
+  if (job.job_type === "API_FOOTBALL_TEAM_MEDIA_LINK") {
+    const result = await linkApiFootballFixture(fixtureId, { enqueueFixtureData: false });
+    if (result.status === "NOT_FOUND") {
+      throw new SportsJobExecutionError("PROVIDER_NOT_FOUND", result.detail);
+    }
+    if (result.status === "UNAVAILABLE") {
+      throw new SportsJobExecutionError("UPSTREAM_UNAVAILABLE", result.detail);
+    }
+    await markSyncSuccess(job, { linkStatus: result.status, apiFixtureId: result.apiFixtureId });
+    return { fixtureId, detail: `TEAM_MEDIA_${result.status}: ${result.detail}` };
+  }
 
   if (job.job_type === "API_FOOTBALL_LINK") {
     const result = await linkApiFootballFixture(fixtureId);
