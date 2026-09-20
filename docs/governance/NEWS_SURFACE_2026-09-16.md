@@ -164,3 +164,14 @@ O SofaScore deixa de ser dependência operacional obrigatória da Resenha. O bac
 A Resenha passa a usar estatísticas do 5DollarFootballAPI já persistidas nos fact packs como fallback operacional, sempre com atribuição explícita ao provedor. O conjunto aceito nesta etapa inclui finalizações no alvo, posse e escanteios; ataques e ataques perigosos permanecem disponíveis no payload para extensões futuras. xG não é inferido nem sintetizado: só aparece quando uma fonte persistida realmente o fornecer.
 
 A API-Football permanece como fonte complementar para estatísticas e detalhamento de fixtures já vinculadas, mas não é usada como dependência primária desta resenha devido à cota/minute rate limit já observada no runtime. A regra editorial fica: usar o melhor dado persistido disponível, identificar a fonte e nunca renomear um número de um provedor como se viesse de outro.
+
+
+## Resenha retrospectiva v8 — apenas o dia esportivo anterior
+
+A Resenha deixa de carregar programação do dia corrente e qualquer informação de transmissão. Agenda e onde assistir pertencem à aba **Hoje**. A seção fixa do Palmeiras também passa a falar somente do que ocorreu no dia encerrado; próximo compromisso não é mais parte da Resenha.
+
+O fechamento ganha uma camada editorial persistida antes das 05:05. Às 04:55 de Brasília, o backend consulta feeds jornalísticos esportivos e persiste evidências em `sports_editorial_source_evidence`. Para futebol, o matching com a fixture canônica é conservador e cada contexto mantém fonte, URL, horário de publicação, horário de coleta e confiança. A publicação usa no máximo duas evidências jornalísticas por partida e nunca altera placar, cronologia ou estatísticas canônicas.
+
+Fontes configuradas nesta versão: ge para Brasil, Sky Sports para Inglaterra, kicker para Alemanha, L'Équipe para França, AS para Espanha e La Gazzetta dello Sport para Itália. Quando uma fonte não oferece um feed direto estável, a descoberta usa Google News RSS restrito ao domínio; a origem exibida continua sendo o veículo jornalístico. Falhas individuais são best effort e não impedem o fechamento factual.
+
+Outros esportes passam a ter evidência própria `OTHER_SPORT`, com cobertura de tênis, automobilismo, basquete e demais modalidades encontradas nos feeds configurados. A Resenha publica até oito destaques do dia anterior, sempre com fonte persistida. Ela não tenta transformar manchete em estatística nem inventa resultado ausente na evidência.

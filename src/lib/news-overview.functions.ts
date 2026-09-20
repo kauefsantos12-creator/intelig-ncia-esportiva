@@ -30,15 +30,6 @@ export type NewsBriefingItem = {
   lateGame: boolean;
 };
 
-export type NewsScheduleItem = {
-  fixtureId: string;
-  kickoffAt: string;
-  competition: string;
-  homeTeam: string;
-  awayTeam: string;
-  broadcasters: string[];
-};
-
 export type NewsBriefing = {
   id: string;
   date: string;
@@ -46,8 +37,6 @@ export type NewsBriefing = {
   otherSportsSummary: string | null;
   factsThrough: string | null;
   generatedAt: string | null;
-  schedule: NewsScheduleItem[];
-  broadcastSourceStatus: "READY" | "ERROR" | "NEVER";
   items: NewsBriefingItem[];
 };
 
@@ -112,22 +101,6 @@ function relation(value: unknown): Record<string, unknown> | null {
 
 function text(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value : null;
-}
-
-function parseSchedule(value: unknown): NewsScheduleItem[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter(isRecord).map((row) => {
-    const fixtureId = text(row["fixtureId"]);
-    const kickoffAt = text(row["kickoffAt"]);
-    const competition = text(row["competition"]);
-    const homeTeam = text(row["homeTeam"]);
-    const awayTeam = text(row["awayTeam"]);
-    if (!fixtureId || !kickoffAt || !competition || !homeTeam || !awayTeam) return null;
-    const broadcasters = Array.isArray(row["broadcast"])
-      ? row["broadcast"].filter(isRecord).map((entry) => text(entry["broadcaster"])).filter((item): item is string => item !== null)
-      : [];
-    return { fixtureId, kickoffAt, competition, homeTeam, awayTeam, broadcasters };
-  }).filter((item): item is NewsScheduleItem => item !== null);
 }
 
 function numeric(value: unknown): number | null {
@@ -274,7 +247,7 @@ export const getNewsOverview = createServerFn({ method: "GET" })
     const [briefingResult, resultsResult, trackingRulesResult, eloResult] = await Promise.all([
       db
         .from("sports_daily_briefings")
-        .select("id,briefing_date,football_summary,other_sports_summary,facts_through,generated_at,editorial_payload")
+        .select("id,briefing_date,football_summary,other_sports_summary,facts_through,generated_at")
         .eq("status", "PUBLISHED")
         .order("briefing_date", { ascending: false })
         .limit(1)
@@ -332,12 +305,6 @@ export const getNewsOverview = createServerFn({ method: "GET" })
           throw new BackendError("INTERNAL_ERROR", "Falha ao carregar os itens da resenha esportiva.", 500);
         }
 
-        const editorialPayload = isRecord(briefingResult.data["editorial_payload"]) ? briefingResult.data["editorial_payload"] : null;
-        const sections = editorialPayload && isRecord(editorialPayload["sections"]) ? editorialPayload["sections"] : null;
-        const rawBroadcastStatus = sections ? text(sections["broadcastSourceStatus"]) : null;
-        const broadcastSourceStatus: NewsBriefing["broadcastSourceStatus"] =
-          rawBroadcastStatus === "READY" || rawBroadcastStatus === "ERROR" ? rawBroadcastStatus : "NEVER";
-
         briefing = {
           id,
           date,
@@ -345,8 +312,6 @@ export const getNewsOverview = createServerFn({ method: "GET" })
           otherSportsSummary: text(briefingResult.data["other_sports_summary"]),
           factsThrough: text(briefingResult.data["facts_through"]),
           generatedAt: text(briefingResult.data["generated_at"]),
-          schedule: parseSchedule(sections?.["todaySchedule"]),
-          broadcastSourceStatus,
           items: records(itemsResult.data).map(parseBriefingItem).filter((item): item is NewsBriefingItem => item !== null),
         };
       }
