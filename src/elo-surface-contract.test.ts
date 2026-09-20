@@ -122,6 +122,13 @@ describe("Elo sports intelligence contract", () => {
     expect(route).toContain("ring-1 ring-inset ring-primary/20");
   });
 
+  it("clears club-specific history when switching from clubs to leagues", () => {
+    const route = source("./routes/elo.tsx");
+    expect(route).toContain('setSelectedTeamId(null)');
+    expect(route).toContain('setSort("RANK")');
+    expect(route).toContain('setLeague("ALL")');
+  });
+
   it("gives the selected team a direct path to its point-in-time history", () => {
     const route = source("./routes/elo.tsx");
     expect(route).toContain("Clube selecionado");
@@ -148,6 +155,14 @@ describe("Elo sports intelligence contract", () => {
     expect(panel).not.toContain("reverse().slice(0, 12)");
   });
 
+  it("makes low inter-league evidence visible without changing league ratings", () => {
+    const route = source("./routes/elo.tsx");
+    expect(route).toContain("league.evidence_matches < 3");
+    expect(route).toContain("evidência {league.evidence_matches}/3");
+    expect(route).toContain("{league.evidence_matches} jogos interligas");
+    expect(route).toContain("Ligas com menos de 3 jogos interligas são sinalizadas como baixa evidência.");
+  });
+
   it("keeps league hierarchy evidence and global-rating semantics explicit", () => {
     const server = source("./lib/elo-feature.server.ts");
     const explorer = source("./lib/elo-explorer.functions.ts");
@@ -162,6 +177,20 @@ describe("Elo sports intelligence contract", () => {
     expect(explorer).toContain("evidence_adjustment,evidence_matches,hierarchy_constrained,updated_at");
     expect(docs).toContain("Elo global do time = Elo da liga + (Elo local do time - 1500)");
     expect(docs).toContain("pelo menos 3 partidas de evidência interligas");
+  });
+
+  it("does not render or commit a stale club history while a new selection is loading", () => {
+    const panel = source("./components/EloHistoryPanel.tsx");
+    expect(panel).toContain("const requestIdRef = useRef(0)");
+    expect(panel).toContain("const requestId = ++requestIdRef.current");
+    expect(panel).toContain("if (requestId !== requestIdRef.current) return");
+    expect(panel).toContain("if (requestId === requestIdRef.current) setLoading(false)");
+    expect(panel).toContain("setHistory(null)");
+    expect(panel).toContain("setLoadedTeamId(null)");
+    expect(panel).toContain("setLoadedTeamId(teamId)");
+    expect(panel).toContain("const selectedHistory = loadedTeamId === teamId ? history : null");
+    expect(panel).toContain("loading && !selectedHistory");
+    expect(panel).toContain("selectedHistory && selectedHistory.history.length");
   });
 
   it("keeps mobile rows touchable and exposes an accessible selection label", () => {

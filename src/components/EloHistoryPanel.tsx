@@ -1,6 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowDownRight, ArrowUpRight, History, Minus, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { StatusBadge } from "@/components/ProductControls";
 import { MetricPreview, SurfaceCard } from "@/components/ProductSurface";
@@ -48,6 +48,8 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [loadedTeamId, setLoadedTeamId] = useState<number | null>(null);
+  const requestIdRef = useRef(0);
 
   const newestFirst = useMemo(() => [...(history?.history ?? [])].reverse(), [history]);
   const totalPages = Math.max(1, Math.ceil(newestFirst.length / HISTORY_PAGE_SIZE));
@@ -59,27 +61,39 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
   }, [page, totalPages]);
 
   const refresh = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
     if (!teamId) {
       setHistory(null);
+      setLoadedTeamId(null);
       setError(null);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
     setError(null);
+    setHistory(null);
+    setLoadedTeamId(null);
     try {
-      setHistory(await loadHistory({ data: { teamId, days: 60 } }));
+      const nextHistory = await loadHistory({ data: { teamId, days: 60 } });
+      if (requestId !== requestIdRef.current) return;
+      setHistory(nextHistory);
+      setLoadedTeamId(teamId);
       setPage(1);
     } catch {
+      if (requestId !== requestIdRef.current) return;
       setError("O histórico Elo desta equipe não pôde ser carregado agora.");
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
   }, [loadHistory, teamId]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  const selectedHistory = loadedTeamId === teamId ? history : null;
 
   if (!teamId) {
     return (
@@ -106,17 +120,17 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
         </button>
       )}
     >
-      {loading && !history ? (
+      {loading && !selectedHistory ? (
         <LoadingState label="Carregando histórico Elo" rows={4} />
-      ) : error && !history ? (
+      ) : error && !selectedHistory ? (
         <ErrorState description={error} onRetry={() => void refresh()} />
-      ) : history && history.history.length ? (
+      ) : selectedHistory && selectedHistory.history.length ? (
         <div className="space-y-5">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricPreview label="Jogos" value={String(history.summary.matches)} detail="Partidas processadas em 60 dias" />
-            <MetricPreview label="Rating local" value={formatRating(history.summary.current)} detail="Após a partida mais recente" />
-            <MetricPreview label="Variação" value={history.summary.delta === null ? "—" : `${history.summary.delta >= 0 ? "+" : ""}${formatRating(history.summary.delta)}`} detail="Desde a primeira referência do período" />
-            <MetricPreview label="Faixa" value={`${formatRating(history.summary.minimum)}–${formatRating(history.summary.maximum)}`} detail="Mínimo e máximo locais" />
+            <MetricPreview label="Jogos" value={String(selectedHistory.summary.matches)} detail="Partidas processadas em 60 dias" />
+            <MetricPreview label="Rating local" value={formatRating(selectedHistory.summary.current)} detail="Após a partida mais recente" />
+            <MetricPreview label="Variação" value={selectedHistory.summary.delta === null ? "—" : `${selectedHistory.summary.delta >= 0 ? "+" : ""}${formatRating(selectedHistory.summary.delta)}`} detail="Desde a primeira referência do período" />
+            <MetricPreview label="Faixa" value={`${formatRating(selectedHistory.summary.minimum)}–${formatRating(selectedHistory.summary.maximum)}`} detail="Mínimo e máximo locais" />
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border/70">
@@ -151,7 +165,7 @@ export function EloHistoryPanel({ teamId, teamName }: EloHistoryPanelProps) {
             </nav>
           ) : null}
 
-          {history.summary.continuityBreaks.length || history.summary.duplicateFixtureIds.length ? (
+          {selectedHistory.summary.continuityBreaks.length || selectedHistory.summary.duplicateFixtureIds.length ? (
             <p className="type-caption text-warning">
               Atenção: foram detectadas inconsistências de continuidade no histórico point-in-time desta equipe.
             </p>

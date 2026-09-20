@@ -25,6 +25,7 @@ Os priors de liga funcionam como âncoras estruturais, não como evidência sufi
 
 - O Elo hierárquico cross-league só pode ser aplicado quando **as duas ligas possuem pelo menos 3 partidas de evidência interligas**.
 - Sem essa evidência, o pipeline falha fechado e mantém o baseline de gols sem Elo cross-league.
+- No ranking de ligas, snapshots com menos de 3 jogos interligas continuam visíveis porque o rating pode refletir o prior hierárquico, mas a interface sinaliza explicitamente a baixa evidência; essa sinalização não altera o rating persistido.
 - Restrições hierárquicas impedem que divisões inferiores superem artificialmente suas ligas-pai por ruído de amostra.
 - Promoção e rebaixamento preservam continuidade por meio do seed ajustado ao prior da nova competição.
 

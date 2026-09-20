@@ -202,6 +202,7 @@ function EloPage() {
   useEffect(() => {
     setSort("RANK");
     setLeague("ALL");
+    setSelectedTeamId(null);
   }, [mode]);
 
   const teamRankById = useMemo(() => {
@@ -366,7 +367,7 @@ function EloPage() {
             <SurfaceCard
               icon={mode === "TEAMS" ? ListOrdered : GitCompareArrows}
               title={mode === "TEAMS" ? "Ranking de clubes" : "Ranking de ligas"}
-              description={mode === "TEAMS" ? "Elo global atual = rating local + ajuste de força da liga." : "Força relativa entre competições, respeitando a hierarquia do modelo."}
+              description={mode === "TEAMS" ? "Elo global atual = rating local + ajuste de força da liga." : "Força relativa entre competições, respeitando a hierarquia do modelo. Ligas com menos de 3 jogos interligas são sinalizadas como baixa evidência."}
               actions={(
                 <div className="flex flex-wrap items-center justify-end gap-2">
                   <StatusBadge tone="neutral">{visibleCount} de {totalCount}</StatusBadge>
@@ -541,8 +542,13 @@ function EloPage() {
                               <div className="flex flex-wrap items-center gap-2">
                                 <p className="truncate type-label text-foreground">{league.league_name}</p>
                                 {league.hierarchy_constrained ? <StatusBadge tone="info">hierarquia</StatusBadge> : null}
+                                {league.evidence_matches < 3 ? (
+                                  <StatusBadge tone="warning">evidência {league.evidence_matches}/3</StatusBadge>
+                                ) : null}
                               </div>
-                              <p className="mt-0.5 type-caption text-muted-foreground sm:hidden">{league.country_code ?? "—"} · divisão {league.division_level ?? "—"}</p>
+                              <p className="mt-0.5 type-caption text-muted-foreground sm:hidden">
+                                {league.country_code ?? "—"} · divisão {league.division_level ?? "—"} · {league.evidence_matches} jogos interligas
+                              </p>
                             </div>
                             <span className="hidden type-caption text-muted-foreground sm:block">{league.country_code ?? "—"}</span>
                             <span className="hidden type-caption text-muted-foreground sm:block">{league.division_level ?? "—"}</span>
