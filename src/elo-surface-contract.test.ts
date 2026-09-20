@@ -148,6 +148,22 @@ describe("Elo sports intelligence contract", () => {
     expect(panel).not.toContain("reverse().slice(0, 12)");
   });
 
+  it("keeps league hierarchy evidence and global-rating semantics explicit", () => {
+    const server = source("./lib/elo-feature.server.ts");
+    const explorer = source("./lib/elo-explorer.functions.ts");
+    const docs = source("../docs/ELO.md");
+
+    expect(server).toContain("const MIN_LEAGUE_EVIDENCE_MATCHES = 3");
+    expect(server).toContain("evidenceMatches >= MIN_LEAGUE_EVIDENCE_MATCHES");
+    expect(server).toContain("rating = Math.min(rating, parent.rating - 70)");
+    expect(server).toContain("rating = Math.min(rating, Math.min(...bigFiveRatings) - 25)");
+    expect(server).toContain("homeLeagueRating!.rating + (home.rating - ELO_INITIAL_RATING)");
+    expect(server).toContain("awayLeagueRating!.rating + (away.rating - ELO_INITIAL_RATING)");
+    expect(explorer).toContain('"evidence_adjustment,evidence_matches,hierarchy_constrained,updated_at"');
+    expect(docs).toContain("Elo global do time = Elo da liga + (Elo local do time - 1500)");
+    expect(docs).toContain("pelo menos 3 partidas de evidência interligas");
+  });
+
   it("keeps mobile rows touchable and exposes an accessible selection label", () => {
     const route = source("./routes/elo.tsx");
     expect(route).toContain("min-h-14 w-full");
