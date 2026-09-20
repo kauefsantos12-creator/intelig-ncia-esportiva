@@ -43,12 +43,35 @@ function EditorialItem({ item }: { item: NewsBriefingItem }) {
   </article>;
 }
 
+function ScheduleRow({ item, sourceStatus }: { item: NonNullable<NewsOverview["briefing"]>["schedule"][number]; sourceStatus: "READY" | "ERROR" | "NEVER" }) {
+  const broadcast = item.broadcasters.length
+    ? item.broadcasters.join(", ")
+    : sourceStatus === "ERROR"
+      ? "Fonte de transmissão indisponível"
+      : sourceStatus === "NEVER"
+        ? "Transmissão ainda não verificada"
+        : "Transmissão não confirmada";
+
+  return <article className="rounded-xl border border-border/55 bg-secondary/20 px-4 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <p className="type-caption text-muted-foreground">{item.competition}</p>
+      <span className="type-label text-foreground">{formatTime(item.kickoffAt)}</span>
+    </div>
+    <p className="mt-2 type-label text-foreground">{item.homeTeam} × {item.awayTeam}</p>
+    <p className="mt-1 type-caption text-muted-foreground">Onde assistir: {broadcast}</p>
+  </article>;
+}
+
 function NewsPage() {
   const loadOverview=useServerFn(getNewsOverview); const [overview,setOverview]=useState<NewsOverview|null>(null); const [loading,setLoading]=useState(true); const [error,setError]=useState<string|null>(null);
   const refresh=useCallback(async()=>{setLoading(true);setError(null);try{setOverview(await loadOverview());}catch{setError("Os dados do Noticiário não puderam ser carregados agora.");}finally{setLoading(false);}},[loadOverview]);
   useEffect(()=>{void refresh();},[refresh]);
-  const briefing=overview?.briefing??null; const footballItems=briefing?.items.filter(i=>i.kind==="FOOTBALL_MATCH"||i.kind==="NEWS_CONTEXT")??[];
-  const contextItems=briefing?.items.filter(i=>i.kind==="NEWS_CONTEXT")??[]; const matchItems=footballItems.filter(i=>i.kind==="FOOTBALL_MATCH");
+  const briefing=overview?.briefing??null;
+  const palmeirasItem=briefing?.items.find(i=>i.kind==="NEWS_CONTEXT"&&i.title==="Palmeiras")??null;
+  const contextItems=briefing?.items.filter(i=>i.kind==="NEWS_CONTEXT"&&i.title!=="Palmeiras")??[];
+  const matchItems=briefing?.items.filter(i=>i.kind==="FOOTBALL_MATCH")??[];
+  const regularMatchItems=matchItems.filter(i=>!i.lateGame);
+  const lateMatchItems=matchItems.filter(i=>i.lateGame);
   const groupedResults=useMemo(()=>{if(!overview)return[];const groups=new Map<string,NewsResult[]>();for(const r of overview.recentResults){const k=localDateKey(r.kickoffAt);groups.set(k,[...(groups.get(k)??[]),r]);}const today=localDateKey(overview.observedAt);const noon=new Date(`${today}T12:00:00-03:00`);const yesterday=Number.isNaN(noon.getTime())?"":localDateKey(new Date(noon.getTime()-86400000));return Array.from(groups.entries()).map(([key,results])=>({key,label:key===today?"Hoje":key===yesterday?"Ontem":results[0]?compactDateFormatter.format(new Date(results[0].kickoffAt)):key,results}));},[overview]);
   return <AppShell stage="news"><div className="space-y-6">
     <ProductPageHeader eyebrow="Noticiário" title="O que aconteceu e o que mudou" description="A resenha é a leitura principal do dia; placares e Elo permanecem como contexto factual." aside={<div className="flex items-center gap-2">{overview?<StatusBadge tone="neutral">Atualizado {formatTime(overview.observedAt)}</StatusBadge>:null}<button type="button" onClick={()=>void refresh()} disabled={loading} className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border/70 bg-secondary/30 px-3 type-meta font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"><RefreshCw className={`size-4 ${loading?"animate-spin":""}`} aria-hidden /><span className="hidden sm:inline">Atualizar</span></button></div>} />
@@ -57,9 +80,12 @@ function NewsPage() {
       <SurfaceCard icon={Newspaper} title={briefing?`Resenha de ${formatDate(briefing.date)}`:"Resenha esportiva"} description="Leitura editorial diária, sustentada por fatos persistidos e proveniência." actions={briefing?.footballSummary?<StatusBadge tone="success">Publicada</StatusBadge>:<StatusBadge tone="neutral">Aguardando publicação</StatusBadge>}>
         {briefing?.footballSummary?<div className="space-y-8">
           <section aria-label="Abertura da resenha"><p className="max-w-[72ch] whitespace-pre-line text-lg leading-8 text-foreground/95">{briefing.footballSummary}</p></section>
-          {contextItems.length?<section className="space-y-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Contexto do dia</h2>{contextItems.map(item=><EditorialItem key={item.id} item={item} />)}</section>:null}
-          {matchItems.length?<section className="space-y-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Destaques de ontem</h2>{matchItems.map(item=><EditorialItem key={item.id} item={item} />)}</section>:null}
+          {palmeirasItem?<section className="border-t border-border/55 pt-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Palmeiras</h2>{palmeirasItem.body?<p className="mt-3 max-w-[72ch] whitespace-pre-line type-body leading-7 text-foreground/90">{palmeirasItem.body}</p>:null}</section>:null}
+          {contextItems.length?<section className="space-y-6 border-t border-border/55 pt-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Contexto do dia</h2>{contextItems.map(item=><EditorialItem key={item.id} item={item} />)}</section>:null}
+          {regularMatchItems.length?<section className="space-y-6 border-t border-border/55 pt-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Destaques de ontem</h2>{regularMatchItems.map(item=><EditorialItem key={item.id} item={item} />)}</section>:null}
+          {lateMatchItems.length?<section className="space-y-6 border-t border-border/55 pt-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Ontem após 21h</h2>{lateMatchItems.map(item=><EditorialItem key={item.id} item={item} />)}</section>:null}
           {briefing.otherSportsSummary?<section className="border-t border-border/55 pt-6"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Outros esportes de ontem</h2><p className="mt-3 max-w-[72ch] whitespace-pre-line type-body leading-7 text-foreground/90">{briefing.otherSportsSummary}</p></section>:null}
+          {briefing.schedule.length?<section className="border-t border-border/55 pt-6"><div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-2xl font-semibold tracking-tight text-foreground">Programação de hoje</h2><StatusBadge tone={briefing.broadcastSourceStatus==="READY"?"success":briefing.broadcastSourceStatus==="ERROR"?"warning":"neutral"}>{briefing.broadcastSourceStatus==="READY"?"Transmissões verificadas":briefing.broadcastSourceStatus==="ERROR"?"Fonte de TV indisponível":"TV ainda não verificada"}</StatusBadge></div><div className="mt-4 grid gap-2 md:grid-cols-2">{briefing.schedule.map(item=><ScheduleRow key={item.fixtureId} item={item} sourceStatus={briefing.broadcastSourceStatus} />)}</div></section>:null}
           <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border/55 pt-3 type-caption text-muted-foreground">{briefing.factsThrough?<span>Fatos verificados até {formatTime(briefing.factsThrough)} (Brasília)</span>:null}{briefing.generatedAt?<span>Gerada às {formatTime(briefing.generatedAt)}</span>:null}</div>
         </div>:<EmptyState icon={Newspaper} title="A resenha ainda não foi publicada" description="A interface não fabrica uma narrativa quando o backend editorial ainda não publicou uma resenha." />}
       </SurfaceCard>

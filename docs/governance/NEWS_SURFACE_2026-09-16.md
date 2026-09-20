@@ -125,3 +125,12 @@ A resenha passa a ter contrato estruturado em `sports_daily_briefings.editorial_
 A publicação automática continua estritamente factual: partidas só entram com fixture `FINISHED` e fact pack persistido. Conteúdo jornalístico externo, recordes, declarações e causalidade só podem entrar após ingestão com proveniência (URL + horário de consulta); a aplicação não inventa esses trechos. Estatísticas só são atribuídas a uma fonte específica quando essa proveniência estiver registrada. A seção Palmeiras consulta explicitamente o clube e a agenda usa fixtures do dia seguinte, anexando `sports_broadcast_evidence` quando disponível.
 
 O fechamento diário roda às 05:05 de Brasília via cron UTC 08:05. O campo `facts_through` passa a considerar apenas os fact packs efetivamente incluídos na resenha, eliminando o vazamento semântico de partidas fora do escopo editorial.
+
+
+## Resenha editorial v4 — fechamento de aceitação
+
+A v4 transforma o scaffold factual da v3 em uma leitura editorial estruturada sem atribuir a terceiros dados que ainda não possuem proveniência específica. A abertura passa a resumir volume e maiores placares do recorte; cada destaque usa placar, competição e cronologia de gols persistida. Estatísticas do fact pack 5Dollar deixam de ser apresentadas como se fossem SofaScore. O contrato exige proveniência SofaScore antes de qualquer número editorial ser atribuído a essa fonte.
+
+A seção **Palmeiras** é fixa e deriva do catálogo canônico: registra jogos do dia e o próximo compromisso disponível nos sete dias seguintes. A seção **Ontem após 21h** usa a hora local de Brasília registrada na fixture. A **Programação de hoje** é filtrada pelo mesmo escopo editorial usado na resenha, evitando despejar ligas irrelevantes; evidências de transmissão vêm de `sports_broadcast_evidence` e o estado da fonte FutNaTV é exposto como READY, ERROR ou NEVER, sem interpretar ausência de evidência como ausência de transmissão.
+
+O frontend recebe apenas uma projeção tipada e serializável do `editorial_payload` (agenda + estado da fonte), preservando a fronteira server-side. Conteúdo jornalístico externo, recordes, declarações, repercussão e outros esportes continuam bloqueados até existir ingestão com URL e horário de consulta persistidos.

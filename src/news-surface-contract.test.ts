@@ -23,6 +23,8 @@ describe("Noticiário sports intelligence contract", () => {
     expect(server).toContain('.eq("status", "FINISHED")');
     expect(server).toContain('from("elo_fixture_history")');
     expect(server).not.toContain("fetch(");
+    expect(server).toContain("editorial_payload");
+    expect(server).toContain("parseSchedule");
   });
 
   it("filters factual result fallbacks through canonical always-track rules", () => {
@@ -63,6 +65,10 @@ describe("Noticiário sports intelligence contract", () => {
     expect(route).toContain("Contexto do dia");
     expect(route).toContain("Destaques de ontem");
     expect(route).toContain("Outros esportes de ontem");
+    expect(route).toContain("Palmeiras");
+    expect(route).toContain("Ontem após 21h");
+    expect(route).toContain("Programação de hoje");
+    expect(route).toContain("Onde assistir:");
     expect(route).not.toContain("<CollapsiblePanel");
   });
 
