@@ -141,3 +141,12 @@ O frontend recebe apenas uma projeção tipada e serializável do `editorial_pay
 O fechamento das 05:05 passa a depender de três pré-cargas 5Dollar executadas antes da publicação: dia anterior às 04:20, dia corrente às 04:35 e dia seguinte às 04:50 (America/Sao_Paulo). Isso corrige a ordem anterior, na qual o briefing podia rodar antes do refresh de resultados e agenda. A pré-carga de amanhã garante que o próximo compromisso do Palmeiras já possa ser resolvido no fechamento, sem depender de uma sincronização manual.
 
 No frontend, quando a publicação corresponde exatamente ao dia anterior observado em Brasília, o título passa a usar **“Resenha de ontem — <data por extenso>”**; publicações históricas continuam usando “Resenha de <data>”.
+
+
+## Estatísticas editoriais SofaScore v6
+
+A resenha passa a aceitar números editoriais somente quando existe evidência persistida do SofaScore. O runtime consulta a agenda pública diária do provedor, faz matching conservador entre evento externo e fixture canônica e busca `/event/{id}/statistics` apenas para até 12 partidas prioritárias do recorte editorial. O resultado é persistido em `sports_editorial_source_evidence`, tabela server-only com RLS, URL consultada, horário de coleta, identificador externo, confiança do matching e payload bruto/curado.
+
+A publicação diária continua sendo gerada a partir do motor canônico. Depois da geração factual, `apply_sports_editorial_evidence(date)` acrescenta exclusivamente as métricas cuja proveniência SofaScore existe: xG, finalizações no alvo, posse, escanteios e total de finalizações quando disponíveis. Fact packs 5Dollar continuam úteis para placar e cronologia factual, mas não são rotulados como SofaScore.
+
+A coleta SofaScore roda às 04:42 de Brasília (07:42 UTC), depois do refresh canônico de ontem e antes da publicação das 05:05. O endpoint de sync é server-side, protegido pelo mesmo token de cron do motor e não é exposto a `anon` ou `authenticated`. Ausência, ambiguidade ou falha do provedor não produz números sintéticos: a resenha permanece sem a métrica correspondente.

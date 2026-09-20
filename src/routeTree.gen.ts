@@ -20,6 +20,7 @@ import { Route as ApiEloSyncRouteImport } from './routes/api.elo-sync'
 import { Route as ApiSportsApiMaintenanceRouteImport } from './routes/api.sports-api-maintenance'
 import { Route as ApiSportsDailySyncRouteImport } from './routes/api.sports-daily-sync'
 import { Route as ApiSportsJobsRouteImport } from './routes/api.sports-jobs'
+import { Route as ApiSofascoreEditorialSyncRouteImport } from './routes/api.sofascore-editorial-sync'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +77,11 @@ const ApiSportsJobsRoute = ApiSportsJobsRouteImport.update({
   path: '/api/sports-jobs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSofascoreEditorialSyncRoute = ApiSofascoreEditorialSyncRouteImport.update({
+  id: '/api/sofascore-editorial-sync',
+  path: '/api/sofascore-editorial-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/api/sports-api-maintenance': typeof ApiSportsApiMaintenanceRoute
   '/api/sports-daily-sync': typeof ApiSportsDailySyncRoute
   '/api/sports-jobs': typeof ApiSportsJobsRoute
+  '/api/sofascore-editorial-sync': typeof ApiSofascoreEditorialSyncRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -131,6 +138,7 @@ export interface FileRouteTypes {
     | '/api/sports-api-maintenance'
     | '/api/sports-daily-sync'
     | '/api/sports-jobs'
+    | '/api/sofascore-editorial-sync'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +152,7 @@ export interface FileRouteTypes {
     | '/api/sports-api-maintenance'
     | '/api/sports-daily-sync'
     | '/api/sports-jobs'
+    | '/api/sofascore-editorial-sync'
   id:
     | '__root__'
     | '/'
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/api/sports-api-maintenance'
     | '/api/sports-daily-sync'
     | '/api/sports-jobs'
+    | '/api/sofascore-editorial-sync'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +181,7 @@ export interface RootRouteChildren {
   ApiSportsApiMaintenanceRoute: typeof ApiSportsApiMaintenanceRoute
   ApiSportsDailySyncRoute: typeof ApiSportsDailySyncRoute
   ApiSportsJobsRoute: typeof ApiSportsJobsRoute
+  ApiSofascoreEditorialSyncRoute: typeof ApiSofascoreEditorialSyncRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSportsJobsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sofascore-editorial-sync': {
+      id: '/api/sofascore-editorial-sync'
+      path: '/api/sofascore-editorial-sync'
+      fullPath: '/api/sofascore-editorial-sync'
+      preLoaderRoute: typeof ApiSofascoreEditorialSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSportsApiMaintenanceRoute: ApiSportsApiMaintenanceRoute,
   ApiSportsDailySyncRoute: ApiSportsDailySyncRoute,
   ApiSportsJobsRoute: ApiSportsJobsRoute,
+  ApiSofascoreEditorialSyncRoute: ApiSofascoreEditorialSyncRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
