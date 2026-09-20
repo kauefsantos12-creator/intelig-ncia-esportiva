@@ -19,6 +19,7 @@ interface TodayQuery extends PromiseLike<DbResponse> {
 
 interface TodayDb {
   from(table: string): TodayQuery;
+  rpc(name: string, args: Record<string, unknown>): PromiseLike<DbResponse>;
 }
 
 export type BroadcastEvidence = {
@@ -87,14 +88,6 @@ export type TodayOverview = {
   };
 };
 
-type TrackingRule = {
-  competitionId: string | null;
-  countryCode: string | null;
-  region: string | null;
-  competitionKind: string | null;
-  divisionLevel: number | null;
-};
-
 type RawFixture = {
   id: string;
   kickoffAt: string;
@@ -124,12 +117,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function records(value: unknown): Record<string, unknown>[] {
   return Array.isArray(value) ? value.filter(isRecord) : [];
-}
-
-function relation(value: unknown): Record<string, unknown> | null {
-  if (isRecord(value)) return value;
-  if (Array.isArray(value) && isRecord(value[0])) return value[0];
-  return null;
 }
 
 function text(value: unknown): string | null {
@@ -202,33 +189,30 @@ function nextDateKey(dateKey: string) {
   return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}-${String(next.getUTCDate()).padStart(2, "0")}`;
 }
 
-function parseRule(row: Record<string, unknown>): TrackingRule | null {
-  if (!boolean(row["enabled"]) || !boolean(row["always_track"])) return null;
-  return {
-    competitionId: text(row["competition_id"]),
-    countryCode: text(row["country_code"]),
-    region: text(row["region"]),
-    competitionKind: text(row["competition_kind"]),
-    divisionLevel: numeric(row["division_level"]),
-  };
-}
-
 function parseFixture(row: Record<string, unknown>): RawFixture | null {
-  const competition = relation(row["competition"]);
-  const home = relation(row["home_team"]);
-  const away = relation(row["away_team"]);
-  const id = text(row["id"]);
+  const id = text(row["fixture_id"]);
   const kickoffAt = text(row["kickoff_at"]);
   const status = text(row["status"]);
-  const competitionId = competition ? text(competition["id"]) : null;
-  const competitionName = competition ? text(competition["name"]) : null;
-  const competitionKind = competition ? text(competition["competition_kind"]) : null;
-  const homeId = home ? text(home["id"]) : null;
-  const homeName = home ? text(home["name"]) : null;
-  const awayId = away ? text(away["id"]) : null;
-  const awayName = away ? text(away["name"]) : null;
+  const competitionId = text(row["competition_id"]);
+  const competitionName = text(row["competition_name"]);
+  const competitionKind = text(row["competition_kind"]);
+  const homeId = text(row["home_team_id"]);
+  const homeName = text(row["home_team_name"]);
+  const awayId = text(row["away_team_id"]);
+  const awayName = text(row["away_team_name"]);
 
-  if (!id || !kickoffAt || !status || !competitionId || !competitionName || !competitionKind || !homeId || !homeName || !awayId || !awayName) {
+  if (
+    !id ||
+    !kickoffAt ||
+    !status ||
+    !competitionId ||
+    !competitionName ||
+    !competitionKind ||
+    !homeId ||
+    !homeName ||
+    !awayId ||
+    !awayName
+  ) {
     return null;
   }
 
@@ -241,36 +225,24 @@ function parseFixture(row: Record<string, unknown>): RawFixture | null {
     competition: {
       id: competitionId,
       name: competitionName,
-      countryCode: competition ? text(competition["country_code"]) : null,
-      region: competition ? text(competition["region"]) : null,
+      countryCode: text(row["country_code"]),
+      region: text(row["region"]),
       kind: competitionKind,
-      divisionLevel: competition ? numeric(competition["division_level"]) : null,
+      divisionLevel: numeric(row["division_level"]),
     },
     home: {
       id: homeId,
       name: homeName,
-      logoUrl: home ? text(home["logo_url"]) : null,
-      fiveDollarTeamId: home ? numeric(home["five_dollar_team_id"]) : null,
+      logoUrl: text(row["home_team_logo"]),
+      fiveDollarTeamId: numeric(row["home_five_dollar_team_id"]),
     },
     away: {
       id: awayId,
       name: awayName,
-      logoUrl: away ? text(away["logo_url"]) : null,
-      fiveDollarTeamId: away ? numeric(away["five_dollar_team_id"]) : null,
+      logoUrl: text(row["away_team_logo"]),
+      fiveDollarTeamId: numeric(row["away_five_dollar_team_id"]),
     },
   };
-}
-
-function isTracked(fixture: RawFixture, rules: TrackingRule[]) {
-  return rules.some((rule) => {
-    if (rule.competitionId) return rule.competitionId === fixture.competition.id;
-    return (
-      (rule.countryCode === null || rule.countryCode === fixture.competition.countryCode) &&
-      (rule.region === null || rule.region === fixture.competition.region) &&
-      (rule.competitionKind === null || rule.competitionKind === fixture.competition.kind) &&
-      (rule.divisionLevel === null || rule.divisionLevel === fixture.competition.divisionLevel)
-    );
-  });
 }
 
 function parseBroadcast(row: Record<string, unknown>): { fixtureId: string; evidence: BroadcastEvidence } | null {
@@ -370,30 +342,17 @@ export const getTodayOverview = createServerFn({ method: "GET" })
     const start = zonedMidnight(dateKey);
     const end = zonedMidnight(nextDateKey(dateKey));
 
-    const [rulesResult, fixturesResult] = await Promise.all([
-      db
-        .from("sports_tracking_rules")
-        .select("competition_id,country_code,region,competition_kind,division_level,enabled,always_track")
-        .eq("enabled", true)
-        .eq("always_track", true)
-        .limit(250),
-      db
-        .from("sports_fixtures")
-        .select(
-          "id,kickoff_at,status,home_goals,away_goals,competition:sports_competitions!sports_fixtures_competition_id_fkey(id,name,country_code,region,competition_kind,division_level),home_team:sports_teams!sports_fixtures_home_team_id_fkey(id,name,logo_url,five_dollar_team_id),away_team:sports_teams!sports_fixtures_away_team_id_fkey(id,name,logo_url,five_dollar_team_id)",
-        )
-        .gte("kickoff_at", start.toISOString())
-        .lt("kickoff_at", end.toISOString())
-        .order("kickoff_at", { ascending: true })
-        .limit(300),
-    ]);
+    const fixturesResult = await db.rpc("get_today_tracked_fixtures", {
+      p_start: start.toISOString(),
+      p_end: end.toISOString(),
+      p_limit: 300,
+    });
 
-    if (rulesResult.error) throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o escopo esportivo acompanhado.", 500);
     if (fixturesResult.error) throw new BackendError("INTERNAL_ERROR", "Falha ao carregar a agenda do dia.", 500);
 
-    const rules = records(rulesResult.data).map(parseRule).filter((rule): rule is TrackingRule => rule !== null);
-    const rawFixtures = records(fixturesResult.data).map(parseFixture).filter((fixture): fixture is RawFixture => fixture !== null);
-    const trackedFixtures = rawFixtures.filter((fixture) => isTracked(fixture, rules));
+    const trackedFixtures = records(fixturesResult.data)
+      .map(parseFixture)
+      .filter((fixture): fixture is RawFixture => fixture !== null);
     const fixtureIds = trackedFixtures.map((fixture) => fixture.id);
     const providerTeamIds = Array.from(
       new Set(
