@@ -15,4 +15,14 @@ describe("Stage 4 six-league enrichment scope", () => {
     expect(sql).toContain("API_FOOTBALL_LINK");
     expect(sql).toContain("and not public.sports_fixture_in_api_football_scope(j.fixture_id)");
   });
+  it("exempts only media-only team reconciliation from the fixture scope guard", () => {
+    const mediaSql = fs.readFileSync(
+      path.resolve("supabase/migrations/20260920174500_api_football_team_media_scope_exemption.sql"),
+      "utf8",
+    );
+    expect(mediaSql).toContain("new.job_type <> 'API_FOOTBALL_TEAM_MEDIA_LINK'");
+    expect(mediaSql).toContain("j.job_type = 'API_FOOTBALL_TEAM_MEDIA_LINK'");
+    expect(mediaSql).not.toContain("API_FOOTBALL_FIXTURE_DATA' and new.job_type <>");
+  });
+
 });
