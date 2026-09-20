@@ -26,3 +26,40 @@
 - Preserve legacy decision-policy rows, but do not mix them silently with `decision-v2-strict70` analytics.
 - Schema/RLS changes require migration plus database regression tests; these tests are part of required `test-and-build`.
 - Access reviews are quarterly; unavailable external evidence remains explicitly `REVIEW_REQUIRED`.
+
+
+## Active audit plan — Elo surface
+
+When working on the `/elo` surface, preserve this execution order:
+
+1. **Current ranking uniqueness and correctness**
+   - expose only one current row per club in `elo_global_team_ratings`;
+   - preserve historical league-local rows in `elo_team_ratings`;
+   - verify promotion/relegation continuity without duplicating clubs in the current ranking.
+2. **Freshness and temporal reference**
+   - validate daily sync/finalize state, last processed fixture and visible update/reference timestamps;
+   - keep current snapshots distinct from point-in-time history.
+3. **Table filters and navigation**
+   - support search by club;
+   - region;
+   - country;
+   - league/competition;
+   - division;
+   - club/league ranking mode;
+   - combined filters;
+   - explicit reset;
+   - visible-result count versus total;
+   - correct handling beyond the first 100 rows;
+   - sorting by position, Elo, club, league and matches processed;
+   - preserve the real global rank while filters/sorts are active.
+4. **Ranking UX**
+   - keep the table as the primary surface;
+   - improve readability, density, hierarchy, crests/context and responsiveness without recalculating ratings client-side.
+5. **Point-in-time history**
+   - validate the 60-day history, delta, fixture ordering and temporal consistency.
+6. **League ranking and hierarchy**
+   - validate league ratings, divisions, inter-league evidence and hierarchy constraints.
+7. **Final E2E**
+   - validate data, filters, search, sorting, history, loading/error/empty states and mobile/browser accessibility.
+
+For Elo changes, use the lifecycle: audit evidence → branch → tests → PR → all required gates green → merge → Lovable sync → runtime migration if needed → runtime validation. Never mark an Elo action complete before the matching runtime evidence exists.
