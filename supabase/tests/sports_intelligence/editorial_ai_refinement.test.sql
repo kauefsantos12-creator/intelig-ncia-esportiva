@@ -18,9 +18,9 @@ select ok(
     select 1 from cron.job
     where jobname='sports-editorial-ai-refine-yesterday'
       and active
-      and schedule='10 8 * * *'
+      and schedule='0 8 * * *'
   ),
-  'AI refinement runs after the 05:05 briefing'
+  'AI refinement runs at 05:00 before the 05:05 release'
 );
 
 select ok(
@@ -31,11 +31,11 @@ select ok(
 select ok(
   exists(
     select 1 from cron.job
-    where jobname='sports-daily-briefing-yesterday'
+    where jobname='sports-daily-briefing-prepare-yesterday'
       and active
-      and schedule='5 8 * * *'
+      and schedule='57 7 * * *'
   ),
-  'factual briefing still publishes before AI refinement'
+  'factual briefing is prepared before AI refinement'
 );
 
 select ok(
@@ -43,9 +43,9 @@ select ok(
     select 1 from cron.job
     where jobname='sports-editorial-source-sync-yesterday'
       and active
-      and schedule='55 7 * * *'
+      and schedule='50 7 * * *'
   ),
-  'editorial sources still sync before the factual briefing'
+  'editorial sources sync from 04:50 before preparation'
 );
 
 select * from finish();

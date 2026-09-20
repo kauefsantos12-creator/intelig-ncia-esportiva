@@ -199,3 +199,17 @@ A Resenha passa a ter uma última etapa de edição após a publicação factual
 O prompt editorial proíbe programação futura, onde assistir, próximos jogos, invenção de recordes/classificação/lesões/declarações e qualquer atribuição incorreta de fonte. Manchetes em espanhol, italiano, francês, inglês ou alemão devem ser traduzidas/parafraseadas; o identificador técnico `5DollarFootballAPI` não deve aparecer no texto final. A proveniência factual/jornalística continua persistida separadamente e os links de fonte permanecem clicáveis no frontend.
 
 O refinamento usa `LOVABLE_API_KEY` apenas no servidor, via `https://ai.gateway.lovable.dev/v1/chat/completions`, modelo `google/gemini-3.7-flash`. Para evitar respostas excessivamente grandes, os itens são processados em lotes de 12 em paralelo, com timeout de 45 segundos e uma tentativa de retry por lote. O desenho mantém o ciclo completo dentro do orçamento de 120 segundos do disparo HTTP. Falha de IA não apaga nem invalida a Resenha factual: o briefing permanece publicado e registra `aiEditorialStatus=FAILED` para diagnóstico.
+
+
+## Agendamento backend da Resenha — v11
+
+O fluxo diário deixa de depender do agendamento do ChatGPT para atualizar a aplicação. A rotina equivalente passa a viver no Lovable Cloud/Postgres, com publicação controlada por estado:
+
+- **04:50 BRT** — `sports-editorial-source-sync-yesterday`: inicia a coleta editorial do dia anterior nos feeds e fontes persistidas.
+- **04:57 BRT** — `sports-daily-briefing-prepare-yesterday`: monta fatos, estatísticas, contexto jornalístico e outros esportes, mas mantém `sports_daily_briefings.status=READY`. Como a interface consulta somente `PUBLISHED`, a edição ainda não aparece.
+- **05:00 BRT** — `sports-editorial-ai-refine-yesterday`: usa o Lovable AI Gateway para reescrever a edição em português brasileiro preservando fatos e proveniência.
+- **05:05 BRT** — `sports-daily-briefing-release-yesterday`: promove a edição pronta para `PUBLISHED`; a próxima leitura da interface recebe a nova Resenha.
+
+A publicação das 05:05 tem fallback deliberado: se a IA estiver indisponível, mas existirem itens editoriais factuais válidos, a edição é publicada em modo `FACTUAL_FALLBACK` em vez de manter a interface desatualizada. Se não houver nenhum item editorial válido, o briefing é marcado `FAILED` e a edição anterior permanece como última publicação disponível.
+
+O cron legado `sports-daily-briefing-yesterday`, que publicava diretamente às 05:05 antes do refinamento, é removido. Isso elimina a janela em que o usuário poderia ver texto cru/estrangeiro antes da passagem pelo AI Gateway.

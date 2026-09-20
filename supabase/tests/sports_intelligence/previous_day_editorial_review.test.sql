@@ -30,9 +30,9 @@ select ok(
     select 1 from cron.job
     where jobname='sports-editorial-source-sync-yesterday'
       and active
-      and schedule='55 7 * * *'
+      and schedule='50 7 * * *'
   ),
-  'editorial sources sync before the 05:05 briefing'
+  'editorial sources start at 04:50 before the backend briefing pipeline'
 );
 
 select ok(
