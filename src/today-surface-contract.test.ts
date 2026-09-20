@@ -14,12 +14,14 @@ describe("Hoje sports intelligence contract", () => {
     expect(server).toContain("await adminDb()");
   });
 
-  it("uses canonical fixtures and the tracked-scope semantics", () => {
+  it("applies the canonical tracked scope in SQL before the agenda display limit", () => {
     const server = source("./lib/today-overview.functions.ts");
-    expect(server).toContain('from("sports_fixtures")');
-    expect(server).toContain('from("sports_tracking_rules")');
-    expect(server).toContain('.eq("always_track", true)');
-    expect(server).toContain("isTracked(fixture, rules)");
+    const migration = source("../supabase/migrations/20260920160000_today_tracked_scope_v2.sql");
+    expect(server).toContain('db.rpc("get_today_tracked_fixtures"');
+    expect(server).toContain("p_limit: 300");
+    expect(migration).toContain("sports_tracking_rules");
+    expect(migration).toContain("tr.always_track=true");
+    expect(migration.indexOf("and exists (")).toBeLessThan(migration.indexOf("limit least"));
   });
 
   it("keeps transmission, Elo and recent form grounded in stored data", () => {
