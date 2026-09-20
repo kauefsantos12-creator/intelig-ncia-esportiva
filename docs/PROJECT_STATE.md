@@ -108,7 +108,7 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 - **Fórmula preservada:** `global_rating = league_rating + (local_rating - 1500)`.
 - **Item 1 do plano Elo:** concluído e validado.
 - **Item 2 — referência temporal:** auditoria runtime confirmou fechamento diário às 05:05 de Brasília, 32/32 ligas domésticas + 9/9 cross-league concluídas e lag de 0 minuto entre a última fixture elegível antes do fechamento e a última fixture Elo processada.
-- **Correção do item 2 em auditoria:** `getEloDirectory()` passa a ler `elo_sync_state` e a UI mostra o horário real do snapshot, a última partida considerada e a cobertura da rodada. O horário de carregamento da página deixa de ser apresentado como geração do modelo.
+- **Item 2 — concluído e validado:** `getEloDirectory()` lê `elo_sync_state`; a UI mostra horário real do snapshot, última partida considerada e cobertura da rodada. Pós-merge, Lovable sincronizado no commit `7411b8d...`, runtime permaneceu `OK`, 32/32 domésticas + 9/9 cross-league e lag 0 minuto. A chamada manual de deploy foi disparada, mas a API ainda reportava `pending`.
 
 ### Auditoria incremental da aba Hoje — 20/09/2026
 

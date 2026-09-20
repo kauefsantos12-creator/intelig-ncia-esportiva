@@ -65,3 +65,29 @@ A UI passa a exibir:
 ## Critério de conclusão
 
 O item 2 só pode ser marcado como concluído após gates verdes, merge, sincronização do Lovable e revalidação do runtime mantendo o finalize `OK` e a cobertura 32/32 + 9/9.
+
+
+## Validação pós-merge
+
+PR #60 foi mergeado no commit `7411b8d8600d91db03f94bb30fcc7630a56a76af`.
+
+Gates finais:
+- Static diagnostics: sucesso;
+- CI/test-and-build: sucesso;
+- Browser compatibility/accessibility: sucesso;
+- o primeiro attempt do CI falhou apenas porque `registry.npmjs.org` fechou a conexão durante `bun audit`; o rerun do mesmo commit passou sem alteração de código.
+
+Após sincronização do Lovable:
+- `latest_commit_sha`: `7411b8d8600d91db03f94bb30fcc7630a56a76af`;
+- projeto: `ready`;
+- `is_published=true`;
+- finalize Elo: `OK`;
+- fechamento: 20/09/2026 05:05:00 de Brasília;
+- cobertura: 32/32 ligas domésticas e 9/9 cross-league;
+- última fixture Elo: 19/09/2026 23:30:22;
+- última fixture elegível antes do fechamento: 19/09/2026 23:30:22;
+- lag: 0 minuto.
+
+A chamada manual de deploy retornou `pending` (deployment `fdaeaab7-4246-4bad-afe8-6172eba00b14`). Esse deployment específico não é classificado como concluído enquanto a API não confirmar.
+
+Status do item 2: **concluído e validado no runtime**.
