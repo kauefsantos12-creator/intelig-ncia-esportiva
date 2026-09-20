@@ -145,6 +145,11 @@ function EloPage() {
     setPage(1);
   }, [mode, region, country, league, division, sort, search]);
 
+  useEffect(() => {
+    setSort("RANK");
+    setLeague("ALL");
+  }, [mode]);
+
   const teamRankById = useMemo(() => {
     const ranks = new Map<number, number>();
     directory?.teams.forEach((team, index) => {
