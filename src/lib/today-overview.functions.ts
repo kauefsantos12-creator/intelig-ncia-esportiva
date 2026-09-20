@@ -365,7 +365,7 @@ export const getTodayOverview = createServerFn({ method: "GET" })
         trackedFixtures.flatMap((fixture) => [fixture.home.fiveDollarTeamId, fixture.away.fiveDollarTeamId]).filter((id): id is number => id !== null),
       ),
     );
-    const recentSince = new Date(start.getTime() - 90 * 86_400_000).toISOString();
+    const recentSince = new Date(start.getTime() - 365 * 86_400_000).toISOString();
 
     const broadcastsPromise = fixtureIds.length
       ? db
