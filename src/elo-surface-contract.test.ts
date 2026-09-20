@@ -154,7 +154,7 @@ describe("Elo sports intelligence contract", () => {
     const docs = source("../docs/ELO.md");
 
     expect(server).toContain("const MIN_LEAGUE_EVIDENCE_MATCHES = 3");
-    expect(server).toContain("evidenceMatches >= MIN_LEAGUE_EVIDENCE_MATCHES");
+    expect(server).toContain("evidenceMatches >= MIN_LEAGUE_EVIDENCE_MATCHES,");
     expect(server).toContain("rating = Math.min(rating, parent.rating - 70)");
     expect(server).toContain("rating = Math.min(rating, Math.min(...bigFiveRatings) - 25)");
     expect(server).toContain("homeLeagueRating!.rating + (home.rating - ELO_INITIAL_RATING)");
