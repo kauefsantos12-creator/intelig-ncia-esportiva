@@ -196,20 +196,25 @@ export const getAnalyticsDirectory = createServerFn({ method: "GET" })
     const competitionIds = [...new Set(memberships.map((row) => row.competitionId))];
     const teamIds = [...new Set(memberships.map((row) => row.teamId))];
 
-    const competitionsPromise = competitionIds.length
-      ? db
-          .from("sports_competitions")
-          .select("id,name,country_code,region,competition_kind,division_level,season")
-          .in("id", competitionIds)
-          .eq("active", true)
-          .limit(1000)
-      : Promise.resolve({ data: [], error: null } satisfies DbResponse);
-    const teamsPromise = teamIds.length
-      ? db.from("sports_teams").select("id,name,short_name,logo_url").in("id", teamIds).limit(5000)
-      : Promise.resolve({ data: [], error: null } satisfies DbResponse);
+    // Chunk large id lists: a single `.in()` with thousands of UUIDs exceeds URL limits.
+    const chunkedSelect = async (table: string, columns: string, ids: string[], extra?: (q: AnalyticsQuery) => AnalyticsQuery): Promise<DbResponse> => {
+      const out: unknown[] = [];
+      for (let i = 0; i < ids.length; i += 150) {
+        let q = db.from(table).select(columns).in("id", ids.slice(i, i + 150));
+        if (extra) q = extra(q);
+        const res = await q.limit(1000);
+        if (res.error) return res;
+        if (Array.isArray(res.data)) out.push(...res.data);
+      }
+      return { data: out, error: null };
+    };
 
-    const [competitionsResult, teamsResult] = await Promise.all([competitionsPromise, teamsPromise]);
+    const [competitionsResult, teamsResult] = await Promise.all([
+      chunkedSelect("sports_competitions", "id,name,country_code,region,competition_kind,division_level,season", competitionIds, (q) => q.eq("active", true)),
+      chunkedSelect("sports_teams", "id,name,short_name,logo_url", teamIds),
+    ]);
     if (competitionsResult.error || teamsResult.error) {
+      console.error("[analytics-overview] catalog query failed", competitionsResult.error ?? teamsResult.error);
       throw new BackendError("INTERNAL_ERROR", "Falha ao carregar o catálogo analítico da temporada.", 500);
     }
 
