@@ -2819,6 +2819,11 @@ export type Database = {
         Args: { p_date: string }
         Returns: number
       }
+      auto_close_expired_sports_reviews: { Args: never; Returns: number }
+      auto_close_expired_sports_reviews_at: {
+        Args: { p_reference_at: string }
+        Returns: number
+      }
       auto_close_sports_reviews: {
         Args: { p_cutoff: string; p_owner_id: string }
         Returns: number
@@ -3163,6 +3168,10 @@ export type Database = {
         Returns: boolean
       }
       requeue_unlinked_api_football_jobs: { Args: never; Returns: number }
+      run_fifa_break_last_round_player_stats_once: {
+        Args: never
+        Returns: Json
+      }
       run_performance_retention_cleanup: { Args: never; Returns: Json }
       run_privacy_retention_cleanup: { Args: never; Returns: Json }
       sports_fixture_in_api_football_scope: {
