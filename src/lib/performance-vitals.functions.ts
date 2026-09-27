@@ -20,14 +20,23 @@ export const reportPerformanceVital = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => vitalSchema.parse(input))
   .handler(async ({ data, context }) => {
-    if (!context.userId) throw new Error("Usuário não autenticado.");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await (supabaseAdmin as any).from("performance_vitals").insert({
-      metric: data.metric,
-      value: data.value,
-      rating: data.rating,
-      route: normalizedRoute(data.route),
-    });
-    if (error) throw new Error(`Falha ao registrar métrica de desempenho: ${error.message}`);
-    return { ok: true };
+    if (!context.userId) return { ok: false };
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { error } = await (supabaseAdmin as any).from("performance_vitals").insert({
+        metric: data.metric,
+        value: data.value,
+        rating: data.rating,
+        route: normalizedRoute(data.route),
+      });
+      if (error) {
+        console.error("[performance-vitals] insert failed:", error.message);
+        return { ok: false };
+      }
+      return { ok: true };
+    } catch (err) {
+      // Telemetry is best-effort: never surface a 500 to the app.
+      console.error("[performance-vitals] unexpected failure:", err);
+      return { ok: false };
+    }
   });
