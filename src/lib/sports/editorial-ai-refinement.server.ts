@@ -106,22 +106,74 @@ function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
   return sources.slice(0, 3);
 }
 
+const MARQUEE_PATTERN = /(champions league|libertadores|sudamericana|europa league|copa do brasil|copa del rey|fa cup|final|classico|clássico|derby|nations league|world cup|copa america|copa américa|eliminat|qualif|international|friendl|euro)/i;
+
+const BIG_CLUBS = new Set([
+  "real madrid", "barcelona", "atletico madrid", "manchester city", "manchester united",
+  "liverpool", "arsenal", "chelsea", "tottenham", "bayern munich", "bayern munchen",
+  "borussia dortmund", "juventus", "inter", "ac milan", "napoli", "psg", "paris saint germain",
+  "benfica", "porto", "sporting", "ajax", "palmeiras", "flamengo", "corinthians", "sao paulo",
+  "gremio", "internacional", "santos", "fluminense", "botafogo", "atletico mineiro", "cruzeiro",
+  "boca juniors", "river plate", "brazil", "argentina", "france", "england", "spain", "germany",
+  "portugal", "italy", "netherlands", "uruguay", "colombia",
+]);
+
+function normalizeName(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
+}
+
+function teamsFromTitle(title: string) {
+  const parts = title.split(/\s\d+\s×\s\d+\s/);
+  if (parts.length !== 2) return [] as string[];
+  return parts.map((part) => normalizeName(part)).filter(Boolean);
+}
+
+function editorialTier(kind: EditorialCandidate["kind"], title: string, facts: Row): EditorialTier {
+  if (kind !== "FOOTBALL_MATCH") return 2;
+  const competition = text(facts["competition"]) ?? "";
+  const teams = teamsFromTitle(title);
+  const bigTeams = teams.filter((team) => BIG_CLUBS.has(team)).length;
+  const margin = numeric(facts["margin"]);
+  const goals = isRecord(facts["score"])
+    ? numeric(facts["score"]["home"]) + numeric(facts["score"]["away"])
+    : 0;
+  const hasJournalism = Array.isArray(facts["journalismContext"]) && facts["journalismContext"].length > 0;
+
+  if (bigTeams >= 2) return 1;
+  if (bigTeams >= 1 && (MARQUEE_PATTERN.test(competition) || hasJournalism)) return 1;
+  if (MARQUEE_PATTERN.test(competition) && (margin <= 1 || goals >= 4)) return 1;
+  if (bigTeams >= 1 || goals >= 4 || margin >= 3 || hasJournalism) return 2;
+  return 3;
+}
+
 function parseCandidate(row: Row): EditorialCandidate | null {
   const id = text(row["id"]);
   const rawKind = text(row["item_kind"]);
   const title = text(row["title"]);
   const body = text(row["body"]) ?? "";
-  if (!id || !title || (rawKind !== "FOOTBALL_MATCH" && rawKind !== "OTHER_SPORT")) return null;
+  if (!id || !title) return null;
 
   const facts = isRecord(row["facts"]) ? row["facts"] : {};
+  const isClubFocus = rawKind === "NEWS_CONTEXT" && text(facts["section"]) === "palmeiras";
+  const kind: EditorialCandidate["kind"] | null =
+    rawKind === "FOOTBALL_MATCH" ? "FOOTBALL_MATCH"
+      : rawKind === "OTHER_SPORT" ? "OTHER_SPORT"
+        : isClubFocus ? "CLUB_FOCUS"
+          : null;
+  if (!kind) return null;
+
   return {
     id,
-    kind: rawKind,
+    fixtureId: text(row["fixture_id"]),
+    kind,
+    tier: editorialTier(kind, title, facts),
     title,
     body,
     priority: numeric(row["priority"]),
     lateGame: facts["lateGame"] === true,
-    sourceContext: sourceContextFromFacts(rawKind, facts),
+    sourceContext: sourceContextFromFacts(kind === "CLUB_FOCUS" ? "FOOTBALL_MATCH" : kind, facts),
+    standouts: [],
+    goalScorers: [],
     facts,
     provenance: Array.isArray(row["provenance"]) ? row["provenance"] : [],
   };
@@ -129,14 +181,15 @@ function parseCandidate(row: Row): EditorialCandidate | null {
 
 function selectCandidates(rows: Row[]) {
   const parsed = rows.map(parseCandidate).filter((item): item is EditorialCandidate => item !== null);
+  const clubFocus = parsed.filter((item) => item.kind === "CLUB_FOCUS");
   const football = parsed
     .filter((item) => item.kind === "FOOTBALL_MATCH")
-    .sort((a, b) => b.priority - a.priority);
+    .sort((a, b) => a.tier - b.tier || b.priority - a.priority);
   const otherSports = parsed
     .filter((item) => item.kind === "OTHER_SPORT")
     .sort((a, b) => b.priority - a.priority)
     .slice(0, MAX_OTHER_SPORTS);
-  return [...football, ...otherSports].slice(0, 100);
+  return [...clubFocus, ...football, ...otherSports].slice(0, 100);
 }
 
 function chunks<T>(items: T[], size: number) {
@@ -147,21 +200,40 @@ function chunks<T>(items: T[], size: number) {
   return result;
 }
 
+const TIER_GUIDANCE: Record<EditorialTier, string> = {
+  1: "JOGO GRANDE: 4 a 6 frases. Conte o roteiro do jogo (quem mandou, quando virou, o lance que decidiu), cite os minutos dos gols, destaque os protagonistas pelo nome e use as estatísticas para explicar a dinâmica. Integre o contexto das fontes jornalísticas.",
+  2: "JOGO RELEVANTE: 2 a 3 frases densas. Narre como o placar foi construído, quem decidiu e um número que explique a partida.",
+  3: "JOGO DE ROTINA: 1 frase objetiva com o placar e quem resolveu. Só escreva uma segunda frase se houver algo realmente fora do comum (virada no fim, goleada, expulsão decisiva, zebra).",
+};
+
 function promptPayload(date: string, candidates: EditorialCandidate[]) {
   return {
     date,
     timezone: "America/Sao_Paulo",
     instructions: {
       language: "pt-BR",
-      audience: "leitor brasileiro de uma resenha esportiva matinal",
-      opening: "2 parágrafos curtos; destaque de 3 a 5 acontecimentos mais relevantes entre os itens de futebol enviados.",
-      football: "2 a 4 frases por partida. Preserve placar, minutos, números e nomes. Integre contexto jornalístico de forma natural e traduzida.",
+      audience: "torcedor brasileiro que lê uma resenha esportiva matinal bem escrita",
+      voice: "jornalismo esportivo de revista: frases vivas, verbos de ação, zero burocracia.",
+      opening: "2 parágrafos de abertura com o que realmente importou no dia, começando pelos jogos grandes e pelas seleções. Escreva como chamada de capa, não como relatório.",
+      depth: "Respeite o campo 'tier' de cada item: ele define quanto espaço o jogo merece.",
+      players: "Quando houver 'standouts' ou 'goalScorers', cite os jogadores pelo nome com o que eles fizeram em campo.",
+      stats: "Transforme números em narrativa (posse que não virou perigo, volume de finalizações que explicou a goleada). Nunca liste números soltos.",
       otherSports: "Título e 1 a 2 frases em português brasileiro. Use somente o que a manchete de origem permite afirmar.",
+      clubFocus: "Bloco fixo do Palmeiras. Se houve jogo, conte o desempenho. Se não houve, escreva uma nota curta e natural de torcedor sobre o clube ter ficado fora de campo na data — nunca uma mensagem de sistema.",
     },
     items: candidates.map((item) => ({
       id: item.id,
       kind: item.kind,
+      tier: item.tier,
+      depth: TIER_GUIDANCE[item.tier],
       title: item.title,
+      competition: text(item.facts["competition"]),
+      score: item.facts["score"] ?? null,
+      goalTimeline: text(item.facts["goalTimeline"]),
+      lateGame: item.lateGame,
+      matchStats: isRecord(item.facts["editorialStats"]) ? item.facts["editorialStats"]["values"] ?? null : null,
+      standouts: item.standouts,
+      goalScorers: item.goalScorers,
       factualBody: item.body,
       sourceHeadlines: item.sourceContext,
     })),
