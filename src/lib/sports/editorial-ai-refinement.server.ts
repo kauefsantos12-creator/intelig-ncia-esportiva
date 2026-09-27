@@ -421,7 +421,7 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
 
   const itemsResult = await db
     .from("sports_briefing_items")
-    .select("id,item_kind,title,body,priority,facts,provenance")
+    .select("id,fixture_id,item_kind,title,body,priority,facts,provenance")
     .eq("briefing_id", briefingId)
     .order("priority", { ascending: false })
     .limit(100);
@@ -443,6 +443,8 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
       reason: "Nenhum item editorial elegível.",
     };
   }
+
+  await attachMatchProtagonists(db, candidates);
 
   const currentMetadata = isRecord(briefing?.["metadata"]) ? briefing?.["metadata"] : {};
   const batches = chunks(candidates, BATCH_SIZE);
