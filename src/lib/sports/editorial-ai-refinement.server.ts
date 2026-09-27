@@ -590,7 +590,8 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
         model: AI_MODEL,
         generatedAt,
         sourceBound: true,
-        version: "editorial-ai-v1",
+        version: EDITORIAL_VERSION,
+        tier: original.tier,
       },
     };
 
