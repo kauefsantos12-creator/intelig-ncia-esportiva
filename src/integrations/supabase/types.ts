@@ -2825,7 +2825,7 @@ export type Database = {
         Returns: number
       }
       auto_close_sports_reviews: {
-        Args: { p_cutoff: string; p_owner_id: string }
+        Args: { p_cutoff?: string; p_owner_id: string }
         Returns: number
       }
       claim_push_delivery_batch: {
@@ -3153,6 +3153,10 @@ export type Database = {
       }
       reconcile_automation_runs: {
         Args: { p_timeout_minutes?: number }
+        Returns: Json
+      }
+      refresh_derived_season_analytics: {
+        Args: { p_season?: string }
         Returns: Json
       }
       release_sports_daily_briefing: {
