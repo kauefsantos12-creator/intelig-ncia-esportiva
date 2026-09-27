@@ -5,17 +5,36 @@ const AI_MODEL = "google/gemini-3.7-flash";
 const MAX_OTHER_SPORTS = 8;
 const BATCH_SIZE = 12;
 const REQUEST_TIMEOUT_MS = 45_000;
+const EDITORIAL_VERSION = "editorial-ai-v2";
+const AI_TEMPERATURE = 0.65;
+const MAX_STANDOUTS_PER_FIXTURE = 3;
 
 type Row = Record<string, unknown>;
 
+type EditorialTier = 1 | 2 | 3;
+
+type Standout = {
+  player: string;
+  team: string;
+  rating: number | null;
+  minutes: number | null;
+  goals: number | null;
+  assists: number | null;
+  saves: number | null;
+};
+
 type EditorialCandidate = {
   id: string;
-  kind: "FOOTBALL_MATCH" | "OTHER_SPORT";
+  fixtureId: string | null;
+  kind: "FOOTBALL_MATCH" | "OTHER_SPORT" | "CLUB_FOCUS";
+  tier: EditorialTier;
   title: string;
   body: string;
   priority: number;
   lateGame: boolean;
   sourceContext: Array<{ source: string; title: string }>;
+  standouts: Standout[];
+  goalScorers: string[];
   facts: Row;
   provenance: unknown[];
 };
