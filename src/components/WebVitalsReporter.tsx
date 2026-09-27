@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 
+import { supabase } from "@/integrations/supabase/client";
+import { reportPerformanceVital } from "@/lib/performance-vitals.functions";
+
 type VitalMetric = "LCP" | "CLS" | "INP" | "TTFB";
 type VitalRating = "good" | "needs-improvement" | "poor";
 
@@ -68,10 +71,8 @@ export function WebVitalsReporter() {
       if (!positiveMetrics.length) return;
       try {
         // Only signed-in users may report; skip silently otherwise to avoid 401/500 noise.
-        const { supabase } = await import("@/integrations/supabase/client");
         const { data: sessionData } = await supabase.auth.getSession();
         if (!sessionData.session) return;
-        const { reportPerformanceVital } = await import("@/lib/performance-vitals.functions");
         await Promise.all(positiveMetrics.map(([metric, value]) => reportPerformanceVital({
           data: { metric, value, rating: rating(metric, value), route: window.location.pathname },
         }).catch(() => undefined)));
