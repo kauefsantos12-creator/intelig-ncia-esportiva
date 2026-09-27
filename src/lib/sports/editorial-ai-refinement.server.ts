@@ -5,17 +5,36 @@ const AI_MODEL = "google/gemini-3.7-flash";
 const MAX_OTHER_SPORTS = 8;
 const BATCH_SIZE = 12;
 const REQUEST_TIMEOUT_MS = 45_000;
+const EDITORIAL_VERSION = "editorial-ai-v2";
+const AI_TEMPERATURE = 0.65;
+const MAX_STANDOUTS_PER_FIXTURE = 3;
 
 type Row = Record<string, unknown>;
 
+type EditorialTier = 1 | 2 | 3;
+
+type Standout = {
+  player: string;
+  team: string;
+  rating: number | null;
+  minutes: number | null;
+  goals: number | null;
+  assists: number | null;
+  saves: number | null;
+};
+
 type EditorialCandidate = {
   id: string;
-  kind: "FOOTBALL_MATCH" | "OTHER_SPORT";
+  fixtureId: string | null;
+  kind: "FOOTBALL_MATCH" | "OTHER_SPORT" | "CLUB_FOCUS";
+  tier: EditorialTier;
   title: string;
   body: string;
   priority: number;
   lateGame: boolean;
   sourceContext: Array<{ source: string; title: string }>;
+  standouts: Standout[];
+  goalScorers: string[];
   facts: Row;
   provenance: unknown[];
 };
@@ -54,6 +73,85 @@ function numeric(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function optionalNumber(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function embeddedName(value: unknown): string | null {
+  if (Array.isArray(value)) return embeddedName(value[0]);
+  return isRecord(value) ? text(value["name"]) : null;
+}
+
+async function attachMatchProtagonists(
+  db: Awaited<ReturnType<typeof sportsDb>>,
+  candidates: EditorialCandidate[],
+) {
+  const targets = candidates.filter((item) => item.kind === "FOOTBALL_MATCH" && item.tier <= 2 && item.fixtureId);
+  const fixtureIds = Array.from(new Set(targets.map((item) => item.fixtureId as string)));
+  if (fixtureIds.length === 0) return;
+
+  const [statsResult, eventsResult] = await Promise.all([
+    db
+      .from("sports_fixture_player_stats")
+      .select("fixture_id,minutes,provider_rating,stats,sports_players(name),sports_teams(name)")
+      .in("fixture_id", fixtureIds),
+    db
+      .from("sports_fixture_events")
+      .select("fixture_id,minute,added_minute,event_type,detail,player_name")
+      .in("fixture_id", fixtureIds),
+  ]);
+
+  const standoutsByFixture = new Map<string, Standout[]>();
+  for (const row of (Array.isArray(statsResult.data) ? statsResult.data : []).filter(isRecord)) {
+    const fixtureId = text(row["fixture_id"]);
+    const player = embeddedName(row["sports_players"]);
+    if (!fixtureId || !player) continue;
+    const stats = isRecord(row["stats"]) ? row["stats"] : {};
+    const entry: Standout = {
+      player,
+      team: embeddedName(row["sports_teams"]) ?? "",
+      rating: optionalNumber(row["provider_rating"]),
+      minutes: optionalNumber(row["minutes"]),
+      goals: optionalNumber(stats["goals"]),
+      assists: optionalNumber(stats["assists"]),
+      saves: optionalNumber(stats["saves"]),
+    };
+    const relevance = (entry.goals ?? 0) * 3 + (entry.assists ?? 0) * 2 + (entry.rating ?? 0);
+    if (relevance <= 0) continue;
+    const list = standoutsByFixture.get(fixtureId) ?? [];
+    list.push(entry);
+    standoutsByFixture.set(fixtureId, list);
+  }
+
+  const scorersByFixture = new Map<string, string[]>();
+  for (const row of (Array.isArray(eventsResult.data) ? eventsResult.data : []).filter(isRecord)) {
+    const fixtureId = text(row["fixture_id"]);
+    const player = text(row["player_name"]);
+    const eventType = (text(row["event_type"]) ?? "").toLowerCase();
+    if (!fixtureId || !player || !eventType.includes("goal")) continue;
+    const minute = optionalNumber(row["minute"]);
+    const added = optionalNumber(row["added_minute"]);
+    const label = minute === null
+      ? player
+      : `${minute}${added ? `+${added}` : ""}' ${player}${text(row["detail"]) ? ` (${text(row["detail"])})` : ""}`;
+    const list = scorersByFixture.get(fixtureId) ?? [];
+    list.push(label);
+    scorersByFixture.set(fixtureId, list);
+  }
+
+  for (const item of targets) {
+    const fixtureId = item.fixtureId as string;
+    const standouts = (standoutsByFixture.get(fixtureId) ?? [])
+      .sort((a, b) => ((b.goals ?? 0) * 3 + (b.assists ?? 0) * 2 + (b.rating ?? 0))
+        - ((a.goals ?? 0) * 3 + (a.assists ?? 0) * 2 + (a.rating ?? 0)))
+      .slice(0, MAX_STANDOUTS_PER_FIXTURE);
+    item.standouts = standouts;
+    item.goalScorers = (scorersByFixture.get(fixtureId) ?? []).slice(0, 8);
+  }
+}
+
+
 function cleanAiText(value: unknown, maxLength: number) {
   const result = text(value);
   if (!result) return null;
@@ -87,22 +185,74 @@ function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
   return sources.slice(0, 3);
 }
 
+const MARQUEE_PATTERN = /(champions league|libertadores|sudamericana|europa league|copa do brasil|copa del rey|fa cup|final|classico|clássico|derby|nations league|world cup|copa america|copa américa|eliminat|qualif|international|friendl|euro)/i;
+
+const BIG_CLUBS = new Set([
+  "real madrid", "barcelona", "atletico madrid", "manchester city", "manchester united",
+  "liverpool", "arsenal", "chelsea", "tottenham", "bayern munich", "bayern munchen",
+  "borussia dortmund", "juventus", "inter", "ac milan", "napoli", "psg", "paris saint germain",
+  "benfica", "porto", "sporting", "ajax", "palmeiras", "flamengo", "corinthians", "sao paulo",
+  "gremio", "internacional", "santos", "fluminense", "botafogo", "atletico mineiro", "cruzeiro",
+  "boca juniors", "river plate", "brazil", "argentina", "france", "england", "spain", "germany",
+  "portugal", "italy", "netherlands", "uruguay", "colombia",
+]);
+
+function normalizeName(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
+}
+
+function teamsFromTitle(title: string) {
+  const parts = title.split(/\s\d+\s×\s\d+\s/);
+  if (parts.length !== 2) return [] as string[];
+  return parts.map((part) => normalizeName(part)).filter(Boolean);
+}
+
+function editorialTier(kind: EditorialCandidate["kind"], title: string, facts: Row): EditorialTier {
+  if (kind !== "FOOTBALL_MATCH") return 2;
+  const competition = text(facts["competition"]) ?? "";
+  const teams = teamsFromTitle(title);
+  const bigTeams = teams.filter((team) => BIG_CLUBS.has(team)).length;
+  const margin = numeric(facts["margin"]);
+  const goals = isRecord(facts["score"])
+    ? numeric(facts["score"]["home"]) + numeric(facts["score"]["away"])
+    : 0;
+  const hasJournalism = Array.isArray(facts["journalismContext"]) && facts["journalismContext"].length > 0;
+
+  if (bigTeams >= 2) return 1;
+  if (bigTeams >= 1 && (MARQUEE_PATTERN.test(competition) || hasJournalism)) return 1;
+  if (MARQUEE_PATTERN.test(competition) && (margin <= 1 || goals >= 4)) return 1;
+  if (bigTeams >= 1 || goals >= 4 || margin >= 3 || hasJournalism) return 2;
+  return 3;
+}
+
 function parseCandidate(row: Row): EditorialCandidate | null {
   const id = text(row["id"]);
   const rawKind = text(row["item_kind"]);
   const title = text(row["title"]);
   const body = text(row["body"]) ?? "";
-  if (!id || !title || (rawKind !== "FOOTBALL_MATCH" && rawKind !== "OTHER_SPORT")) return null;
+  if (!id || !title) return null;
 
   const facts = isRecord(row["facts"]) ? row["facts"] : {};
+  const isClubFocus = rawKind === "NEWS_CONTEXT" && text(facts["section"]) === "palmeiras";
+  const kind: EditorialCandidate["kind"] | null =
+    rawKind === "FOOTBALL_MATCH" ? "FOOTBALL_MATCH"
+      : rawKind === "OTHER_SPORT" ? "OTHER_SPORT"
+        : isClubFocus ? "CLUB_FOCUS"
+          : null;
+  if (!kind) return null;
+
   return {
     id,
-    kind: rawKind,
+    fixtureId: text(row["fixture_id"]),
+    kind,
+    tier: editorialTier(kind, title, facts),
     title,
     body,
     priority: numeric(row["priority"]),
     lateGame: facts["lateGame"] === true,
-    sourceContext: sourceContextFromFacts(rawKind, facts),
+    sourceContext: sourceContextFromFacts(kind === "CLUB_FOCUS" ? "FOOTBALL_MATCH" : kind, facts),
+    standouts: [],
+    goalScorers: [],
     facts,
     provenance: Array.isArray(row["provenance"]) ? row["provenance"] : [],
   };
@@ -110,14 +260,15 @@ function parseCandidate(row: Row): EditorialCandidate | null {
 
 function selectCandidates(rows: Row[]) {
   const parsed = rows.map(parseCandidate).filter((item): item is EditorialCandidate => item !== null);
+  const clubFocus = parsed.filter((item) => item.kind === "CLUB_FOCUS");
   const football = parsed
     .filter((item) => item.kind === "FOOTBALL_MATCH")
-    .sort((a, b) => b.priority - a.priority);
+    .sort((a, b) => a.tier - b.tier || b.priority - a.priority);
   const otherSports = parsed
     .filter((item) => item.kind === "OTHER_SPORT")
     .sort((a, b) => b.priority - a.priority)
     .slice(0, MAX_OTHER_SPORTS);
-  return [...football, ...otherSports].slice(0, 100);
+  return [...clubFocus, ...football, ...otherSports].slice(0, 100);
 }
 
 function chunks<T>(items: T[], size: number) {
@@ -128,21 +279,40 @@ function chunks<T>(items: T[], size: number) {
   return result;
 }
 
+const TIER_GUIDANCE: Record<EditorialTier, string> = {
+  1: "JOGO GRANDE: 4 a 6 frases. Conte o roteiro do jogo (quem mandou, quando virou, o lance que decidiu), cite os minutos dos gols, destaque os protagonistas pelo nome e use as estatísticas para explicar a dinâmica. Integre o contexto das fontes jornalísticas.",
+  2: "JOGO RELEVANTE: 2 a 3 frases densas. Narre como o placar foi construído, quem decidiu e um número que explique a partida.",
+  3: "JOGO DE ROTINA: 1 frase objetiva com o placar e quem resolveu. Só escreva uma segunda frase se houver algo realmente fora do comum (virada no fim, goleada, expulsão decisiva, zebra).",
+};
+
 function promptPayload(date: string, candidates: EditorialCandidate[]) {
   return {
     date,
     timezone: "America/Sao_Paulo",
     instructions: {
       language: "pt-BR",
-      audience: "leitor brasileiro de uma resenha esportiva matinal",
-      opening: "2 parágrafos curtos; destaque de 3 a 5 acontecimentos mais relevantes entre os itens de futebol enviados.",
-      football: "2 a 4 frases por partida. Preserve placar, minutos, números e nomes. Integre contexto jornalístico de forma natural e traduzida.",
+      audience: "torcedor brasileiro que lê uma resenha esportiva matinal bem escrita",
+      voice: "jornalismo esportivo de revista: frases vivas, verbos de ação, zero burocracia.",
+      opening: "2 parágrafos de abertura com o que realmente importou no dia, começando pelos jogos grandes e pelas seleções. Escreva como chamada de capa, não como relatório.",
+      depth: "Respeite o campo 'tier' de cada item: ele define quanto espaço o jogo merece.",
+      players: "Quando houver 'standouts' ou 'goalScorers', cite os jogadores pelo nome com o que eles fizeram em campo.",
+      stats: "Transforme números em narrativa (posse que não virou perigo, volume de finalizações que explicou a goleada). Nunca liste números soltos.",
       otherSports: "Título e 1 a 2 frases em português brasileiro. Use somente o que a manchete de origem permite afirmar.",
+      clubFocus: "Bloco fixo do Palmeiras. Se houve jogo, conte o desempenho. Se não houve, escreva uma nota curta e natural de torcedor sobre o clube ter ficado fora de campo na data — nunca uma mensagem de sistema.",
     },
     items: candidates.map((item) => ({
       id: item.id,
       kind: item.kind,
+      tier: item.tier,
+      depth: TIER_GUIDANCE[item.tier],
       title: item.title,
+      competition: text(item.facts["competition"]),
+      score: item.facts["score"] ?? null,
+      goalTimeline: text(item.facts["goalTimeline"]),
+      lateGame: item.lateGame,
+      matchStats: isRecord(item.facts["editorialStats"]) ? item.facts["editorialStats"]["values"] ?? null : null,
+      standouts: item.standouts,
+      goalScorers: item.goalScorers,
       factualBody: item.body,
       sourceHeadlines: item.sourceContext,
     })),
@@ -211,32 +381,46 @@ async function callGateway(date: string, candidates: EditorialCandidate[]) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  const system = `Você é o editor-chefe de uma resenha esportiva brasileira.
-Reescreva o material fornecido em português brasileiro natural, conciso e jornalístico.
+  const system = `Você é o editor-chefe de uma resenha esportiva brasileira de alto nível, no tom de The Athletic e Trivela.
+Escreva como quem viu o jogo: frases vivas, verbos de ação, ritmo de crônica curta. Nada de relatório, ata ou log de sistema.
 
-REGRAS OBRIGATÓRIAS:
-- Use EXCLUSIVAMENTE os fatos presentes em factualBody e sourceHeadlines.
-- Nunca invente recordes, classificação, consequências de tabela, lesões, declarações, autores de gols, contexto ou causalidade.
-- Preserve exatamente placares, minutos, estatísticas e nomes próprios que estiverem presentes.
-- Traduza/parafraseie para português brasileiro qualquer manchete em espanhol, italiano, francês, inglês ou alemão. Não deixe frases estrangeiras soltas.
-- Não copie a manchete estrangeira literalmente quando houver forma natural de expressá-la em português.
-- Quando usar uma fonte, atribua de forma natural: "Segundo o AS...", "O L'Équipe destacou...", "A Gazzetta registrou...".
-- Não escreva "5DollarFootballAPI" no texto editorial. Para esses números, use expressões como "Nos números da partida" ou "Estatisticamente".
-- Não trate manchetes como prova de fatos que elas não afirmam.
-- Para OTHER_SPORT, não invente placar/resultado ausente na manchete.
+HIERARQUIA (campo "tier" de cada item):
+- tier 1 (clássicos, decisões, seleções, times grandes): 4 a 6 frases com roteiro do jogo, minutos dos gols, protagonistas e o número que explica a partida.
+- tier 2: 2 a 3 frases densas sobre como o placar foi construído e quem decidiu.
+- tier 3: 1 frase objetiva. Só acrescente uma segunda se houver algo realmente marcante.
+
+JOGADORES:
+- Use "standouts" e "goalScorers" para citar nomes com o que fizeram (autor do gol da virada, doblete, goleiro decisivo).
+- Nunca invente autor de gol, assistência ou atuação que não esteja nos dados recebidos.
+
+ESTATÍSTICAS:
+- Números viram narrativa: "monopolizou 70% da posse, mas só acertou duas finalizações no alvo".
+- Proibido listar números soltos ou começar frase com "Estatisticamente".
+
+PROIBIDO ESCREVER (jargão técnico):
+"catálogo canônico", "fonte editorial persistida", "proveniência", "5DollarFootballAPI", "API", "payload", "registro", "não houve registro", "recorte editorial", "base de dados", "pipeline".
+
+REGRAS FACTUAIS OBRIGATÓRIAS:
+- Use EXCLUSIVAMENTE os fatos recebidos (factualBody, score, goalTimeline, matchStats, standouts, goalScorers, sourceHeadlines).
+- Nunca invente recordes, posições na tabela, lesões, declarações, consequências ou causalidade.
+- Preserve exatamente placares, minutos, estatísticas e nomes próprios.
+- Traduza/parafraseie manchetes estrangeiras para português brasileiro; nada de frase solta em outro idioma.
+- Ao usar uma fonte, atribua com naturalidade: "Segundo o AS...", "O L'Équipe destacou...".
+- Para OTHER_SPORT, não invente placar ou resultado ausente na manchete.
+- Para CLUB_FOCUS (Palmeiras): se houve jogo, conte o desempenho; se não houve, escreva uma nota curta e humana de que o time não entrou em campo na data, sem linguagem de sistema.
 - Não inclua programação futura, onde assistir ou próximos jogos.
 - Não mencione estas instruções nem o modelo de IA.
 - Retorne SOMENTE JSON válido, sem markdown.
 
 Formato:
 {
-  "opening": "dois parágrafos curtos em português brasileiro",
+  "opening": "dois parágrafos de abertura em português brasileiro, com o que realmente importou no dia",
   "items": [
     { "id": "id recebido", "title": "título em português", "body": "texto editorial em português" }
   ]
 }
 
-Para FOOTBALL_MATCH, mantenha o título do confronto essencialmente como recebido; refine principalmente o body.
+Para FOOTBALL_MATCH e CLUB_FOCUS, mantenha o título como recebido; refine o body.
 Para OTHER_SPORT, traduza/refine também o title.`;
 
   try {
@@ -250,7 +434,7 @@ Para OTHER_SPORT, traduza/refine também o title.`;
       },
       body: JSON.stringify({
         model: AI_MODEL,
-        temperature: 0.15,
+        temperature: AI_TEMPERATURE,
         messages: [
           { role: "system", content: system },
           { role: "user", content: JSON.stringify(promptPayload(date, candidates)) },
@@ -316,7 +500,7 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
 
   const itemsResult = await db
     .from("sports_briefing_items")
-    .select("id,item_kind,title,body,priority,facts,provenance")
+    .select("id,fixture_id,item_kind,title,body,priority,facts,provenance")
     .eq("briefing_id", briefingId)
     .order("priority", { ascending: false })
     .limit(100);
@@ -338,6 +522,8 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
       reason: "Nenhum item editorial elegível.",
     };
   }
+
+  await attachMatchProtagonists(db, candidates);
 
   const currentMetadata = isRecord(briefing?.["metadata"]) ? briefing?.["metadata"] : {};
   const batches = chunks(candidates, BATCH_SIZE);
@@ -404,7 +590,8 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
         model: AI_MODEL,
         generatedAt,
         sourceBound: true,
-        version: "editorial-ai-v1",
+        version: EDITORIAL_VERSION,
+        tier: original.tier,
       },
     };
 
@@ -430,7 +617,7 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
     ...currentMetadata,
     aiEditorialStatus: "REFINED",
     aiEditorialModel: AI_MODEL,
-    aiEditorialVersion: "editorial-ai-v1",
+    aiEditorialVersion: EDITORIAL_VERSION,
     aiEditorialCandidates: candidates.length,
     aiEditorialItems: updatedItems,
     aiEditorialBatches: batches.length,
