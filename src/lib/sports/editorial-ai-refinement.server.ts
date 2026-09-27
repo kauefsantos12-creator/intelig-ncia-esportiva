@@ -73,6 +73,85 @@ function numeric(value: unknown): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function optionalNumber(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function embeddedName(value: unknown): string | null {
+  if (Array.isArray(value)) return embeddedName(value[0]);
+  return isRecord(value) ? text(value["name"]) : null;
+}
+
+async function attachMatchProtagonists(
+  db: Awaited<ReturnType<typeof sportsDb>>,
+  candidates: EditorialCandidate[],
+) {
+  const targets = candidates.filter((item) => item.kind === "FOOTBALL_MATCH" && item.tier <= 2 && item.fixtureId);
+  const fixtureIds = Array.from(new Set(targets.map((item) => item.fixtureId as string)));
+  if (fixtureIds.length === 0) return;
+
+  const [statsResult, eventsResult] = await Promise.all([
+    db
+      .from("sports_fixture_player_stats")
+      .select("fixture_id,minutes,provider_rating,stats,sports_players(name),sports_teams(name)")
+      .in("fixture_id", fixtureIds),
+    db
+      .from("sports_fixture_events")
+      .select("fixture_id,minute,added_minute,event_type,detail,player_name")
+      .in("fixture_id", fixtureIds),
+  ]);
+
+  const standoutsByFixture = new Map<string, Standout[]>();
+  for (const row of (Array.isArray(statsResult.data) ? statsResult.data : []).filter(isRecord)) {
+    const fixtureId = text(row["fixture_id"]);
+    const player = embeddedName(row["sports_players"]);
+    if (!fixtureId || !player) continue;
+    const stats = isRecord(row["stats"]) ? row["stats"] : {};
+    const entry: Standout = {
+      player,
+      team: embeddedName(row["sports_teams"]) ?? "",
+      rating: optionalNumber(row["provider_rating"]),
+      minutes: optionalNumber(row["minutes"]),
+      goals: optionalNumber(stats["goals"]),
+      assists: optionalNumber(stats["assists"]),
+      saves: optionalNumber(stats["saves"]),
+    };
+    const relevance = (entry.goals ?? 0) * 3 + (entry.assists ?? 0) * 2 + (entry.rating ?? 0);
+    if (relevance <= 0) continue;
+    const list = standoutsByFixture.get(fixtureId) ?? [];
+    list.push(entry);
+    standoutsByFixture.set(fixtureId, list);
+  }
+
+  const scorersByFixture = new Map<string, string[]>();
+  for (const row of (Array.isArray(eventsResult.data) ? eventsResult.data : []).filter(isRecord)) {
+    const fixtureId = text(row["fixture_id"]);
+    const player = text(row["player_name"]);
+    const eventType = (text(row["event_type"]) ?? "").toLowerCase();
+    if (!fixtureId || !player || !eventType.includes("goal")) continue;
+    const minute = optionalNumber(row["minute"]);
+    const added = optionalNumber(row["added_minute"]);
+    const label = minute === null
+      ? player
+      : `${minute}${added ? `+${added}` : ""}' ${player}${text(row["detail"]) ? ` (${text(row["detail"])})` : ""}`;
+    const list = scorersByFixture.get(fixtureId) ?? [];
+    list.push(label);
+    scorersByFixture.set(fixtureId, list);
+  }
+
+  for (const item of targets) {
+    const fixtureId = item.fixtureId as string;
+    const standouts = (standoutsByFixture.get(fixtureId) ?? [])
+      .sort((a, b) => ((b.goals ?? 0) * 3 + (b.assists ?? 0) * 2 + (b.rating ?? 0))
+        - ((a.goals ?? 0) * 3 + (a.assists ?? 0) * 2 + (a.rating ?? 0)))
+      .slice(0, MAX_STANDOUTS_PER_FIXTURE);
+    item.standouts = standouts;
+    item.goalScorers = (scorersByFixture.get(fixtureId) ?? []).slice(0, 8);
+  }
+}
+
+
 function cleanAiText(value: unknown, maxLength: number) {
   const result = text(value);
   if (!result) return null;
