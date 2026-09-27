@@ -617,7 +617,7 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
     ...currentMetadata,
     aiEditorialStatus: "REFINED",
     aiEditorialModel: AI_MODEL,
-    aiEditorialVersion: "editorial-ai-v1",
+    aiEditorialVersion: EDITORIAL_VERSION,
     aiEditorialCandidates: candidates.length,
     aiEditorialItems: updatedItems,
     aiEditorialBatches: batches.length,
