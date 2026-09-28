@@ -8,6 +8,13 @@
       "when": 1790553900861,
       "tag": "0000_resenha_national_team_coverage_v12",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790553994624,
+      "tag": "0001_resenha_national_team_priority_tuning_v13",
+      "breakpoints": true
     }
   ]
 }
