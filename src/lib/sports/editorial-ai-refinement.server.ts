@@ -185,6 +185,7 @@ function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
   return sources.slice(0, 3);
 }
 
+const MAJOR_PATTERN = /(champions league|libertadores|world cup|copa america|copa américa|european championship|eurocopa|nations league a\b|final)/i;
 const MARQUEE_PATTERN = /(champions league|libertadores|sudamericana|europa league|copa do brasil|copa del rey|fa cup|final|classico|clássico|derby|nations league|world cup|copa america|copa américa|eliminat|qualif|international|friendl|euro)/i;
 
 const BIG_CLUBS = new Set([
@@ -220,8 +221,8 @@ function editorialTier(kind: EditorialCandidate["kind"], title: string, facts: R
 
   if (bigTeams >= 2) return 1;
   if (bigTeams >= 1 && (MARQUEE_PATTERN.test(competition) || hasJournalism)) return 1;
-  if (MARQUEE_PATTERN.test(competition) && (margin <= 1 || goals >= 4)) return 1;
-  if (bigTeams >= 1 || goals >= 4 || margin >= 3 || hasJournalism) return 2;
+  if (MAJOR_PATTERN.test(competition) && (margin <= 1 || goals >= 4)) return 1;
+  if (bigTeams >= 1 || MARQUEE_PATTERN.test(competition) || goals >= 4 || margin >= 3 || hasJournalism) return 2;
   return 3;
 }
 
