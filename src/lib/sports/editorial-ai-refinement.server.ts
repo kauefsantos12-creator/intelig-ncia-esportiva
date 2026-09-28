@@ -185,6 +185,7 @@ function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
   return sources.slice(0, 3);
 }
 
+const MAJOR_PATTERN = /(champions league|libertadores|world cup|copa america|copa américa|european championship|eurocopa|nations league a\b|final)/i;
 const MARQUEE_PATTERN = /(champions league|libertadores|sudamericana|europa league|copa do brasil|copa del rey|fa cup|final|classico|clássico|derby|nations league|world cup|copa america|copa américa|eliminat|qualif|international|friendl|euro)/i;
 
 const BIG_CLUBS = new Set([
