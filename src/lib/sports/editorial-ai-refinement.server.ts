@@ -35,6 +35,8 @@ type EditorialCandidate = {
   sourceContext: Array<{ source: string; title: string }>;
   standouts: Standout[];
   goalScorers: string[];
+  keyMoments: string[];
+
   facts: Row;
   provenance: unknown[];
 };
@@ -83,22 +85,69 @@ function embeddedName(value: unknown): string | null {
   return isRecord(value) ? text(value["name"]) : null;
 }
 
+function minuteLabel(minute: number | null, added: number | null) {
+  if (minute === null) return null;
+  return `${minute}${added ? `+${added}` : ""}'`;
+}
+
+function classifyEvent(eventType: string, detail: string) {
+  const type = eventType.toLowerCase();
+  const info = detail.toLowerCase();
+
+  if (type.includes("goal")) {
+    if (info.includes("own")) return { bucket: "moment" as const, label: "gol contra" };
+    if (info.includes("missed") || info.includes("saved")) {
+      return { bucket: "moment" as const, label: info.includes("saved") ? "pênalti defendido" : "pênalti perdido" };
+    }
+    if (info.includes("penalty")) return { bucket: "goal" as const, label: "gol de pênalti" };
+    return { bucket: "goal" as const, label: "gol" };
+  }
+
+  if (type.includes("penalt")) {
+    if (info.includes("saved")) return { bucket: "moment" as const, label: "pênalti defendido" };
+    if (info.includes("missed")) return { bucket: "moment" as const, label: "pênalti perdido" };
+    if (info.includes("scored") || info.includes("converted")) return { bucket: "goal" as const, label: "gol de pênalti" };
+    return { bucket: "moment" as const, label: "lance de pênalti" };
+  }
+
+  if (type.includes("card")) {
+    if (info.includes("red")) return { bucket: "moment" as const, label: "cartão vermelho" };
+    if (info.includes("second yellow") || info.includes("yellowred")) {
+      return { bucket: "moment" as const, label: "expulso com o segundo amarelo" };
+    }
+    return null;
+  }
+
+  if (type.includes("var")) {
+    if (info.includes("disallow") || info.includes("cancel") || info.includes("goal")) {
+      return { bucket: "moment" as const, label: "gol anulado pelo árbitro de vídeo" };
+    }
+    return null;
+  }
+
+  return null;
+}
+
 async function attachMatchProtagonists(
   db: Awaited<ReturnType<typeof sportsDb>>,
   candidates: EditorialCandidate[],
 ) {
-  const targets = candidates.filter((item) => item.kind === "FOOTBALL_MATCH" && item.tier <= 2 && item.fixtureId);
-  const fixtureIds = Array.from(new Set(targets.map((item) => item.fixtureId as string)));
+  const football = candidates.filter((item) => item.kind === "FOOTBALL_MATCH" && item.fixtureId);
+  const statsTargets = football.filter((item) => item.tier <= 2);
+  const fixtureIds = Array.from(new Set(football.map((item) => item.fixtureId as string)));
   if (fixtureIds.length === 0) return;
+  const statsFixtureIds = Array.from(new Set(statsTargets.map((item) => item.fixtureId as string)));
 
   const [statsResult, eventsResult] = await Promise.all([
-    db
-      .from("sports_fixture_player_stats")
-      .select("fixture_id,minutes,provider_rating,stats,sports_players(name),sports_teams(name)")
-      .in("fixture_id", fixtureIds),
+    statsFixtureIds.length
+      ? db
+        .from("sports_fixture_player_stats")
+        .select("fixture_id,minutes,provider_rating,stats,sports_players(name),sports_teams(name)")
+        .in("fixture_id", statsFixtureIds)
+      : Promise.resolve({ data: [] as unknown[] }),
     db
       .from("sports_fixture_events")
-      .select("fixture_id,minute,added_minute,event_type,detail,player_name")
+      .select("fixture_id,minute,added_minute,event_type,detail,player_name,sports_teams(name)")
       .in("fixture_id", fixtureIds),
   ]);
 
@@ -125,22 +174,35 @@ async function attachMatchProtagonists(
   }
 
   const scorersByFixture = new Map<string, string[]>();
+  const momentsByFixture = new Map<string, string[]>();
   for (const row of (Array.isArray(eventsResult.data) ? eventsResult.data : []).filter(isRecord)) {
     const fixtureId = text(row["fixture_id"]);
     const player = text(row["player_name"]);
-    const eventType = (text(row["event_type"]) ?? "").toLowerCase();
-    if (!fixtureId || !player || !eventType.includes("goal")) continue;
-    const minute = optionalNumber(row["minute"]);
-    const added = optionalNumber(row["added_minute"]);
-    const label = minute === null
-      ? player
-      : `${minute}${added ? `+${added}` : ""}' ${player}${text(row["detail"]) ? ` (${text(row["detail"])})` : ""}`;
-    const list = scorersByFixture.get(fixtureId) ?? [];
-    list.push(label);
-    scorersByFixture.set(fixtureId, list);
+    const eventType = text(row["event_type"]) ?? "";
+    if (!fixtureId || !eventType) continue;
+    const classified = classifyEvent(eventType, text(row["detail"]) ?? "");
+    if (!classified) continue;
+
+    const stamp = minuteLabel(optionalNumber(row["minute"]), optionalNumber(row["added_minute"]));
+    const team = embeddedName(row["sports_teams"]);
+    const who = player ?? team ?? "";
+    const parts = [stamp, who, classified.bucket === "goal" && classified.label === "gol" ? null : `(${classified.label})`]
+      .filter(Boolean);
+    const label = parts.join(" ").trim();
+    if (!label) continue;
+
+    if (classified.bucket === "goal") {
+      const list = scorersByFixture.get(fixtureId) ?? [];
+      list.push(team && player ? `${label} — ${team}` : label);
+      scorersByFixture.set(fixtureId, list);
+    } else {
+      const list = momentsByFixture.get(fixtureId) ?? [];
+      list.push(team && player ? `${label} — ${team}` : label);
+      momentsByFixture.set(fixtureId, list);
+    }
   }
 
-  for (const item of targets) {
+  for (const item of football) {
     const fixtureId = item.fixtureId as string;
     const standouts = (standoutsByFixture.get(fixtureId) ?? [])
       .sort((a, b) => ((b.goals ?? 0) * 3 + (b.assists ?? 0) * 2 + (b.rating ?? 0))
@@ -148,8 +210,10 @@ async function attachMatchProtagonists(
       .slice(0, MAX_STANDOUTS_PER_FIXTURE);
     item.standouts = standouts;
     item.goalScorers = (scorersByFixture.get(fixtureId) ?? []).slice(0, 8);
+    item.keyMoments = (momentsByFixture.get(fixtureId) ?? []).slice(0, 6);
   }
 }
+
 
 
 function cleanAiText(value: unknown, maxLength: number) {
