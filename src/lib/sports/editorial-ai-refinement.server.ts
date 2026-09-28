@@ -35,6 +35,8 @@ type EditorialCandidate = {
   sourceContext: Array<{ source: string; title: string }>;
   standouts: Standout[];
   goalScorers: string[];
+  keyMoments: string[];
+
   facts: Row;
   provenance: unknown[];
 };
