@@ -2807,6 +2807,10 @@ export type Database = {
         }
         Returns: string
       }
+      apply_editorial_national_team_coverage: {
+        Args: { p_date: string }
+        Returns: number
+      }
       apply_previous_day_editorial_context: {
         Args: { p_date: string }
         Returns: Json
