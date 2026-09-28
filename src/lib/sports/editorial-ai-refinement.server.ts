@@ -221,8 +221,8 @@ function editorialTier(kind: EditorialCandidate["kind"], title: string, facts: R
 
   if (bigTeams >= 2) return 1;
   if (bigTeams >= 1 && (MARQUEE_PATTERN.test(competition) || hasJournalism)) return 1;
-  if (MARQUEE_PATTERN.test(competition) && (margin <= 1 || goals >= 4)) return 1;
-  if (bigTeams >= 1 || goals >= 4 || margin >= 3 || hasJournalism) return 2;
+  if (MAJOR_PATTERN.test(competition) && (margin <= 1 || goals >= 4)) return 1;
+  if (bigTeams >= 1 || MARQUEE_PATTERN.test(competition) || goals >= 4 || margin >= 3 || hasJournalism) return 2;
   return 3;
 }
 
