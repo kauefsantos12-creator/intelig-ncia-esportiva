@@ -15,6 +15,13 @@
       "when": 1790553994624,
       "tag": "0001_resenha_national_team_priority_tuning_v13",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790554067689,
+      "tag": "0002_resenha_national_team_scope_fix_v14",
+      "breakpoints": true
     }
   ]
 }
