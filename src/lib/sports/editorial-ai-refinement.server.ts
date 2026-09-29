@@ -92,7 +92,8 @@ function minuteLabel(minute: number | null, added: number | null) {
 
 function classifyEvent(eventType: string, detail: string) {
   const type = eventType.toLowerCase();
-  const info = detail.toLowerCase();
+  const info = `${eventType} ${detail ?? ""}`.toLowerCase();
+
 
   if (type.includes("goal")) {
     if (info.includes("own")) return { bucket: "moment" as const, label: "gol contra" };
