@@ -216,21 +216,20 @@ async function attachMatchProtagonists(
 
 
 
-function cleanAiText(value: unknown, maxLength: number) {
+function cleanAiText(value: unknown, maxLength: number, collapseParagraphs = true) {
   const result = text(value);
   if (!result) return null;
-  return result
+  const stripped = result
     .replace(/\r\n/g, "\n")
     .replace(/^\s*[-•*]\s+/gm, "")
     .replace(/^\s*\d+[.)]\s+/gm, "")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/\n{2,}/g, " ")
-    .replace(/\s{2,}/g, " ")
-    .replace(/[ \t]+\n/g, "\n")
-    .trim()
-    .slice(0, maxLength);
-
+    .replace(/^#{1,6}\s+/gm, "");
+  const normalized = collapseParagraphs
+    ? stripped.replace(/\n+/g, " ")
+    : stripped.replace(/\n{3,}/g, "\n\n").replace(/[ \t]+\n/g, "\n");
+  return normalized.replace(/[ \t]{2,}/g, " ").trim().slice(0, maxLength);
 }
+
 
 function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
   const sources: Array<{ source: string; title: string }> = [];
