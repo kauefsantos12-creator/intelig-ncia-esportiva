@@ -318,6 +318,8 @@ function parseCandidate(row: Row): EditorialCandidate | null {
     sourceContext: sourceContextFromFacts(kind === "CLUB_FOCUS" ? "FOOTBALL_MATCH" : kind, facts),
     standouts: [],
     goalScorers: [],
+    keyMoments: [],
+
     facts,
     provenance: Array.isArray(row["provenance"]) ? row["provenance"] : [],
   };
