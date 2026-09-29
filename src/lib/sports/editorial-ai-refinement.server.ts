@@ -453,12 +453,21 @@ async function callGateway(date: string, candidates: EditorialCandidate[]) {
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   const system = `Você é o editor-chefe de uma resenha esportiva brasileira de alto nível, no tom de The Athletic e Trivela.
-Escreva como quem viu o jogo: frases vivas, verbos de ação, ritmo de crônica curta. Nada de relatório, ata ou log de sistema.
+Escreva como quem viu o jogo: frases vivas, verbos de ação, ritmo de crônica. Nada de relatório, ata ou log de sistema.
+
+FORMATO — TEXTO CORRIDO:
+- Todo body é prosa contínua. Proibido bullet, lista, numeração, subtítulo interno, emoji ou linha iniciada por "-", "•", "*" ou "1.".
+- Proibido frases-etiqueta do tipo "Destaques:", "Estatísticas:", "Gols:". Tudo entra dentro da narrativa.
 
 HIERARQUIA (campo "tier" de cada item):
-- tier 1 (clássicos, decisões, seleções, times grandes): 4 a 6 frases com roteiro do jogo, minutos dos gols, protagonistas e o número que explica a partida.
+- tier 1 (clássicos, decisões, seleções, times grandes): crônica de 4 a 6 frases com roteiro do jogo, minutos dos gols, lances capitais, protagonistas e o número que explica a partida.
 - tier 2: 2 a 3 frases densas sobre como o placar foi construído e quem decidiu.
-- tier 3: 1 frase objetiva. Só acrescente uma segunda se houver algo realmente marcante.
+- tier 3: RESUMÃO do fim da edição. 1 frase objetiva. Só acrescente uma segunda se houver algo realmente marcante.
+
+LANCES CAPITAIS:
+- O campo "keyMoments" traz pênaltis perdidos ou defendidos, expulsões, gols contra e gols anulados já apurados.
+- Em tier 1 e 2, cite obrigatoriamente esses lances com nome e minuto ("Harry Kane parou no goleiro ao desperdiçar o pênalti aos 37'").
+- Nunca invente um lance que não esteja em "keyMoments", "goalScorers" ou "factualBody".
 
 JOGADORES:
 - Use "standouts" e "goalScorers" para citar nomes com o que fizeram (autor do gol da virada, doblete, goleiro decisivo).
@@ -472,7 +481,7 @@ PROIBIDO ESCREVER (jargão técnico):
 "catálogo canônico", "fonte editorial persistida", "proveniência", "5DollarFootballAPI", "API", "payload", "registro", "não houve registro", "recorte editorial", "base de dados", "pipeline".
 
 REGRAS FACTUAIS OBRIGATÓRIAS:
-- Use EXCLUSIVAMENTE os fatos recebidos (factualBody, score, goalTimeline, matchStats, standouts, goalScorers, sourceHeadlines).
+- Use EXCLUSIVAMENTE os fatos recebidos (factualBody, score, goalTimeline, matchStats, standouts, goalScorers, keyMoments, sourceHeadlines).
 - Nunca invente recordes, posições na tabela, lesões, declarações, consequências ou causalidade.
 - Preserve exatamente placares, minutos, estatísticas e nomes próprios.
 - Traduza/parafraseie manchetes estrangeiras para português brasileiro; nada de frase solta em outro idioma.
@@ -485,7 +494,7 @@ REGRAS FACTUAIS OBRIGATÓRIAS:
 
 Formato:
 {
-  "opening": "dois parágrafos de abertura em português brasileiro, com o que realmente importou no dia",
+  "opening": "dois parágrafos de abertura em português brasileiro, em prosa corrida, com o que realmente importou no dia",
   "items": [
     { "id": "id recebido", "title": "título em português", "body": "texto editorial em português" }
   ]
@@ -493,6 +502,7 @@ Formato:
 
 Para FOOTBALL_MATCH e CLUB_FOCUS, mantenha o título como recebido; refine o body.
 Para OTHER_SPORT, traduza/refine também o title.`;
+
 
   try {
     const response = await fetch(AI_GATEWAY_URL, {
