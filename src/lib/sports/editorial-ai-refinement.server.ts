@@ -428,7 +428,7 @@ function parseGatewayOutput(payload: unknown, allowedIds: Set<string>): GatewayO
   }
 
   if (!isRecord(parsed)) return null;
-  const opening = cleanAiText(parsed["opening"], 1_800);
+  const opening = cleanAiText(parsed["opening"], 1_800, false);
   const entries = Array.isArray(parsed["items"]) ? parsed["items"] : [];
   const seen = new Set<string>();
   const items: GatewayItem[] = [];
