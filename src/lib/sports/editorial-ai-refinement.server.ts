@@ -92,7 +92,8 @@ function minuteLabel(minute: number | null, added: number | null) {
 
 function classifyEvent(eventType: string, detail: string) {
   const type = eventType.toLowerCase();
-  const info = detail.toLowerCase();
+  const info = `${eventType} ${detail ?? ""}`.toLowerCase();
+
 
   if (type.includes("goal")) {
     if (info.includes("own")) return { bucket: "moment" as const, label: "gol contra" };
@@ -216,16 +217,20 @@ async function attachMatchProtagonists(
 
 
 
-function cleanAiText(value: unknown, maxLength: number) {
+function cleanAiText(value: unknown, maxLength: number, collapseParagraphs = true) {
   const result = text(value);
   if (!result) return null;
-  return result
+  const stripped = result
     .replace(/\r\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/[ \t]+\n/g, "\n")
-    .trim()
-    .slice(0, maxLength);
+    .replace(/^\s*[-•*]\s+/gm, "")
+    .replace(/^\s*\d+[.)]\s+/gm, "")
+    .replace(/^#{1,6}\s+/gm, "");
+  const normalized = collapseParagraphs
+    ? stripped.replace(/\n+/g, " ")
+    : stripped.replace(/\n{3,}/g, "\n\n").replace(/[ \t]+\n/g, "\n");
+  return normalized.replace(/[ \t]{2,}/g, " ").trim().slice(0, maxLength);
 }
+
 
 function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
   const sources: Array<{ source: string; title: string }> = [];
@@ -318,6 +323,8 @@ function parseCandidate(row: Row): EditorialCandidate | null {
     sourceContext: sourceContextFromFacts(kind === "CLUB_FOCUS" ? "FOOTBALL_MATCH" : kind, facts),
     standouts: [],
     goalScorers: [],
+    keyMoments: [],
+
     facts,
     provenance: Array.isArray(row["provenance"]) ? row["provenance"] : [],
   };
@@ -345,9 +352,9 @@ function chunks<T>(items: T[], size: number) {
 }
 
 const TIER_GUIDANCE: Record<EditorialTier, string> = {
-  1: "JOGO GRANDE: 4 a 6 frases. Conte o roteiro do jogo (quem mandou, quando virou, o lance que decidiu), cite os minutos dos gols, destaque os protagonistas pelo nome e use as estatísticas para explicar a dinâmica. Integre o contexto das fontes jornalísticas.",
-  2: "JOGO RELEVANTE: 2 a 3 frases densas. Narre como o placar foi construído, quem decidiu e um número que explique a partida.",
-  3: "JOGO DE ROTINA: 1 frase objetiva com o placar e quem resolveu. Só escreva uma segunda frase se houver algo realmente fora do comum (virada no fim, goleada, expulsão decisiva, zebra).",
+  1: "JOGO GRANDE: crônica corrida de 4 a 6 frases, sem tópicos e sem listas. Conte o roteiro do jogo (quem mandou, quando virou, o lance que decidiu), cite os minutos dos gols, os lances capitais de 'keyMoments' (pênalti perdido ou defendido, expulsão, gol anulado) com o nome de quem protagonizou, destaque os craques e use as estatísticas dentro das frases. Integre o contexto das fontes jornalísticas.",
+  2: "JOGO RELEVANTE: 2 a 3 frases corridas. Narre como o placar foi construído, quem decidiu, qualquer lance capital de 'keyMoments' e um número que explique a partida.",
+  3: "RESUMÃO: 1 frase objetiva com quem resolveu o jogo. Só escreva uma segunda frase se houver algo realmente fora do comum (virada no fim, goleada, pênalti perdido decisivo, expulsão, zebra).",
 };
 
 function promptPayload(date: string, candidates: EditorialCandidate[]) {
@@ -358,9 +365,11 @@ function promptPayload(date: string, candidates: EditorialCandidate[]) {
       language: "pt-BR",
       audience: "torcedor brasileiro que lê uma resenha esportiva matinal bem escrita",
       voice: "jornalismo esportivo de revista: frases vivas, verbos de ação, zero burocracia.",
-      opening: "2 parágrafos de abertura com o que realmente importou no dia, começando pelos jogos grandes e pelas seleções. Escreva como chamada de capa, não como relatório.",
-      depth: "Respeite o campo 'tier' de cada item: ele define quanto espaço o jogo merece.",
+      format: "TEXTO CORRIDO SEMPRE. Proibido bullet, travessão de lista, numeração, subtítulo interno ou linha começando com '-' ou '•'. Cada body é prosa contínua.",
+      opening: "2 parágrafos de abertura em prosa corrida com o que realmente importou no dia, começando pelos jogos grandes e pelas seleções. Escreva como chamada de capa, não como relatório.",
+      depth: "Respeite o campo 'tier' de cada item: ele define quanto espaço o jogo merece. Os itens de tier 3 formam o resumão final do dia e devem ser curtíssimos.",
       players: "Quando houver 'standouts' ou 'goalScorers', cite os jogadores pelo nome com o que eles fizeram em campo.",
+      keyMoments: "O campo 'keyMoments' traz lances capitais já apurados (pênalti perdido ou defendido, expulsão, gol contra, gol anulado). Em tier 1 e 2 eles são obrigatórios no texto, com nome e minuto. Nunca invente um lance que não esteja ali.",
       stats: "Transforme números em narrativa (posse que não virou perigo, volume de finalizações que explicou a goleada). Nunca liste números soltos.",
       otherSports: "Título e 1 a 2 frases em português brasileiro. Use somente o que a manchete de origem permite afirmar.",
       clubFocus: "Bloco fixo do Palmeiras. Se houve jogo, conte o desempenho. Se não houve, escreva uma nota curta e natural de torcedor sobre o clube ter ficado fora de campo na data — nunca uma mensagem de sistema.",
@@ -378,9 +387,11 @@ function promptPayload(date: string, candidates: EditorialCandidate[]) {
       matchStats: isRecord(item.facts["editorialStats"]) ? item.facts["editorialStats"]["values"] ?? null : null,
       standouts: item.standouts,
       goalScorers: item.goalScorers,
+      keyMoments: item.keyMoments,
       factualBody: item.body,
       sourceHeadlines: item.sourceContext,
     })),
+
   };
 }
 
@@ -418,7 +429,7 @@ function parseGatewayOutput(payload: unknown, allowedIds: Set<string>): GatewayO
   }
 
   if (!isRecord(parsed)) return null;
-  const opening = cleanAiText(parsed["opening"], 1_800);
+  const opening = cleanAiText(parsed["opening"], 1_800, false);
   const entries = Array.isArray(parsed["items"]) ? parsed["items"] : [];
   const seen = new Set<string>();
   const items: GatewayItem[] = [];
@@ -447,12 +458,21 @@ async function callGateway(date: string, candidates: EditorialCandidate[]) {
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   const system = `Você é o editor-chefe de uma resenha esportiva brasileira de alto nível, no tom de The Athletic e Trivela.
-Escreva como quem viu o jogo: frases vivas, verbos de ação, ritmo de crônica curta. Nada de relatório, ata ou log de sistema.
+Escreva como quem viu o jogo: frases vivas, verbos de ação, ritmo de crônica. Nada de relatório, ata ou log de sistema.
+
+FORMATO — TEXTO CORRIDO:
+- Todo body é prosa contínua. Proibido bullet, lista, numeração, subtítulo interno, emoji ou linha iniciada por "-", "•", "*" ou "1.".
+- Proibido frases-etiqueta do tipo "Destaques:", "Estatísticas:", "Gols:". Tudo entra dentro da narrativa.
 
 HIERARQUIA (campo "tier" de cada item):
-- tier 1 (clássicos, decisões, seleções, times grandes): 4 a 6 frases com roteiro do jogo, minutos dos gols, protagonistas e o número que explica a partida.
+- tier 1 (clássicos, decisões, seleções, times grandes): crônica de 4 a 6 frases com roteiro do jogo, minutos dos gols, lances capitais, protagonistas e o número que explica a partida.
 - tier 2: 2 a 3 frases densas sobre como o placar foi construído e quem decidiu.
-- tier 3: 1 frase objetiva. Só acrescente uma segunda se houver algo realmente marcante.
+- tier 3: RESUMÃO do fim da edição. 1 frase objetiva. Só acrescente uma segunda se houver algo realmente marcante.
+
+LANCES CAPITAIS:
+- O campo "keyMoments" traz pênaltis perdidos ou defendidos, expulsões, gols contra e gols anulados já apurados.
+- Em tier 1 e 2, cite obrigatoriamente esses lances com nome e minuto ("Harry Kane parou no goleiro ao desperdiçar o pênalti aos 37'").
+- Nunca invente um lance que não esteja em "keyMoments", "goalScorers" ou "factualBody".
 
 JOGADORES:
 - Use "standouts" e "goalScorers" para citar nomes com o que fizeram (autor do gol da virada, doblete, goleiro decisivo).
@@ -466,7 +486,7 @@ PROIBIDO ESCREVER (jargão técnico):
 "catálogo canônico", "fonte editorial persistida", "proveniência", "5DollarFootballAPI", "API", "payload", "registro", "não houve registro", "recorte editorial", "base de dados", "pipeline".
 
 REGRAS FACTUAIS OBRIGATÓRIAS:
-- Use EXCLUSIVAMENTE os fatos recebidos (factualBody, score, goalTimeline, matchStats, standouts, goalScorers, sourceHeadlines).
+- Use EXCLUSIVAMENTE os fatos recebidos (factualBody, score, goalTimeline, matchStats, standouts, goalScorers, keyMoments, sourceHeadlines).
 - Nunca invente recordes, posições na tabela, lesões, declarações, consequências ou causalidade.
 - Preserve exatamente placares, minutos, estatísticas e nomes próprios.
 - Traduza/parafraseie manchetes estrangeiras para português brasileiro; nada de frase solta em outro idioma.
@@ -479,7 +499,7 @@ REGRAS FACTUAIS OBRIGATÓRIAS:
 
 Formato:
 {
-  "opening": "dois parágrafos de abertura em português brasileiro, com o que realmente importou no dia",
+  "opening": "dois parágrafos de abertura em português brasileiro, em prosa corrida, com o que realmente importou no dia",
   "items": [
     { "id": "id recebido", "title": "título em português", "body": "texto editorial em português" }
   ]
@@ -487,6 +507,7 @@ Formato:
 
 Para FOOTBALL_MATCH e CLUB_FOCUS, mantenha o título como recebido; refine o body.
 Para OTHER_SPORT, traduza/refine também o title.`;
+
 
   try {
     const response = await fetch(AI_GATEWAY_URL, {
