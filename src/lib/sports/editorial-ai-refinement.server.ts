@@ -347,9 +347,9 @@ function chunks<T>(items: T[], size: number) {
 }
 
 const TIER_GUIDANCE: Record<EditorialTier, string> = {
-  1: "JOGO GRANDE: 4 a 6 frases. Conte o roteiro do jogo (quem mandou, quando virou, o lance que decidiu), cite os minutos dos gols, destaque os protagonistas pelo nome e use as estatísticas para explicar a dinâmica. Integre o contexto das fontes jornalísticas.",
-  2: "JOGO RELEVANTE: 2 a 3 frases densas. Narre como o placar foi construído, quem decidiu e um número que explique a partida.",
-  3: "JOGO DE ROTINA: 1 frase objetiva com o placar e quem resolveu. Só escreva uma segunda frase se houver algo realmente fora do comum (virada no fim, goleada, expulsão decisiva, zebra).",
+  1: "JOGO GRANDE: crônica corrida de 4 a 6 frases, sem tópicos e sem listas. Conte o roteiro do jogo (quem mandou, quando virou, o lance que decidiu), cite os minutos dos gols, os lances capitais de 'keyMoments' (pênalti perdido ou defendido, expulsão, gol anulado) com o nome de quem protagonizou, destaque os craques e use as estatísticas dentro das frases. Integre o contexto das fontes jornalísticas.",
+  2: "JOGO RELEVANTE: 2 a 3 frases corridas. Narre como o placar foi construído, quem decidiu, qualquer lance capital de 'keyMoments' e um número que explique a partida.",
+  3: "RESUMÃO: 1 frase objetiva com quem resolveu o jogo. Só escreva uma segunda frase se houver algo realmente fora do comum (virada no fim, goleada, pênalti perdido decisivo, expulsão, zebra).",
 };
 
 function promptPayload(date: string, candidates: EditorialCandidate[]) {
@@ -360,9 +360,11 @@ function promptPayload(date: string, candidates: EditorialCandidate[]) {
       language: "pt-BR",
       audience: "torcedor brasileiro que lê uma resenha esportiva matinal bem escrita",
       voice: "jornalismo esportivo de revista: frases vivas, verbos de ação, zero burocracia.",
-      opening: "2 parágrafos de abertura com o que realmente importou no dia, começando pelos jogos grandes e pelas seleções. Escreva como chamada de capa, não como relatório.",
-      depth: "Respeite o campo 'tier' de cada item: ele define quanto espaço o jogo merece.",
+      format: "TEXTO CORRIDO SEMPRE. Proibido bullet, travessão de lista, numeração, subtítulo interno ou linha começando com '-' ou '•'. Cada body é prosa contínua.",
+      opening: "2 parágrafos de abertura em prosa corrida com o que realmente importou no dia, começando pelos jogos grandes e pelas seleções. Escreva como chamada de capa, não como relatório.",
+      depth: "Respeite o campo 'tier' de cada item: ele define quanto espaço o jogo merece. Os itens de tier 3 formam o resumão final do dia e devem ser curtíssimos.",
       players: "Quando houver 'standouts' ou 'goalScorers', cite os jogadores pelo nome com o que eles fizeram em campo.",
+      keyMoments: "O campo 'keyMoments' traz lances capitais já apurados (pênalti perdido ou defendido, expulsão, gol contra, gol anulado). Em tier 1 e 2 eles são obrigatórios no texto, com nome e minuto. Nunca invente um lance que não esteja ali.",
       stats: "Transforme números em narrativa (posse que não virou perigo, volume de finalizações que explicou a goleada). Nunca liste números soltos.",
       otherSports: "Título e 1 a 2 frases em português brasileiro. Use somente o que a manchete de origem permite afirmar.",
       clubFocus: "Bloco fixo do Palmeiras. Se houve jogo, conte o desempenho. Se não houve, escreva uma nota curta e natural de torcedor sobre o clube ter ficado fora de campo na data — nunca uma mensagem de sistema.",
@@ -380,9 +382,11 @@ function promptPayload(date: string, candidates: EditorialCandidate[]) {
       matchStats: isRecord(item.facts["editorialStats"]) ? item.facts["editorialStats"]["values"] ?? null : null,
       standouts: item.standouts,
       goalScorers: item.goalScorers,
+      keyMoments: item.keyMoments,
       factualBody: item.body,
       sourceHeadlines: item.sourceContext,
     })),
+
   };
 }
 
