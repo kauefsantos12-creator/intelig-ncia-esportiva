@@ -221,10 +221,15 @@ function cleanAiText(value: unknown, maxLength: number) {
   if (!result) return null;
   return result
     .replace(/\r\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
+    .replace(/^\s*[-•*]\s+/gm, "")
+    .replace(/^\s*\d+[.)]\s+/gm, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\n{2,}/g, " ")
+    .replace(/\s{2,}/g, " ")
     .replace(/[ \t]+\n/g, "\n")
     .trim()
     .slice(0, maxLength);
+
 }
 
 function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
