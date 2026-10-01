@@ -67,15 +67,18 @@ describe("Noticiário sports intelligence contract", () => {
     expect(route).toContain("max-w-[72ch]");
     expect(route).toContain("function EditorialItem");
     expect(route).toContain("Contexto do dia");
-    expect(route).toContain("Destaques de ontem");
+    expect(route).toContain("A crônica de ontem");
+    expect(route).toContain("Resumão dos demais jogos");
     expect(route).toContain("Outros esportes de ontem");
     expect(route).toContain("otherSportsItems");
     expect(route).toContain("Fontes:");
     expect(route).toContain('target="_blank"');
     expect(route).toContain("Palmeiras");
-    expect(route).toContain("Ontem após 21h");
-    expect(route).not.toContain("Programação de hoje");
-    expect(route).not.toContain("Onde assistir:");
+    expect(route).toContain("após 21h");
+    expect(route).toContain('title="Programação de hoje"');
+    expect(route).toContain("A confirmar");
+    expect(route).toContain("function schedulePriority");
+    expect(route.indexOf('title="Programação de hoje"')).toBeGreaterThan(route.indexOf("Resumão dos demais jogos"));
     expect(route).not.toContain("<CollapsiblePanel");
   });
 

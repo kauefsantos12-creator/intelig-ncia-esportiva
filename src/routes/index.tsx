@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowDownRight, ArrowUpRight, CalendarClock, Newspaper, RefreshCw, Trophy, TrendingUp } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CalendarClock, Newspaper, RefreshCw, Tv, Trophy, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
@@ -8,11 +8,16 @@ import { StatusBadge } from "@/components/ProductControls";
 import { ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
 import { getNewsOverview, type EloMovement, type NewsBriefingItem, type NewsOverview, type NewsResult } from "@/lib/news-overview.functions";
+import { getTodayOverview, type TodayFixture, type TodayOverview } from "@/lib/today-overview.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
     { title: "Noticiário · Motor de Inteligência Esportiva" },
     { name: "description", content: "Resenha esportiva diária, resultados recentes e movimentos relevantes de Elo." },
+    { property: "og:title", content: "Noticiário · Motor de Inteligência Esportiva" },
+    { property: "og:description", content: "Edição matinal: a crônica de ontem e a programação de hoje com onde assistir." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: NewsPage,
 });
@@ -52,10 +57,45 @@ function EditorialItem({ item }: { item: NewsBriefingItem }) {
   </article>;
 }
 
+const BIG_CLUBS = ["barcelona","real madrid","atletico","atlético","milan","juventus","napoli","inter","arsenal","manchester united","man united","manchester city","man city","liverpool","tottenham","chelsea","bayern","dortmund","paris saint","psg","flamengo","corinthians","são paulo","sao paulo","santos","grêmio","gremio","internacional","cruzeiro","atlético mineiro","botafogo","fluminense","vasco"];
+const CORE_LEAGUES = ["serie a","serie b","coppa italia","ligue 1","ligue 2","coupe de france","laliga","la liga","segunda","copa del rey","bundesliga","dfb","premier league","championship","fa cup","efl cup","carabao","brasileirão","brasileiro","copa do brasil","libertadores","sul-americana","sudamericana","champions league","europa league","conference league"];
+function normalize(value: string) { return value.toLocaleLowerCase("pt-BR"); }
+function isNationalTeamFixture(fixture: TodayFixture) { const kind=normalize(fixture.competition.kind); const name=normalize(fixture.competition.name); return kind.includes("national")||kind.includes("selec")||/elimina|nations league|copa américa|copa america|eurocopa|euro |afcon|gold cup|copa do mundo|world cup|amistoso|friendly/.test(name); }
+function schedulePriority(fixture: TodayFixture) {
+  const home=normalize(fixture.home.name); const away=normalize(fixture.away.name); const teams=`${home} ${away}`; const competition=normalize(fixture.competition.name);
+  if (teams.includes("palmeiras")) return 1000;
+  if (isNationalTeamFixture(fixture) && /brasil|brazil/.test(teams)) return 900;
+  if (isNationalTeamFixture(fixture)) return 800;
+  const bigHome=BIG_CLUBS.some(club=>home.includes(club)); const bigAway=BIG_CLUBS.some(club=>away.includes(club));
+  if (bigHome && bigAway) return 720;
+  if (bigHome || bigAway) return 700;
+  if (CORE_LEAGUES.some(league=>competition.includes(league))) return 500;
+  return 100;
+}
+function broadcastLabel(fixture: TodayFixture) {
+  if (!fixture.broadcasts.length) return "A confirmar";
+  const seen=new Set<string>(); const names:string[]=[];
+  for (const evidence of [...fixture.broadcasts].sort((a,b)=>Number(b.isPrimary)-Number(a.isPrimary)||b.confidence-a.confidence)) {
+    const label=evidence.platform?`${evidence.broadcaster} (${evidence.platform})`:evidence.broadcaster;
+    if (seen.has(label)) continue; seen.add(label); names.push(label);
+    if (names.length===3) break;
+  }
+  return names.join(" · ");
+}
+function ScheduleRow({ fixture }: { fixture: TodayFixture }) {
+  const confirmed=fixture.broadcasts.length>0;
+  return <article className="grid gap-1 border-t border-border/55 py-3 first:border-t-0 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-baseline sm:gap-4">
+    <span className="type-metric text-foreground">{formatTime(fixture.kickoffAt)}</span>
+    <div className="min-w-0"><p className="type-label text-foreground">{fixture.home.name} x {fixture.away.name}</p><p className="type-caption text-muted-foreground">{fixture.competition.name}</p></div>
+    <span className={`type-caption ${confirmed?"text-foreground":"text-muted-foreground"}`}>{broadcastLabel(fixture)}</span>
+  </article>;
+}
+
 function NewsPage() {
-  const loadOverview=useServerFn(getNewsOverview); const [overview,setOverview]=useState<NewsOverview|null>(null); const [loading,setLoading]=useState(true); const [error,setError]=useState<string|null>(null);
-  const refresh=useCallback(async()=>{setLoading(true);setError(null);try{setOverview(await loadOverview());}catch{setError("Os dados do Noticiário não puderam ser carregados agora.");}finally{setLoading(false);}},[loadOverview]);
+  const loadOverview=useServerFn(getNewsOverview); const loadToday=useServerFn(getTodayOverview); const [overview,setOverview]=useState<NewsOverview|null>(null); const [today,setToday]=useState<TodayOverview|null>(null); const [loading,setLoading]=useState(true); const [error,setError]=useState<string|null>(null);
+  const refresh=useCallback(async()=>{setLoading(true);setError(null);try{const[news,schedule]=await Promise.all([loadOverview(),loadToday().catch(()=>null)]);setOverview(news);setToday(schedule);}catch{setError("Os dados do Noticiário não puderam ser carregados agora.");}finally{setLoading(false);}},[loadOverview,loadToday]);
   useEffect(()=>{void refresh();},[refresh]);
+  const scheduleFixtures=useMemo(()=>{if(!today)return[];return[...today.fixtures].filter(f=>f.status!=="FINISHED").sort((a,b)=>schedulePriority(b)-schedulePriority(a)||a.kickoffAt.localeCompare(b.kickoffAt));},[today]);
   const briefing=overview?.briefing??null;
   const palmeirasItem=briefing?.items.find(i=>i.kind==="NEWS_CONTEXT"&&i.title==="Palmeiras")??null;
   const contextItems=briefing?.items.filter(i=>i.kind==="NEWS_CONTEXT"&&i.title!=="Palmeiras")??[];
@@ -69,6 +109,8 @@ function NewsPage() {
     <ProductPageHeader eyebrow="Noticiário" title="O que aconteceu e o que mudou" description="A resenha é a leitura principal do dia; placares e Elo permanecem como contexto factual." aside={<div className="flex items-center gap-2">{overview?<StatusBadge tone="neutral">Atualizado {formatTime(overview.observedAt)}</StatusBadge>:null}<button type="button" onClick={()=>void refresh()} disabled={loading} className="touch-target inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border/70 bg-secondary/30 px-3 type-meta font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"><RefreshCw className={`size-4 ${loading?"animate-spin":""}`} aria-hidden /><span className="hidden sm:inline">Atualizar</span></button></div>} />
     {loading&&!overview?<LoadingState rows={5} label="Carregando Noticiário" />:null}{error&&!overview?<ErrorState description={error} onRetry={()=>void refresh()} />:null}
     {overview?<div className="space-y-4">
+      <nav aria-label="Índice da edição" className="flex flex-wrap items-center gap-2 rounded-xl border border-border/55 bg-secondary/22 px-4 py-3 type-caption text-muted-foreground"><span className="font-medium text-foreground">Edição de hoje:</span><a href="#resenha" className="underline decoration-border underline-offset-4 hover:text-foreground">Resenha de ontem</a><span aria-hidden>·</span><a href="#programacao" className="underline decoration-border underline-offset-4 hover:text-foreground">Programação de hoje</a></nav>
+      <div id="resenha" className="scroll-mt-24" />
       <SurfaceCard icon={Newspaper} title={briefing?briefingTitle(briefing.date,overview.observedAt):"Resenha esportiva"} description="Leitura editorial diária, sustentada por fatos persistidos e proveniência." actions={briefing?.footballSummary?<StatusBadge tone="success">Publicada</StatusBadge>:<StatusBadge tone="neutral">Aguardando publicação</StatusBadge>}>
         {briefing?.footballSummary?<div className="space-y-8">
           <section aria-label="Abertura da resenha"><p className="max-w-[72ch] whitespace-pre-line text-lg leading-8 text-foreground/95">{briefing.footballSummary}</p></section>
@@ -80,6 +122,10 @@ function NewsPage() {
           
           <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border/55 pt-3 type-caption text-muted-foreground">{briefing.factsThrough?<span>Fatos verificados até {formatTime(briefing.factsThrough)} (Brasília)</span>:null}{briefing.generatedAt?<span>Gerada às {formatTime(briefing.generatedAt)}</span>:null}</div>
         </div>:<EmptyState icon={Newspaper} title="A resenha ainda não foi publicada" description="A interface não fabrica uma narrativa quando o backend editorial ainda não publicou uma resenha." />}
+      </SurfaceCard>
+      <div id="programacao" className="scroll-mt-24" />
+      <SurfaceCard icon={Tv} title="Programação de hoje" description="Ordem de relevância, horários de Brasília e onde assistir no Brasil." actions={<StatusBadge tone="neutral">{scheduleFixtures.length} jogos</StatusBadge>}>
+        {scheduleFixtures.length?<div>{scheduleFixtures.map(fixture=><ScheduleRow key={fixture.id} fixture={fixture} />)}</div>:<EmptyState icon={CalendarClock} title="Sem jogos previstos para hoje" description="Nenhuma partida do escopo acompanhado está programada para hoje." />}
       </SurfaceCard>
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <SurfaceCard icon={Trophy} title="Resultados recentes" description="Partidas encerradas do escopo prioritário nas últimas 48 horas." actions={<StatusBadge tone="neutral">{overview.recentResults.length} jogos</StatusBadge>}>{groupedResults.length?<div className="space-y-5">{groupedResults.map(g=><section key={g.key}><div className="mb-2 flex items-center justify-between gap-3"><h3 className="type-label text-foreground">{g.label}</h3><span className="type-caption text-muted-foreground">{g.results.length} {g.results.length===1?"jogo":"jogos"}</span></div><div className="space-y-2">{g.results.map(r=><ResultRow key={r.id} result={r} />)}</div></section>)}</div>:<EmptyState icon={CalendarClock} title="Sem resultados prioritários recentes" description="Nenhuma partida encerrada do escopo prioritário foi registrada nas últimas 48 horas." />}</SurfaceCard>
