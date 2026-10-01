@@ -57,6 +57,40 @@ function EditorialItem({ item }: { item: NewsBriefingItem }) {
   </article>;
 }
 
+const BIG_CLUBS = ["barcelona","real madrid","atletico","atlético","milan","juventus","napoli","inter","arsenal","manchester united","man united","manchester city","man city","liverpool","tottenham","chelsea","bayern","dortmund","paris saint","psg","flamengo","corinthians","são paulo","sao paulo","santos","grêmio","gremio","internacional","cruzeiro","atlético mineiro","botafogo","fluminense","vasco"];
+const CORE_LEAGUES = ["serie a","serie b","coppa italia","ligue 1","ligue 2","coupe de france","laliga","la liga","segunda","copa del rey","bundesliga","dfb","premier league","championship","fa cup","efl cup","carabao","brasileirão","brasileiro","copa do brasil","libertadores","sul-americana","sudamericana","champions league","europa league","conference league"];
+function normalize(value: string) { return value.toLocaleLowerCase("pt-BR"); }
+function isNationalTeamFixture(fixture: TodayFixture) { const kind=normalize(fixture.competition.kind); const name=normalize(fixture.competition.name); return kind.includes("national")||kind.includes("selec")||/elimina|nations league|copa américa|copa america|eurocopa|euro |afcon|gold cup|copa do mundo|world cup|amistoso|friendly/.test(name); }
+function schedulePriority(fixture: TodayFixture) {
+  const home=normalize(fixture.home.name); const away=normalize(fixture.away.name); const teams=`${home} ${away}`; const competition=normalize(fixture.competition.name);
+  if (teams.includes("palmeiras")) return 1000;
+  if (isNationalTeamFixture(fixture) && /brasil|brazil/.test(teams)) return 900;
+  if (isNationalTeamFixture(fixture)) return 800;
+  const bigHome=BIG_CLUBS.some(club=>home.includes(club)); const bigAway=BIG_CLUBS.some(club=>away.includes(club));
+  if (bigHome && bigAway) return 720;
+  if (bigHome || bigAway) return 700;
+  if (CORE_LEAGUES.some(league=>competition.includes(league))) return 500;
+  return 100;
+}
+function broadcastLabel(fixture: TodayFixture) {
+  if (!fixture.broadcasts.length) return "A confirmar";
+  const seen=new Set<string>(); const names:string[]=[];
+  for (const evidence of [...fixture.broadcasts].sort((a,b)=>Number(b.isPrimary)-Number(a.isPrimary)||b.confidence-a.confidence)) {
+    const label=evidence.platform?`${evidence.broadcaster} (${evidence.platform})`:evidence.broadcaster;
+    if (seen.has(label)) continue; seen.add(label); names.push(label);
+    if (names.length===3) break;
+  }
+  return names.join(" · ");
+}
+function ScheduleRow({ fixture }: { fixture: TodayFixture }) {
+  const confirmed=fixture.broadcasts.length>0;
+  return <article className="grid gap-1 border-t border-border/55 py-3 first:border-t-0 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-baseline sm:gap-4">
+    <span className="type-metric text-foreground">{formatTime(fixture.kickoffAt)}</span>
+    <div className="min-w-0"><p className="type-label text-foreground">{fixture.home.name} x {fixture.away.name}</p><p className="type-caption text-muted-foreground">{fixture.competition.name}</p></div>
+    <span className={`type-caption ${confirmed?"text-foreground":"text-muted-foreground"}`}>{broadcastLabel(fixture)}</span>
+  </article>;
+}
+
 function NewsPage() {
   const loadOverview=useServerFn(getNewsOverview); const [overview,setOverview]=useState<NewsOverview|null>(null); const [loading,setLoading]=useState(true); const [error,setError]=useState<string|null>(null);
   const refresh=useCallback(async()=>{setLoading(true);setError(null);try{setOverview(await loadOverview());}catch{setError("Os dados do Noticiário não puderam ser carregados agora.");}finally{setLoading(false);}},[loadOverview]);
