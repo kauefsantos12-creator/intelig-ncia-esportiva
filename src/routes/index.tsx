@@ -92,9 +92,10 @@ function ScheduleRow({ fixture }: { fixture: TodayFixture }) {
 }
 
 function NewsPage() {
-  const loadOverview=useServerFn(getNewsOverview); const [overview,setOverview]=useState<NewsOverview|null>(null); const [loading,setLoading]=useState(true); const [error,setError]=useState<string|null>(null);
-  const refresh=useCallback(async()=>{setLoading(true);setError(null);try{setOverview(await loadOverview());}catch{setError("Os dados do Noticiário não puderam ser carregados agora.");}finally{setLoading(false);}},[loadOverview]);
+  const loadOverview=useServerFn(getNewsOverview); const loadToday=useServerFn(getTodayOverview); const [overview,setOverview]=useState<NewsOverview|null>(null); const [today,setToday]=useState<TodayOverview|null>(null); const [loading,setLoading]=useState(true); const [error,setError]=useState<string|null>(null);
+  const refresh=useCallback(async()=>{setLoading(true);setError(null);try{const[news,schedule]=await Promise.all([loadOverview(),loadToday().catch(()=>null)]);setOverview(news);setToday(schedule);}catch{setError("Os dados do Noticiário não puderam ser carregados agora.");}finally{setLoading(false);}},[loadOverview,loadToday]);
   useEffect(()=>{void refresh();},[refresh]);
+  const scheduleFixtures=useMemo(()=>{if(!today)return[];return[...today.fixtures].filter(f=>f.status!=="FINISHED").sort((a,b)=>schedulePriority(b)-schedulePriority(a)||a.kickoffAt.localeCompare(b.kickoffAt));},[today]);
   const briefing=overview?.briefing??null;
   const palmeirasItem=briefing?.items.find(i=>i.kind==="NEWS_CONTEXT"&&i.title==="Palmeiras")??null;
   const contextItems=briefing?.items.filter(i=>i.kind==="NEWS_CONTEXT"&&i.title!=="Palmeiras")??[];
