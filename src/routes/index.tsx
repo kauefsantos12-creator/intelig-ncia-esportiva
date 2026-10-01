@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowDownRight, ArrowUpRight, CalendarClock, Newspaper, RefreshCw, Trophy, TrendingUp } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CalendarClock, Newspaper, RefreshCw, Tv, Trophy, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
@@ -8,11 +8,16 @@ import { StatusBadge } from "@/components/ProductControls";
 import { ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
 import { getNewsOverview, type EloMovement, type NewsBriefingItem, type NewsOverview, type NewsResult } from "@/lib/news-overview.functions";
+import { getTodayOverview, type TodayFixture, type TodayOverview } from "@/lib/today-overview.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
     { title: "Noticiário · Motor de Inteligência Esportiva" },
     { name: "description", content: "Resenha esportiva diária, resultados recentes e movimentos relevantes de Elo." },
+    { property: "og:title", content: "Noticiário · Motor de Inteligência Esportiva" },
+    { property: "og:description", content: "Edição matinal: a crônica de ontem e a programação de hoje com onde assistir." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: NewsPage,
 });
