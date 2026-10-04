@@ -1,11 +1,30 @@
 # Motor de Inteligência Esportiva — estado canônico
 
-> Atualizado: 19/09/2026  
-> Repositório: kauefsantos12-creator/quant-football-insights  
-> Lovable canônico: 28664075-8af4-4155-9ee9-8ed86021681a  
-> Produção: https://quant-football-insights.lovable.app
+> Atualizado: 04/10/2026  
+> Repositório: kauefsantos12-creator/intelig-ncia-esportiva  
+> Produção: https://value-bet-engine.lovable.app  
+> Lovable Cloud (Supabase): hefuvmocohhpmnhwpkac  
+> Histórico: até 01/10/2026 o projeto vivia em kauefsantos12-creator/quant-football-insights (Lovable 28664075-…, Supabase vsygkpwptoppbrlnrpcp, produção quant-football-insights.lovable.app).
 
 Este documento registra o estado vigente do produto. Auditorias e migrations antigas preservam a trilha histórica, mas não representam o runtime atual quando contradizem o main ou o estado vivo do Lovable Cloud.
+
+## Remix de 01/10/2026 e recuperação
+
+Em 01/10/2026 o projeto foi remixado para outra conta Lovable (commit `f600756`, "Add integration configuration from remix"). O remix:
+
+- apontou o app para um novo Lovable Cloud (`hefuvmocohhpmnhwpkac`), que recebeu o esquema mas nenhum dado;
+- apagou `supabase/migrations/` do repositório (o estado completo continua em `f600756~1`);
+- regenerou `src/integrations/supabase/auth-middleware.ts`, removendo `is_approved_app_user` e o prazo absoluto de 30 dias no servidor;
+- não copiou gatilhos de `auth.users`, segredos do Vault nem jobs do `pg_cron`.
+
+Recuperação de 04/10/2026:
+
+- `scripts/diagnostico-remix.sql`: diagnóstico somente leitura do banco;
+- `scripts/recuperacao-remix.sql`: segredos do Vault, gatilhos de auth, dados de configuração das migrations originais e os 20 jobs `pg_cron` finais — aplicado e validado no Lovable Cloud em 04/10/2026;
+- `scripts/carga-inicial.sql` / `scripts/status-carga.sql`: carga inicial (5Dollar ontem/hoje/amanhã + Elo temporário a cada 2 min) e acompanhamento;
+- `auth-middleware.ts` restaurado a partir de `f600756~1` (allowlist via `is_approved_app_user` + sessão de 30 dias).
+
+O Dia Zero da coleta prospectiva (Etapa 4) foi reiniciado em 04/10/2026 no banco novo. Pendente: restaurar `supabase/migrations/` no repositório sem reaplicá-las ao banco novo.
 
 ## Fontes de verdade
 
