@@ -16,7 +16,7 @@ describe("Hoje sports intelligence contract", () => {
 
   it("applies the canonical tracked scope in SQL before the agenda display limit", () => {
     const server = source("./lib/today-overview.functions.ts");
-    const migration = source("../supabase/migrations/20260920160000_today_tracked_scope_v2.sql");
+    const migration = source("../supabase/migrations_archive/20260920160000_today_tracked_scope_v2.sql");
     expect(server).toContain('db.rpc("get_today_tracked_fixtures"');
     expect(server).toContain("p_limit: 300");
     expect(migration).toContain("sports_tracking_rules");
@@ -35,7 +35,7 @@ describe("Hoje sports intelligence contract", () => {
 
   it("scopes recent form to Today teams before applying the per-team limit", () => {
     const server = source("./lib/today-overview.functions.ts");
-    const migration = source("../supabase/migrations/20260920161500_today_recent_form_scope_v1.sql");
+    const migration = source("../supabase/migrations_archive/20260920161500_today_recent_form_scope_v1.sql");
     expect(server).toContain("p_team_ids: sportsTeamIds");
     expect(server).toContain("p_per_team: 5");
     expect(server).toContain("365 * 86_400_000");
@@ -47,7 +47,7 @@ describe("Hoje sports intelligence contract", () => {
 
 
   it("keeps Today fixture status fresh throughout the active match window", () => {
-    const migration = source("../supabase/migrations/20260920183000_today_intraday_status_refresh.sql");
+    const migration = source("../supabase/migrations_archive/20260920183000_today_intraday_status_refresh.sql");
     expect(migration).toContain("'sports-today-refresh-day'");
     expect(migration).toContain("'*/15 9-23 * * *'");
     expect(migration).toContain("'sports-today-refresh-late'");
@@ -70,7 +70,7 @@ describe("Hoje sports intelligence contract", () => {
   it("keeps recent-form history seeding lightweight and outside detailed player backfill", () => {
     const sync = source("./lib/sports/five-dollar-sports-sync.server.ts");
     const worker = source("./lib/sports/sports-job-worker.server.ts");
-    const migration = source("../supabase/migrations/20260920163000_today_recent_form_history_seed.sql");
+    const migration = source("../supabase/migrations_archive/20260920163000_today_recent_form_history_seed.sql");
     const basicStart = sync.indexOf("async function persistRecentFormFixtureBasic");
     const basicEnd = sync.indexOf("export interface FiveDollarRecentFormLeagueSyncResult");
 

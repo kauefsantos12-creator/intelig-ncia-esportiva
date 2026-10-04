@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("Stage 4 six-league enrichment scope", () => {
-  const sql = fs.readFileSync(path.resolve("supabase/migrations/20260919101500_stage4_six_league_enrichment_scope.sql"), "utf8");
+  const sql = fs.readFileSync(path.resolve("supabase/migrations_archive/20260919101500_stage4_six_league_enrichment_scope.sql"), "utf8");
 
   it("limits detailed API-Football work to the six Stage 3 squad leagues", () => {
     for (const leagueId of [39, 61, 71, 78, 135, 140]) expect(sql).toContain(String(leagueId));
@@ -17,7 +17,7 @@ describe("Stage 4 six-league enrichment scope", () => {
   });
   it("exempts only media-only team reconciliation from the fixture scope guard", () => {
     const mediaSql = fs.readFileSync(
-      path.resolve("supabase/migrations/20260920174500_api_football_team_media_scope_exemption.sql"),
+      path.resolve("supabase/migrations_archive/20260920174500_api_football_team_media_scope_exemption.sql"),
       "utf8",
     );
     expect(mediaSql).toContain("new.job_type <> 'API_FOOTBALL_TEAM_MEDIA_LINK'");
