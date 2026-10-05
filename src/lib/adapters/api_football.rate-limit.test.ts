@@ -22,7 +22,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({
   },
 }));
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.resetModules();
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-10-05T02:00:00Z"));
@@ -32,6 +32,9 @@ beforeEach(() => {
   fetchMock.mockReset();
   maybeSingle.mockResolvedValue({ data: null, error: null });
   vi.spyOn(console, "info").mockImplementation(() => undefined);
+  // Resolve the lazy dependency before concurrent adapter imports/calls.
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  expect(supabaseAdmin.rpc).toBe(rpc);
 });
 
 afterEach(() => {
