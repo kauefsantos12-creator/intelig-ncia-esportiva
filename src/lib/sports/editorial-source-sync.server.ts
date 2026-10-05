@@ -116,28 +116,44 @@ const FOOTBALL_FEEDS: EditorialFeed[] = [
   },
 ];
 
-// Google News is discovery transport only; publisher attribution and host are validated.
+// Publisher-operated feeds; Google News discovery returned HTTP 503 in production.
+const ADDITIONAL_FOOTBALL_RSS: Record<string, string> = {
+  "BILD Sport": "https://www.bild.de/rss-feeds/rss-16725492,feed=sport.bild.html",
+  Marca: "https://e00-marca.uecdn.es/rss/futbol.xml",
+  "BBC Sport": "https://feeds.bbci.co.uk/sport/football/rss.xml",
+  "RMC Sport": "https://rmcsport.bfmtv.com/rss/football/",
+  "Corriere dello Sport": "https://www.corrieredellosport.it/rss/calcio",
+  "A Bola": "https://www.abola.pt/rss-articles.xml",
+  Record: "https://www.record.pt/rss/",
+  "UOL Esporte": "https://rss.uol.com.br/feed/esporte.xml",
+};
+
 for (const publisher of EDITORIAL_PUBLISHERS) {
   const existing = FOOTBALL_FEEDS.find((feed) => feed.sourceName === publisher.source);
   if (existing) {
     existing.priority = publisher.primary ? 110 : 100;
     continue;
   }
-  const query = new URLSearchParams({
-    q: `site:${publisher.domains[0]} (football OR fútbol OR futebol OR calcio OR fussball) when:2d`,
-    hl: "pt-BR",
-    gl: "BR",
-    ceid: "BR:pt-419",
-  });
+  const url = ADDITIONAL_FOOTBALL_RSS[publisher.source];
+  if (!url) throw new Error(`Missing editorial RSS for ${publisher.source}`);
   FOOTBALL_FEEDS.push({
     key: `${publisher.country.toLowerCase()}-${publisher.domains[0]}-football`,
     sourceName: publisher.source,
     country: publisher.country,
     sport: "FOOTBALL",
-    url: `https://news.google.com/rss/search?${query.toString()}`,
-    transport: "GOOGLE_NEWS_RSS",
+    url,
+    transport: "DIRECT_RSS",
     priority: publisher.primary ? 110 : 100,
   });
+}
+
+export function decodeEditorialRss(bytes: Uint8Array, contentType: string | null) {
+  const declaration = new TextDecoder().decode(bytes.subarray(0, 200));
+  const charset =
+    contentType?.match(/charset=["']?([^;\s"']+)/i)?.[1] ??
+    declaration.match(/encoding=["']([^"']+)["']/i)?.[1] ??
+    "utf-8";
+  return new TextDecoder(charset).decode(bytes);
 }
 
 export function approvedEditorialFeedItem(feed: EditorialFeed, item: FeedItem) {
@@ -485,7 +501,12 @@ async function fetchFeed(feed: EditorialFeed) {
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return parseEditorialRss(await response.text(), feed.sourceName);
+    const xml = decodeEditorialRss(
+      new Uint8Array(await response.arrayBuffer()),
+      response.headers.get("content-type"),
+    );
+    if (!/<rss\b/i.test(xml)) throw new Error("Expected RSS XML");
+    return parseEditorialRss(xml, feed.sourceName);
   } finally {
     clearTimeout(timer);
   }

@@ -3,11 +3,23 @@ import { describe, expect, it } from "vitest";
 import {
   approvedEditorialFeedItem,
   belongsToPreviousSportsDay,
+  decodeEditorialRss,
   editorialFixtureMatchScore,
   parseEditorialRss,
 } from "./editorial-source-sync.server";
 
 describe("editorial source sync", () => {
+  it("preserves Portuguese accents in the ISO-8859-1 Record feed", () => {
+    const prefix = '<?xml version="1.0" encoding="iso-8859-1"?><title>Jo';
+    const suffix = "o</title>";
+    const bytes = new Uint8Array([
+      ...new TextEncoder().encode(prefix),
+      0xe3,
+      ...new TextEncoder().encode(suffix),
+    ]);
+    expect(decodeEditorialRss(bytes, "text/xml")).toContain("João");
+  });
+
   it("accepts discovery RSS only when the attributed publisher is the configured one", () => {
     const feed = {
       key: "as",
