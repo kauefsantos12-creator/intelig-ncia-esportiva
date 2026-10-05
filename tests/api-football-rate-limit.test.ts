@@ -48,7 +48,7 @@ describe("API-Football shared pacing", () => {
     rpc.mockResolvedValue(state === "denied"
       ? { data: [{ allowed: false, reset_at: "2026-10-05T02:05:00Z" }], error: null }
       : { data: null, error: { message: "database unavailable" } });
-    const { apiFootballGet } = await import("./api_football.server");
+    const { apiFootballGet } = await import("@/lib/adapters/api_football.server");
     const result = await apiFootballGet("/players/squads?team=1");
     expect(result.status).toBe("UNAVAILABLE");
     expect(result.errorMessage).toContain("Rate limit compartilhado");
@@ -64,7 +64,7 @@ describe("API-Football shared pacing", () => {
         headers: { "x-ratelimit-limit": "10", "x-ratelimit-remaining": "9" },
       });
     });
-    const { apiFootballGet, apiFootballRateLimitState } = await import("./api_football.server");
+    const { apiFootballGet, apiFootballRateLimitState } = await import("@/lib/adapters/api_football.server");
     const calls = Promise.all([apiFootballGet("/teams?country=England"), apiFootballGet("/players/squads?team=2")]);
     await vi.runAllTimersAsync();
     expect((await calls).map((result) => result.status)).toEqual(["OK", "OK"]);
@@ -76,7 +76,7 @@ describe("API-Football shared pacing", () => {
   it("returns cached payloads without acquiring another slot or fetching again", async () => {
     rpc.mockResolvedValue({ data: [{ allowed: true, reset_at: "2026-10-05T02:01:00Z" }], error: null });
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ response: [], errors: [] })));
-    const { apiFootballGet } = await import("./api_football.server");
+    const { apiFootballGet } = await import("@/lib/adapters/api_football.server");
     await apiFootballGet("/players/squads?team=3");
     rpc.mockClear();
     expect((await apiFootballGet("/players/squads?team=3")).fromCache).toBe(true);
