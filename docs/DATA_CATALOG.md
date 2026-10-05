@@ -33,3 +33,5 @@ Validação: regressões de domínio/atribuição, estatísticas ausentes, isola
 A definição editorial é registrada por `INSERT ... ON CONFLICT`, permitindo aplicar a política também em runtimes restaurados sem o seed histórico de `source_definitions`. A operação preserva os campos existentes de propriedade e licença; não registra outras fontes nem altera as definições do motor.
 
 Os 14 veículos editoriais usam feeds RSS próprios. A descoberta pelo Google News foi substituída após retornar HTTP 503 no ambiente; o parser respeita a codificação declarada no XML, inclusive ISO-8859-1 do Record. A validação de domínio e atribuição continua obrigatória e falhas individuais mantêm o fechamento factual.
+
+A revisão editorial de relógio preserva minutos absolutos da partida (por exemplo, “aos 75 minutos”), sem tratá-los como minutos transcorridos do segundo tempo. Minuto 90 sem acréscimo informado não comprova gol nos acréscimos; a lista de eventos pode ser parcial. Um empate sem gols não autoriza interpretação de bloqueio defensivo sem evidência. Esses limites foram reforçados após a leitura do primeiro rascunho gerado em produção.
