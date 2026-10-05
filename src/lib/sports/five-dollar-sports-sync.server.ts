@@ -29,12 +29,13 @@ function hasMore(payload: unknown): boolean {
   return pagination?.["has_more"] === true;
 }
 
-function inferCompetitionKind(name: string, knownContinental: boolean): "LEAGUE" | "CUP" | "CONTINENTAL" | "OTHER" {
+export function inferCompetitionKind(name: string, knownContinental: boolean, knownDomestic = false): "LEAGUE" | "CUP" | "CONTINENTAL" | "OTHER" {
   if (knownContinental) return "CONTINENTAL";
+  if (knownDomestic) return "LEAGUE";
   const normalized = name.toLowerCase();
-  if (/champions|libertadores|sudamericana|europa league|conference league|continental/.test(normalized)) return "CONTINENTAL";
+  if (/champions\s+league|libertadores|sudamericana|europa league|conference league|continental/.test(normalized)) return "CONTINENTAL";
   if (/\bcup\b|\bcopa\b|\bcoppa\b|\bpokal\b|coupe|taça|taca/.test(normalized)) return "CUP";
-  if (/league|liga|serie|bundesliga|premier|ligue|divisi|division|brasileir/.test(normalized)) return "LEAGUE";
+  if (/league|liga|serie|bundesliga|premier|ligue|divisi|division|brasileir|championship\b/.test(normalized)) return "LEAGUE";
   return "OTHER";
 }
 
@@ -66,6 +67,7 @@ async function leagueContext(db: Awaited<ReturnType<typeof sportsDb>>, leagueId:
     region: text(targetData?.["region"]) ?? text(crossData?.["region"]),
     divisionLevel: nullableProviderNumber(targetData?.["division_level"]),
     knownContinental: Boolean(crossData),
+    knownDomestic: Boolean(targetData),
   };
 }
 
@@ -78,7 +80,7 @@ async function upsertCompetition(db: Awaited<ReturnType<typeof sportsDb>>, fixtu
     name: fixture.tournament || `League ${fixture.leagueId}`,
     country_code: context.countryCode,
     region: context.region,
-    competition_kind: inferCompetitionKind(fixture.tournament, context.knownContinental),
+    competition_kind: inferCompetitionKind(fixture.tournament, context.knownContinental, context.knownDomestic),
     division_level: context.divisionLevel,
     season: SEASON,
     five_dollar_league_id: fixture.leagueId,
