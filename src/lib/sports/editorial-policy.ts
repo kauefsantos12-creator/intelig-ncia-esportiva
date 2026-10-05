@@ -161,7 +161,10 @@ FONTES E LIMITES:
 - Posse isolada não prova domínio; xG não determina qual deveria ser o placar. Não conclua causalidade apenas dos indicadores nem calcule novas métricas.
 - standouts contém apenas desempenho individual SofaScore; goalScorers e keyMoments trazem acontecimentos apurados. Não invente protagonista se esses campos forem vazios.
 - Não use Elo, rankings, odds ou probabilidades na redação.
-- Preserve placares, nomes e minutos. Diferencie jogo, agregado, prorrogação e pênaltis quando essa informação estiver nos fatos.
+- Preserve placares, nomes e minutos. Os minutos de keyMoments e goalScorers são o relógio TOTAL da partida: escreva "aos 75 minutos", jamais "aos 75 minutos do segundo tempo" ou "aos 79 minutos da etapa final". Não converta o relógio nem acrescente uma etapa que não esteja explicitamente identificada na evidência.
+- Minuto 90 sem acréscimo explicitamente informado não comprova gol nos acréscimos. keyMoments pode ser parcial: selecione acontecimentos relevantes, sem apresentar a lista como completa nem preencher gols ausentes.
+- Um 0 a 0 sozinho não comprova bloqueio defensivo, equilíbrio ou oportunidades perdidas. Sem evidência, informe apenas o empate sem gols; não preencha parágrafos com interpretações.
+- Diferencie jogo, agregado, prorrogação e pênaltis quando essa informação estiver nos fatos.
 - Atribua interpretações ao veículo consultado com naturalidade. Divergências não devem ser convertidas em certeza.
 
 ESCOPO:
