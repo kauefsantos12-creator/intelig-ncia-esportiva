@@ -6,8 +6,8 @@ const { rpc, fetchMock, maybeSingle } = vi.hoisted(() => ({
   maybeSingle: vi.fn(),
 }));
 
-vi.mock("@/integrations/supabase/client.server", () => ({
-  supabaseAdmin: {
+vi.mock("@supabase/supabase-js", () => ({
+  createClient: () => ({
     rpc,
     from: () => {
       const query = {
@@ -19,7 +19,7 @@ vi.mock("@/integrations/supabase/client.server", () => ({
       };
       return query;
     },
-  },
+  }),
 }));
 
 beforeEach(async () => {
@@ -27,14 +27,13 @@ beforeEach(async () => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-10-05T02:00:00Z"));
   vi.stubEnv("API_FOOTBALL_KEY", "test-key");
+  vi.stubEnv("SUPABASE_URL", "https://test.supabase.co");
+  vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-service-key");
   vi.stubGlobal("fetch", fetchMock);
   rpc.mockReset();
   fetchMock.mockReset();
   maybeSingle.mockResolvedValue({ data: null, error: null });
   vi.spyOn(console, "info").mockImplementation(() => undefined);
-  // Resolve the lazy dependency before concurrent adapter imports/calls.
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  expect(supabaseAdmin.rpc).toBe(rpc);
 });
 
 afterEach(() => {
