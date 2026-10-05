@@ -19,3 +19,11 @@ Cada fonte deve ter: `source`, `definition_version`, provider, data owner, data 
 
 ## Linhagem
 Novos registros de `raw_observations` e `source_fetches` são aceitos somente quando `source + definition_version` estiver cadastrado. Registros históricos anteriores ao controle podem permanecer como legado até reconciliação, mas não autorizam novas fontes não catalogadas.
+
+## Noticiário — definição editorial de 05/10/2026
+
+`editorial_rss` usa `editorial-rss-v2`: exatamente dois veículos por país, com Kicker/BILD Sport, Marca/AS, BBC Sport/Sky Sports, L'Équipe/RMC Sport, Gazzetta/Corriere dello Sport, A Bola/Record e ge/UOL Esporte. O RSS do Google News é transporte de descoberta; a atribuição e o domínio do publisher precisam ser aprovados antes da persistência. Trechos de RSS não constituem leitura integral da matéria. Evidências históricas permanecem intactas; fontes fora da lista não alimentam novos textos.
+
+O padrão `editorial-explanatory-v3` integra explicação, relação entre placar e desempenho e protagonista no coletivo. Estatísticas de desempenho do futebol usam somente evidência SofaScore; a disponibilidade dessa evidência não é presumida. O fallback 5Dollar foi desativado exclusivamente na resenha, preservando os dados do motor e seus mapeamentos existentes. Sem estatísticas ou cobertura editorial suficiente, aplica-se a redação factual. Ver `docs/governance/EDITORIAL_REVIEW_STANDARD_2026-10-05.md`.
+
+Validação: regressões de domínio/atribuição, estatísticas ausentes, isolamento de provedores e testes SQL da política. Rollback: restaurar as duas funções da migration anterior mediante nova migration e reverter o código em novo commit. O padrão não altera a automação diária do ChatGPT.

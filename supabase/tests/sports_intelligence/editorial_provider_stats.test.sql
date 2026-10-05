@@ -15,7 +15,7 @@ select ok(
 
 select ok(
   position('apply_sports_editorial_provider_stats' in lower(pg_get_functiondef('public.publish_sports_daily_briefing(date)'::regprocedure))) > 0,
-  'daily briefing applies provider stats fallback'
+  'daily briefing applies the governed statistics policy'
 );
 
 select ok(
@@ -36,8 +36,9 @@ select is(
 );
 
 select ok(
-  position('5DollarFootballAPI' in pg_get_functiondef('public.apply_sports_editorial_provider_stats(date)'::regprocedure)) > 0,
-  'enrichment attributes statistics to the actual provider'
+  position('sofascore_only' in pg_get_functiondef('public.apply_sports_editorial_provider_stats(date)'::regprocedure)) > 0
+  and position('sports_match_fact_packs' in pg_get_functiondef('public.apply_sports_editorial_provider_stats(date)'::regprocedure)) = 0,
+  'editorial performance statistics use SofaScore without provider fallback'
 );
 
 select * from finish();

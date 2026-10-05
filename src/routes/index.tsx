@@ -52,6 +52,7 @@ function EloMovementRow({ movement }: { movement: EloMovement }) { const positiv
 function EditorialItem({ item }: { item: NewsBriefingItem }) {
   return <article className="border-t border-border/55 pt-6 first:border-t-0 first:pt-0">
     <h3 className="text-xl font-semibold tracking-tight text-foreground">{item.title}</h3>
+    {item.matchLabel ? <p className="mt-1 type-caption text-muted-foreground">{item.matchLabel}</p> : null}
     {item.body ? <p className="mt-3 max-w-[72ch] whitespace-pre-line type-body leading-7 text-foreground/90">{item.body}</p> : null}
     {item.sources.length ? <p className="mt-3 type-caption text-muted-foreground">Fontes: {item.sources.map((source,index)=><span key={source.url}>{index>0?" · ":null}<a href={source.url} target="_blank" rel="noreferrer" className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground">{source.label}</a></span>)}</p> : null}
   </article>;

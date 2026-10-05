@@ -31,6 +31,7 @@ export type NewsBriefingItem = {
   fixtureId: string | null;
   kind: "FOOTBALL_MATCH" | "ELO_MOVE" | "OTHER_SPORT" | "NEWS_CONTEXT" | "UNKNOWN";
   title: string;
+  matchLabel?: string | null;
   body: string | null;
   priority: number;
   lateGame: boolean;
@@ -132,6 +133,7 @@ function parseBriefingItem(row: Record<string, unknown>): NewsBriefingItem | nul
     fixtureId: text(row["fixture_id"]),
     kind,
     title,
+    matchLabel: isRecord(row["facts"]) ? text(row["facts"]["matchLabel"]) : null,
     body: text(row["body"]),
     priority: numeric(row["priority"]) ?? 0,
     lateGame: isRecord(row["facts"]) && row["facts"]["lateGame"] === true,

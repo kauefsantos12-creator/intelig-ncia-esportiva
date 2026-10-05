@@ -1,3 +1,9 @@
+import {
+  approvedEditorialPublisher,
+  EDITORIAL_SYSTEM_PROMPT,
+  EDITORIAL_VERSION,
+  sofaScoreEditorialStats,
+} from "./editorial-policy";
 import { sportsDb } from "./sports-db.server";
 
 const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -5,7 +11,6 @@ const AI_MODEL = "google/gemini-3.7-flash";
 const MAX_OTHER_SPORTS = 8;
 const BATCH_SIZE = 12;
 const REQUEST_TIMEOUT_MS = 45_000;
-const EDITORIAL_VERSION = "editorial-ai-v2";
 const AI_TEMPERATURE = 0.65;
 const MAX_STANDOUTS_PER_FIXTURE = 3;
 
@@ -32,7 +37,12 @@ type EditorialCandidate = {
   body: string;
   priority: number;
   lateGame: boolean;
-  sourceContext: Array<{ source: string; title: string }>;
+  sourceContext: Array<{
+    source: string;
+    title: string;
+    sourceUrl: string;
+    excerpt: string | null;
+  }>;
   standouts: Standout[];
   goalScorers: string[];
   keyMoments: string[];
@@ -71,12 +81,14 @@ function text(value: unknown): string | null {
 }
 
 function numeric(value: unknown): number {
-  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  const parsed =
+    typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function optionalNumber(value: unknown): number | null {
-  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
+  const parsed =
+    typeof value === "number" ? value : typeof value === "string" ? Number(value) : Number.NaN;
   return Number.isFinite(parsed) ? parsed : null;
 }
 
@@ -94,11 +106,13 @@ function classifyEvent(eventType: string, detail: string) {
   const type = eventType.toLowerCase();
   const info = `${eventType} ${detail ?? ""}`.toLowerCase();
 
-
   if (type.includes("goal")) {
     if (info.includes("own")) return { bucket: "moment" as const, label: "gol contra" };
     if (info.includes("missed") || info.includes("saved")) {
-      return { bucket: "moment" as const, label: info.includes("saved") ? "pênalti defendido" : "pênalti perdido" };
+      return {
+        bucket: "moment" as const,
+        label: info.includes("saved") ? "pênalti defendido" : "pênalti perdido",
+      };
     }
     if (info.includes("penalty")) return { bucket: "goal" as const, label: "gol de pênalti" };
     return { bucket: "goal" as const, label: "gol" };
@@ -107,7 +121,8 @@ function classifyEvent(eventType: string, detail: string) {
   if (type.includes("penalt")) {
     if (info.includes("saved")) return { bucket: "moment" as const, label: "pênalti defendido" };
     if (info.includes("missed")) return { bucket: "moment" as const, label: "pênalti perdido" };
-    if (info.includes("scored") || info.includes("converted")) return { bucket: "goal" as const, label: "gol de pênalti" };
+    if (info.includes("scored") || info.includes("converted"))
+      return { bucket: "goal" as const, label: "gol de pênalti" };
     return { bucket: "moment" as const, label: "lance de pênalti" };
   }
 
@@ -142,9 +157,12 @@ async function attachMatchProtagonists(
   const [statsResult, eventsResult] = await Promise.all([
     statsFixtureIds.length
       ? db
-        .from("sports_fixture_player_stats")
-        .select("fixture_id,minutes,provider_rating,stats,sports_players(name),sports_teams(name)")
-        .in("fixture_id", statsFixtureIds)
+          .from("sports_fixture_player_stats")
+          .select(
+            "fixture_id,minutes,provider_rating,stats,sports_players(name),sports_teams(name)",
+          )
+          .eq("provider", "sofascore")
+          .in("fixture_id", statsFixtureIds)
       : Promise.resolve({ data: [] as unknown[] }),
     db
       .from("sports_fixture_events")
@@ -187,8 +205,11 @@ async function attachMatchProtagonists(
     const stamp = minuteLabel(optionalNumber(row["minute"]), optionalNumber(row["added_minute"]));
     const team = embeddedName(row["sports_teams"]);
     const who = player ?? team ?? "";
-    const parts = [stamp, who, classified.bucket === "goal" && classified.label === "gol" ? null : `(${classified.label})`]
-      .filter(Boolean);
+    const parts = [
+      stamp,
+      who,
+      classified.bucket === "goal" && classified.label === "gol" ? null : `(${classified.label})`,
+    ].filter(Boolean);
     const label = parts.join(" ").trim();
     if (!label) continue;
 
@@ -206,16 +227,19 @@ async function attachMatchProtagonists(
   for (const item of football) {
     const fixtureId = item.fixtureId as string;
     const standouts = (standoutsByFixture.get(fixtureId) ?? [])
-      .sort((a, b) => ((b.goals ?? 0) * 3 + (b.assists ?? 0) * 2 + (b.rating ?? 0))
-        - ((a.goals ?? 0) * 3 + (a.assists ?? 0) * 2 + (a.rating ?? 0)))
+      .sort(
+        (a, b) =>
+          (b.goals ?? 0) * 3 +
+          (b.assists ?? 0) * 2 +
+          (b.rating ?? 0) -
+          ((a.goals ?? 0) * 3 + (a.assists ?? 0) * 2 + (a.rating ?? 0)),
+      )
       .slice(0, MAX_STANDOUTS_PER_FIXTURE);
     item.standouts = standouts;
     item.goalScorers = (scorersByFixture.get(fixtureId) ?? []).slice(0, 8);
     item.keyMoments = (momentsByFixture.get(fixtureId) ?? []).slice(0, 6);
   }
 }
-
-
 
 function cleanAiText(value: unknown, maxLength: number, collapseParagraphs = true) {
   const result = text(value);
@@ -228,12 +252,14 @@ function cleanAiText(value: unknown, maxLength: number, collapseParagraphs = tru
   const normalized = collapseParagraphs
     ? stripped.replace(/\n+/g, " ")
     : stripped.replace(/\n{3,}/g, "\n\n").replace(/[ \t]+\n/g, "\n");
-  return normalized.replace(/[ \t]{2,}/g, " ").trim().slice(0, maxLength);
+  return normalized
+    .replace(/[ \t]{2,}/g, " ")
+    .trim()
+    .slice(0, maxLength);
 }
 
-
 function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
-  const sources: Array<{ source: string; title: string }> = [];
+  const sources: EditorialCandidate["sourceContext"] = [];
 
   if (kind === "FOOTBALL_MATCH") {
     const entries = Array.isArray(facts["journalismContext"]) ? facts["journalismContext"] : [];
@@ -241,34 +267,99 @@ function sourceContextFromFacts(kind: EditorialCandidate["kind"], facts: Row) {
       if (!isRecord(entry)) continue;
       const source = text(entry["source"]);
       const title = text(entry["title"]);
-      if (source && title) sources.push({ source, title });
+      const sourceUrl = text(entry["sourceUrl"]);
+      const publisherUrl = text(entry["publisherUrl"]) ?? sourceUrl;
+      if (
+        source &&
+        title &&
+        sourceUrl &&
+        publisherUrl &&
+        approvedEditorialPublisher(source, publisherUrl)
+      ) {
+        sources.push({ source, title, sourceUrl, excerpt: text(entry["excerpt"]) });
+      }
     }
   }
 
   if (kind === "OTHER_SPORT") {
     const source = text(facts["sourceName"]) ?? text(facts["source"]);
     const title = text(facts["sourceTitle"]) ?? text(facts["title"]);
-    if (source && title) sources.push({ source, title });
+    const sourceUrl = text(facts["sourceUrl"]);
+    const publisherUrl = text(facts["publisherUrl"]) ?? sourceUrl;
+    if (
+      source &&
+      title &&
+      sourceUrl &&
+      publisherUrl &&
+      approvedEditorialPublisher(source, publisherUrl)
+    ) {
+      sources.push({ source, title, sourceUrl, excerpt: text(facts["sourceExcerpt"]) });
+    }
   }
 
   return sources.slice(0, 3);
 }
 
-const MAJOR_PATTERN = /(champions league|libertadores|world cup|copa america|copa américa|european championship|eurocopa|nations league a\b|final)/i;
-const MARQUEE_PATTERN = /(champions league|libertadores|sudamericana|europa league|copa do brasil|copa del rey|fa cup|final|classico|clássico|derby|nations league|world cup|copa america|copa américa|eliminat|qualif|international|friendl|euro)/i;
+const MAJOR_PATTERN =
+  /(champions league|libertadores|world cup|copa america|copa américa|european championship|eurocopa|nations league a\b|final)/i;
+const MARQUEE_PATTERN =
+  /(champions league|libertadores|sudamericana|europa league|copa do brasil|copa del rey|fa cup|final|classico|clássico|derby|nations league|world cup|copa america|copa américa|eliminat|qualif|international|friendl|euro)/i;
 
 const BIG_CLUBS = new Set([
-  "real madrid", "barcelona", "atletico madrid", "manchester city", "manchester united",
-  "liverpool", "arsenal", "chelsea", "tottenham", "bayern munich", "bayern munchen",
-  "borussia dortmund", "juventus", "inter", "ac milan", "napoli", "psg", "paris saint germain",
-  "benfica", "porto", "sporting", "ajax", "palmeiras", "flamengo", "corinthians", "sao paulo",
-  "gremio", "internacional", "santos", "fluminense", "botafogo", "atletico mineiro", "cruzeiro",
-  "boca juniors", "river plate", "brazil", "argentina", "france", "england", "spain", "germany",
-  "portugal", "italy", "netherlands", "uruguay", "colombia",
+  "real madrid",
+  "barcelona",
+  "atletico madrid",
+  "manchester city",
+  "manchester united",
+  "liverpool",
+  "arsenal",
+  "chelsea",
+  "tottenham",
+  "bayern munich",
+  "bayern munchen",
+  "borussia dortmund",
+  "juventus",
+  "inter",
+  "ac milan",
+  "napoli",
+  "psg",
+  "paris saint germain",
+  "benfica",
+  "porto",
+  "sporting",
+  "ajax",
+  "palmeiras",
+  "flamengo",
+  "corinthians",
+  "sao paulo",
+  "gremio",
+  "internacional",
+  "santos",
+  "fluminense",
+  "botafogo",
+  "atletico mineiro",
+  "cruzeiro",
+  "boca juniors",
+  "river plate",
+  "brazil",
+  "argentina",
+  "france",
+  "england",
+  "spain",
+  "germany",
+  "portugal",
+  "italy",
+  "netherlands",
+  "uruguay",
+  "colombia",
 ]);
 
 function normalizeName(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("pt-BR").trim();
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
 }
 
 function teamsFromTitle(title: string) {
@@ -286,30 +377,47 @@ function editorialTier(kind: EditorialCandidate["kind"], title: string, facts: R
   const goals = isRecord(facts["score"])
     ? numeric(facts["score"]["home"]) + numeric(facts["score"]["away"])
     : 0;
-  const hasJournalism = Array.isArray(facts["journalismContext"]) && facts["journalismContext"].length > 0;
+  const hasJournalism =
+    Array.isArray(facts["journalismContext"]) && facts["journalismContext"].length > 0;
 
   if (bigTeams >= 2) return 1;
   if (bigTeams >= 1 && (MARQUEE_PATTERN.test(competition) || hasJournalism)) return 1;
   if (MAJOR_PATTERN.test(competition) && (margin <= 1 || goals >= 4)) return 1;
-  if (bigTeams >= 1 || MARQUEE_PATTERN.test(competition) || goals >= 4 || margin >= 3 || hasJournalism) return 2;
+  if (
+    bigTeams >= 1 ||
+    MARQUEE_PATTERN.test(competition) ||
+    goals >= 4 ||
+    margin >= 3 ||
+    hasJournalism
+  )
+    return 2;
   return 3;
 }
 
 function parseCandidate(row: Row): EditorialCandidate | null {
   const id = text(row["id"]);
   const rawKind = text(row["item_kind"]);
-  const title = text(row["title"]);
+  const title =
+    text(isRecord(row["facts"]) ? row["facts"]["matchLabel"] : null) ?? text(row["title"]);
   const body = text(row["body"]) ?? "";
   if (!id || !title) return null;
 
   const facts = isRecord(row["facts"]) ? row["facts"] : {};
   const isClubFocus = rawKind === "NEWS_CONTEXT" && text(facts["section"]) === "palmeiras";
   const kind: EditorialCandidate["kind"] | null =
-    rawKind === "FOOTBALL_MATCH" ? "FOOTBALL_MATCH"
-      : rawKind === "OTHER_SPORT" ? "OTHER_SPORT"
-        : isClubFocus ? "CLUB_FOCUS"
+    rawKind === "FOOTBALL_MATCH"
+      ? "FOOTBALL_MATCH"
+      : rawKind === "OTHER_SPORT"
+        ? "OTHER_SPORT"
+        : isClubFocus
+          ? "CLUB_FOCUS"
           : null;
   if (!kind) return null;
+  if (kind === "CLUB_FOCUS") {
+    const data = isRecord(facts["data"]) ? facts["data"] : {};
+    if (!Array.isArray(data["yesterdayFixtures"]) || data["yesterdayFixtures"].length === 0)
+      return null;
+  }
 
   return {
     id,
@@ -331,7 +439,9 @@ function parseCandidate(row: Row): EditorialCandidate | null {
 }
 
 function selectCandidates(rows: Row[]) {
-  const parsed = rows.map(parseCandidate).filter((item): item is EditorialCandidate => item !== null);
+  const parsed = rows
+    .map(parseCandidate)
+    .filter((item): item is EditorialCandidate => item !== null);
   const clubFocus = parsed.filter((item) => item.kind === "CLUB_FOCUS");
   const football = parsed
     .filter((item) => item.kind === "FOOTBALL_MATCH")
@@ -352,28 +462,16 @@ function chunks<T>(items: T[], size: number) {
 }
 
 const TIER_GUIDANCE: Record<EditorialTier, string> = {
-  1: "JOGO GRANDE: crônica corrida de 4 a 6 frases, sem tópicos e sem listas. Conte o roteiro do jogo (quem mandou, quando virou, o lance que decidiu), cite os minutos dos gols, os lances capitais de 'keyMoments' (pênalti perdido ou defendido, expulsão, gol anulado) com o nome de quem protagonizou, destaque os craques e use as estatísticas dentro das frases. Integre o contexto das fontes jornalísticas.",
-  2: "JOGO RELEVANTE: 2 a 3 frases corridas. Narre como o placar foi construído, quem decidiu, qualquer lance capital de 'keyMoments' e um número que explique a partida.",
-  3: "RESUMÃO: 1 frase objetiva com quem resolveu o jogo. Só escreva uma segunda frase se houver algo realmente fora do comum (virada no fim, goleada, pênalti perdido decisivo, expulsão, zebra).",
+  1: "Destaque: normalmente 3 a 5 parágrafos curtos, com explicação, comparação estatística pertinente e protagonista quando sustentados pela evidência.",
+  2: "Jogo relevante: 1 ou 2 parágrafos; resultado, acontecimento decisivo e evidência que ajude a compreender o jogo.",
+  3: "Compacto: 1 ou 2 frases, mantendo o confronto identificável e seu fato decisivo.",
 };
 
 function promptPayload(date: string, candidates: EditorialCandidate[]) {
   return {
     date,
     timezone: "America/Sao_Paulo",
-    instructions: {
-      language: "pt-BR",
-      audience: "torcedor brasileiro que lê uma resenha esportiva matinal bem escrita",
-      voice: "jornalismo esportivo de revista: frases vivas, verbos de ação, zero burocracia.",
-      format: "TEXTO CORRIDO SEMPRE. Proibido bullet, travessão de lista, numeração, subtítulo interno ou linha começando com '-' ou '•'. Cada body é prosa contínua.",
-      opening: "2 parágrafos de abertura em prosa corrida com o que realmente importou no dia, começando pelos jogos grandes e pelas seleções. Escreva como chamada de capa, não como relatório.",
-      depth: "Respeite o campo 'tier' de cada item: ele define quanto espaço o jogo merece. Os itens de tier 3 formam o resumão final do dia e devem ser curtíssimos.",
-      players: "Quando houver 'standouts' ou 'goalScorers', cite os jogadores pelo nome com o que eles fizeram em campo.",
-      keyMoments: "O campo 'keyMoments' traz lances capitais já apurados (pênalti perdido ou defendido, expulsão, gol contra, gol anulado). Em tier 1 e 2 eles são obrigatórios no texto, com nome e minuto. Nunca invente um lance que não esteja ali.",
-      stats: "Transforme números em narrativa (posse que não virou perigo, volume de finalizações que explicou a goleada). Nunca liste números soltos.",
-      otherSports: "Título e 1 a 2 frases em português brasileiro. Use somente o que a manchete de origem permite afirmar.",
-      clubFocus: "Bloco fixo do Palmeiras. Se houve jogo, conte o desempenho. Se não houve, escreva uma nota curta e natural de torcedor sobre o clube ter ficado fora de campo na data — nunca uma mensagem de sistema.",
-    },
+    editorialVersion: EDITORIAL_VERSION,
     items: candidates.map((item) => ({
       id: item.id,
       kind: item.kind,
@@ -384,14 +482,13 @@ function promptPayload(date: string, candidates: EditorialCandidate[]) {
       score: item.facts["score"] ?? null,
       goalTimeline: text(item.facts["goalTimeline"]),
       lateGame: item.lateGame,
-      matchStats: isRecord(item.facts["editorialStats"]) ? item.facts["editorialStats"]["values"] ?? null : null,
+      matchStats: sofaScoreEditorialStats(item.facts["editorialStats"]),
       standouts: item.standouts,
       goalScorers: item.goalScorers,
       keyMoments: item.keyMoments,
       factualBody: item.body,
       sourceHeadlines: item.sourceContext,
     })),
-
   };
 }
 
@@ -405,7 +502,7 @@ function extractMessageContent(payload: unknown) {
   if (typeof content === "string") return content;
   if (Array.isArray(content)) {
     return content
-      .map((part) => isRecord(part) && typeof part["text"] === "string" ? part["text"] : "")
+      .map((part) => (isRecord(part) && typeof part["text"] === "string" ? part["text"] : ""))
       .join("");
   }
   return null;
@@ -438,7 +535,7 @@ function parseGatewayOutput(payload: unknown, allowedIds: Set<string>): GatewayO
     if (!isRecord(entry)) continue;
     const id = text(entry["id"]);
     const title = cleanAiText(entry["title"], 280);
-    const body = cleanAiText(entry["body"], 1_500);
+    const body = cleanAiText(entry["body"], 4_000, false);
     if (!id || !allowedIds.has(id) || seen.has(id) || !title || !body) continue;
     seen.add(id);
     items.push({ id, title, body });
@@ -448,66 +545,23 @@ function parseGatewayOutput(payload: unknown, allowedIds: Set<string>): GatewayO
   return { opening, items };
 }
 
-async function callGateway(date: string, candidates: EditorialCandidate[]) {
+async function callGateway(
+  date: string,
+  candidates: EditorialCandidate[],
+  edition: EditorialCandidate[] = candidates,
+) {
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) {
-    return { output: null as GatewayOutput | null, reason: "LOVABLE_API_KEY indisponível no runtime." };
+    return {
+      output: null as GatewayOutput | null,
+      reason: "LOVABLE_API_KEY indisponível no runtime.",
+    };
   }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  const system = `Você é o editor-chefe de uma resenha esportiva brasileira de alto nível, no tom de The Athletic e Trivela.
-Escreva como quem viu o jogo: frases vivas, verbos de ação, ritmo de crônica. Nada de relatório, ata ou log de sistema.
-
-FORMATO — TEXTO CORRIDO:
-- Todo body é prosa contínua. Proibido bullet, lista, numeração, subtítulo interno, emoji ou linha iniciada por "-", "•", "*" ou "1.".
-- Proibido frases-etiqueta do tipo "Destaques:", "Estatísticas:", "Gols:". Tudo entra dentro da narrativa.
-
-HIERARQUIA (campo "tier" de cada item):
-- tier 1 (clássicos, decisões, seleções, times grandes): crônica de 4 a 6 frases com roteiro do jogo, minutos dos gols, lances capitais, protagonistas e o número que explica a partida.
-- tier 2: 2 a 3 frases densas sobre como o placar foi construído e quem decidiu.
-- tier 3: RESUMÃO do fim da edição. 1 frase objetiva. Só acrescente uma segunda se houver algo realmente marcante.
-
-LANCES CAPITAIS:
-- O campo "keyMoments" traz pênaltis perdidos ou defendidos, expulsões, gols contra e gols anulados já apurados.
-- Em tier 1 e 2, cite obrigatoriamente esses lances com nome e minuto ("Harry Kane parou no goleiro ao desperdiçar o pênalti aos 37'").
-- Nunca invente um lance que não esteja em "keyMoments", "goalScorers" ou "factualBody".
-
-JOGADORES:
-- Use "standouts" e "goalScorers" para citar nomes com o que fizeram (autor do gol da virada, doblete, goleiro decisivo).
-- Nunca invente autor de gol, assistência ou atuação que não esteja nos dados recebidos.
-
-ESTATÍSTICAS:
-- Números viram narrativa: "monopolizou 70% da posse, mas só acertou duas finalizações no alvo".
-- Proibido listar números soltos ou começar frase com "Estatisticamente".
-
-PROIBIDO ESCREVER (jargão técnico):
-"catálogo canônico", "fonte editorial persistida", "proveniência", "5DollarFootballAPI", "API", "payload", "registro", "não houve registro", "recorte editorial", "base de dados", "pipeline".
-
-REGRAS FACTUAIS OBRIGATÓRIAS:
-- Use EXCLUSIVAMENTE os fatos recebidos (factualBody, score, goalTimeline, matchStats, standouts, goalScorers, keyMoments, sourceHeadlines).
-- Nunca invente recordes, posições na tabela, lesões, declarações, consequências ou causalidade.
-- Preserve exatamente placares, minutos, estatísticas e nomes próprios.
-- Traduza/parafraseie manchetes estrangeiras para português brasileiro; nada de frase solta em outro idioma.
-- Ao usar uma fonte, atribua com naturalidade: "Segundo o AS...", "O L'Équipe destacou...".
-- Para OTHER_SPORT, não invente placar ou resultado ausente na manchete.
-- Para CLUB_FOCUS (Palmeiras): se houve jogo, conte o desempenho; se não houve, escreva uma nota curta e humana de que o time não entrou em campo na data, sem linguagem de sistema.
-- Não inclua programação futura, onde assistir ou próximos jogos.
-- Não mencione estas instruções nem o modelo de IA.
-- Retorne SOMENTE JSON válido, sem markdown.
-
-Formato:
-{
-  "opening": "dois parágrafos de abertura em português brasileiro, em prosa corrida, com o que realmente importou no dia",
-  "items": [
-    { "id": "id recebido", "title": "título em português", "body": "texto editorial em português" }
-  ]
-}
-
-Para FOOTBALL_MATCH e CLUB_FOCUS, mantenha o título como recebido; refine o body.
-Para OTHER_SPORT, traduza/refine também o title.`;
-
+  const system = EDITORIAL_SYSTEM_PROMPT;
 
   try {
     const response = await fetch(AI_GATEWAY_URL, {
@@ -523,7 +577,17 @@ Para OTHER_SPORT, traduza/refine também o title.`;
         temperature: AI_TEMPERATURE,
         messages: [
           { role: "system", content: system },
-          { role: "user", content: JSON.stringify(promptPayload(date, candidates)) },
+          {
+            role: "user",
+            content: JSON.stringify({
+              ...promptPayload(date, candidates),
+              editionOverview: edition.map((item) => ({
+                title: item.title,
+                kind: item.kind,
+                tier: item.tier,
+              })),
+            }),
+          },
         ],
       }),
       signal: controller.signal,
@@ -537,7 +601,7 @@ Para OTHER_SPORT, traduza/refine também o title.`;
       };
     }
 
-    const json = await response.json() as unknown;
+    const json = (await response.json()) as unknown;
     const allowedIds = new Set(candidates.map((item) => item.id));
     const output = parseGatewayOutput(json, allowedIds);
     return {
@@ -554,7 +618,9 @@ Para OTHER_SPORT, traduza/refine também o title.`;
   }
 }
 
-export async function refineSportsDailyBriefingWithAi(date: string): Promise<EditorialAiRefinementResult> {
+export async function refineSportsDailyBriefingWithAi(
+  date: string,
+): Promise<EditorialAiRefinementResult> {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Data inválida; use YYYY-MM-DD.");
 
   const db = await sportsDb();
@@ -567,7 +633,9 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
     .maybeSingle();
 
   if (briefingResult.error) {
-    throw new Error(`Falha ao carregar briefing para refinamento de IA: ${briefingResult.error.message}`);
+    throw new Error(
+      `Falha ao carregar briefing para refinamento de IA: ${briefingResult.error.message}`,
+    );
   }
 
   const briefing = isRecord(briefingResult.data) ? briefingResult.data : null;
@@ -613,11 +681,14 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
 
   const currentMetadata = isRecord(briefing?.["metadata"]) ? briefing?.["metadata"] : {};
   const batches = chunks(candidates, BATCH_SIZE);
-  const batchResults = await Promise.all(batches.map(async (batch) => {
-    let gateway = await callGateway(date, batch);
-    if (!gateway.output) gateway = await callGateway(date, batch);
-    return gateway;
-  }));
+  const batchResults = await Promise.all(
+    batches.map(async (batch) => {
+      // Every opening receives the complete edition, rather than only a 12-item batch.
+      let gateway = await callGateway(date, batch, candidates);
+      if (!gateway.output) gateway = await callGateway(date, batch, candidates);
+      return gateway;
+    }),
+  );
   const refinedItems: GatewayItem[] = [];
   let opening: string | null = null;
   const errors: string[] = [];
@@ -639,7 +710,10 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
       aiEditorialAttemptedAt: generatedAt,
       aiEditorialError: errors.join(" | ").slice(0, 1500) || "Falha desconhecida.",
     };
-    await db.from("sports_daily_briefings").update({ metadata: failedMetadata, updated_at: generatedAt }).eq("id", briefingId);
+    await db
+      .from("sports_daily_briefings")
+      .update({ metadata: failedMetadata, updated_at: generatedAt })
+      .eq("id", briefingId);
     return {
       date,
       status: "FAILED",
@@ -658,9 +732,9 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
     const original = byId.get(refined.id);
     if (!original) continue;
 
-    const existingAi = original.provenance.filter((entry) => (
-      !isRecord(entry) || entry["role"] !== "ai_editorial_transform"
-    ));
+    const existingAi = original.provenance.filter(
+      (entry) => !isRecord(entry) || entry["role"] !== "ai_editorial_transform",
+    );
     const provenance = [
       ...existingAi,
       {
@@ -672,6 +746,7 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
     ];
     const facts = {
       ...original.facts,
+      ...(original.kind === "FOOTBALL_MATCH" ? { matchLabel: original.title } : {}),
       aiEditorial: {
         model: AI_MODEL,
         generatedAt,
@@ -686,7 +761,8 @@ export async function refineSportsDailyBriefingWithAi(date: string): Promise<Edi
       facts,
       provenance,
     };
-    if (original.kind === "OTHER_SPORT") update["title"] = refined.title;
+    if (original.kind === "OTHER_SPORT" || original.kind === "FOOTBALL_MATCH")
+      update["title"] = refined.title;
 
     const updateResult = await db
       .from("sports_briefing_items")
