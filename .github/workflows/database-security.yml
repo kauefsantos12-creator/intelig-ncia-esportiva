@@ -29,7 +29,10 @@ jobs:
           version: 2.100.0
 
       - name: Start local database and apply migrations
-        run: supabase db start
+        run: |
+          mkdir -p supabase/migrations
+          cp -n supabase/migrations_archive/*.sql supabase/migrations/
+          supabase db start
 
       - name: Sports intelligence security and integrity regressions
         run: supabase test db supabase/tests/sports_intelligence/*.test.sql

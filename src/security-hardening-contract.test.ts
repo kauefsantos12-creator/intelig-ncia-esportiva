@@ -58,13 +58,13 @@ describe("security hardening contracts", () => {
   it("keeps the approved identity in the database instead of source literals", () => {
     const middleware = source("src/integrations/supabase/auth-middleware.ts");
     const initialAuthMigration = source(
-      "supabase/migrations/20260911120500_reconcile_single_google_user_auth.sql",
+      "supabase/migrations_archive/20260911120500_reconcile_single_google_user_auth.sql",
     );
     const ownerMigration = source(
-      "supabase/migrations/20260911235100_owner_defaults_and_push_guard.sql",
+      "supabase/migrations_archive/20260911235100_owner_defaults_and_push_guard.sql",
     );
     const closureMigration = source(
-      "supabase/migrations/20260912012500_remove_public_authorized_identity.sql",
+      "supabase/migrations_archive/20260912012500_remove_public_authorized_identity.sql",
     );
 
     expect(middleware).not.toContain("ALLOWED_EMAIL");

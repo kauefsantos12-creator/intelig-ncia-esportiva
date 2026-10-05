@@ -16,7 +16,7 @@ describe("Elo sports intelligence contract", () => {
   });
 
   it("uses a single current league context per club in the global ranking read model", () => {
-    const migration = source("../supabase/migrations/20260920190000_elo_current_team_rating_v1.sql");
+    const migration = source("../supabase/migrations_archive/20260920190000_elo_current_team_rating_v1.sql");
     expect(migration).toContain("partition by t.team_id");
     expect(migration).toContain("t.last_fixture_at desc nulls last");
     expect(migration).toContain("where t.current_rank=1");

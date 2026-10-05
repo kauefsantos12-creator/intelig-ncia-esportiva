@@ -5,7 +5,7 @@ describe("stage 4 prospective fixture collection contract", () => {
   const sync = readFileSync("src/lib/sports/api-football-sports-sync.server.ts", "utf8");
   const quota = readFileSync("src/lib/sports/api-football-quota-sync.server.ts", "utf8");
   const five = readFileSync("src/lib/sports/five-dollar-sports-sync.server.ts", "utf8");
-  const migration = readFileSync("supabase/migrations/20260919090000_stage4_prospective_fixture_collection.sql", "utf8");
+  const migration = readFileSync("supabase/migrations_archive/20260919090000_stage4_prospective_fixture_collection.sql", "utf8");
 
   it("uses fixture endpoints and persists per-fixture player data", () => {
     expect(sync).toContain("apiFootballFixtureLineups");

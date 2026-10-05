@@ -1,36 +1,46 @@
 begin;
+select plan(2);
 
-insert into public.sports_tracking_rules (
-  rule_key,country_code,region,competition_kind,division_level,competition_id,
-  always_track,enabled,priority,metadata
-)
-select
-  'test-second-league-' || country_code,
-  country_code,null,'LEAGUE',2,null,true,true,100,
-  jsonb_build_object('label','second division test')
-from (values ('BR'),('GB-ENG'),('DE'),('FR'),('IT'),('ES')) v(country_code)
-on conflict (rule_key) do update set enabled=true,always_track=true;
-
-do $$
-declare
-  v_missing text;
-begin
-  select string_agg(country_code, ', ' order by country_code)
-  into v_missing
-  from (values ('BR'),('GB-ENG'),('DE'),('FR'),('IT'),('ES')) expected(country_code)
-  where not exists (
-    select 1
+-- Seeded by 20260921123500_today_brazil_serie_b_tracking.sql: the principal
+-- countries' second divisions are always tracked in Today.
+select is(
+  (
+    select count(*)::integer
     from public.sports_tracking_rules r
-    where r.enabled=true
-      and r.always_track=true
-      and r.country_code=expected.country_code
-      and r.competition_kind='LEAGUE'
-      and r.division_level=2
-  );
+    where r.rule_key in (
+      'always-brazil-second-league',
+      'always-england-second-league',
+      'always-germany-second-league',
+      'always-france-second-league',
+      'always-italy-second-league',
+      'always-spain-second-league'
+    )
+      and r.enabled = true
+      and r.always_track = true
+      and r.competition_kind = 'LEAGUE'
+      and r.division_level = 2
+  ),
+  6,
+  'Six second-division Today tracking rules are seeded and enabled'
+);
 
-  if v_missing is not null then
-    raise exception 'Missing second-division tracking rules: %', v_missing;
-  end if;
-end $$;
+select is(
+  (
+    select string_agg(expected.country_code, ', ' order by expected.country_code)
+    from (values ('BR'), ('GB-ENG'), ('DE'), ('FR'), ('IT'), ('ES')) expected(country_code)
+    where not exists (
+      select 1
+      from public.sports_tracking_rules r
+      where r.enabled = true
+        and r.always_track = true
+        and r.country_code = expected.country_code
+        and r.competition_kind = 'LEAGUE'
+        and r.division_level = 2
+    )
+  ),
+  null,
+  'Every principal country has an enabled second-division tracking rule'
+);
 
+select * from finish();
 rollback;

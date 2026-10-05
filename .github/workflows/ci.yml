@@ -128,6 +128,8 @@ jobs:
 
       - name: Database migrations and sports-intelligence regressions
         run: |
+          mkdir -p supabase/migrations
+          cp -n supabase/migrations_archive/*.sql supabase/migrations/
           supabase db start
           supabase test db supabase/tests/sports_intelligence
 
