@@ -17,9 +17,9 @@ export const API_FOOTBALL_SOURCE = "api_football";
 const BASE = "https://v3.football.api-sports.io";
 const TIMEOUT_MS = 10000;
 const MAX_ATTEMPTS = 3;
-const MIN_INTERVAL_MS = 5000;
+const MIN_INTERVAL_MS = 15000;
 const CACHE_TTL_MS = 10 * 60 * 1000;
-const DEFAULT_DISTRIBUTED_LIMIT_PER_MINUTE = 4;
+const DEFAULT_DISTRIBUTED_LIMIT_PER_MINUTE = 2;
 
 export type ApiFootballFetchStatus = "OK" | "UNAVAILABLE" | "NOT_CONFIGURED";
 
@@ -43,6 +43,7 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 let lastCallAt = 0;
+let throttleTail: Promise<void> = Promise.resolve();
 const PROVIDER = "api_football";
 let distributedLimitPerMinute = DEFAULT_DISTRIBUTED_LIMIT_PER_MINUTE;
 let providerMinuteLimit: number | null = null;
@@ -88,6 +89,13 @@ function readProviderRateHeaders(res: Response) {
   const minuteRemaining = headerNumber(res.headers.get("x-ratelimit-remaining"));
   providerMinuteLimit = minuteLimit;
   providerMinuteRemaining = minuteRemaining;
+  console.info("[api-football] rate limits", {
+    httpStatus: res.status,
+    minuteLimit,
+    minuteRemaining,
+    dailyLimit: headerNumber(res.headers.get("x-ratelimit-requests-limit")),
+    dailyRemaining: headerNumber(res.headers.get("x-ratelimit-requests-remaining")),
+  });
   if (minuteLimit !== null && minuteLimit > 1) {
     // Keep one request of headroom so maintenance/status calls are not starved.
     distributedLimitPerMinute = Math.max(1, Math.min(DEFAULT_DISTRIBUTED_LIMIT_PER_MINUTE, Math.floor(minuteLimit) - 1));
@@ -131,10 +139,14 @@ async function writeDistributedCache(endpoint: string, payload: unknown, httpSta
   }
 }
 
-async function throttle() {
-  const wait = lastCallAt + MIN_INTERVAL_MS - Date.now();
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-  lastCallAt = Date.now();
+function throttle(): Promise<void> {
+  const turn = throttleTail.then(async () => {
+    const wait = lastCallAt + MIN_INTERVAL_MS - Date.now();
+    if (wait > 0) await new Promise<void>((resolve) => setTimeout(resolve, wait));
+    lastCallAt = Date.now();
+  });
+  throttleTail = turn.catch(() => undefined);
+  return turn;
 }
 
 async function acquireDistributedSlot() {
@@ -154,17 +166,12 @@ async function acquireDistributedSlot() {
   }
 }
 
-async function globalThrottle() {
-  // Keep a conservative shared ceiling. The provider enforces a rolling minute window,
-  // so using the advertised maximum with fixed local windows can create boundary bursts.
+async function globalThrottle(): Promise<boolean> {
   await throttle();
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const slot = await acquireDistributedSlot();
-    if (slot === null) return;
-    if (slot.allowed) return;
-    const wait = Math.max(250, Math.min(61_000, slot.resetAt - Date.now() + 250));
-    await new Promise((resolve) => setTimeout(resolve, wait));
-  }
+  // A denied or unavailable shared permit is deferred to the job queue.
+  // Never fall through to fetch after retries or bypass a provider cooldown.
+  const slot = await acquireDistributedSlot();
+  return slot?.allowed === true;
 }
 
 async function markDistributedRateLimit(seconds: number) {
@@ -218,7 +225,13 @@ export async function apiFootballGet<T = unknown>(path: string): Promise<ApiFoot
   let lastStatus: number | null = null;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    await globalThrottle();
+    if (!(await globalThrottle())) {
+      return {
+        status: "UNAVAILABLE", endpoint, path, payload: null, httpStatus: null,
+        errorMessage: "Rate limit compartilhado da API-Football: requisição adiada sem consumir quota do provedor.",
+        fetchedAt: now(), fromCache: false,
+      };
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
