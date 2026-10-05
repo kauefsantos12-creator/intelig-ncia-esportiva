@@ -15,3 +15,11 @@ O banco novo não possui `supabase_migrations.schema_migrations`. Se os arquivos
 ## Estado de runtime (04/10/2026)
 - `scripts/recuperacao-remix.sql` aplicado: Vault, gatilhos de auth, seeds de configuração e 20 jobs `pg_cron`.
 - Carga inicial 5Dollar validada (agenda ontem/hoje/amanhã); Elo em bootstrap; elencos API-Football enfileirados (plano gratuito).
+
+## Fallback público do cliente Supabase
+
+O remix removeu o fallback público de `src/integrations/supabase/client.ts`. Sem variáveis Vite no navegador, a inicialização falhava e o botão de login não aparecia no CI.
+
+O cliente foi restaurado a partir de `63ef081404a3`, alterando somente as constantes públicas de URL e chave publishable para o Cloud `hefuvmocohhpmnhwpkac`, confirmado no ambiente Lovable. A função `serverEnv()` preserva a guarda para não acessar `process` no navegador. Nenhuma credencial privilegiada foi incluída.
+
+`src/supabase-client-fallback-contract.test.ts` verifica o fallback, o Cloud atual e a guarda de ambiente. CI verde não comprova publicação: merge, sincronização e validação em produção permanecem etapas posteriores.
