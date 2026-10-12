@@ -16,12 +16,18 @@ O produto atual não possui fluxo de apostas, odds, banca, picks ou execução f
 
 | Item | Valor |
 | --- | --- |
-| Repositório | kauefsantos12-creator/quant-football-insights |
-| Lovable project ID | 28664075-8af4-4155-9ee9-8ed86021681a |
-| Workspace Lovable | IgC7Z3MS5vlDXWjvizgE |
-| Produção | https://quant-football-insights.lovable.app |
-| Banco/runtime | Lovable Cloud |
+| Repositório | kauefsantos12-creator/intelig-ncia-esportiva |
+| Branch canônica | main |
+| Lovable project ID | 428fa571-e363-4bbf-ab2c-058451eba7dc |
+| Workspace Lovable | a6f6ab0ce77b5538cbf7 |
+| Editor conectado | https://lovable.dev/projects/428fa571-e363-4bbf-ab2c-058451eba7dc |
+| Endereço público nesta fase | Não se aplica — desenvolvimento por commits, confirmado por Kauê em 11/10/2026 |
+| Banco/runtime PRIMARY | Lovable Cloud — hefuvmocohhpmnhwpkac |
 | Timezone operacional | America/Sao_Paulo |
+
+Identidade conferida em 11/10/2026 na tarefa IE-00.01. GitHub main e projeto Lovable conectado apontavam para `4696c8eb400a088b226dce0653eb775b64383490`; a conexão SQL do projeto respondeu em modo somente leitura. Kauê confirmou que não há endereço de publicação nesta fase e que o trabalho deve seguir por commits neste repositório. A ausência de URL não bloqueia a preparação do projeto; publicação e validação da aplicação serão verificadas na etapa correspondente do roadmap. Evidências e limites: [IE-00.01 — identidade atual](docs/governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md).
+
+`quant-football-insights`, Lovable `28664075-…` e banco `vsygkpwptoppbrlnrpcp` pertencem ao histórico anterior ao remix de 01/10/2026.
 
 Não criar um projeto Lovable paralelo para continuar este produto.
 
@@ -56,6 +62,8 @@ O CI obrigatório cobre lint, typecheck, arquitetura, vulnerabilidades, secret s
 
 ## Documentação canônica
 
+- [Roadmap pessoal e operacional — EBSA 1.7](docs/roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md)
+- [Evidência de identidade — IE-00.01](docs/governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md)
 - docs/PROJECT_STATE.md
 - docs/ARCHITECTURE.md
 - docs/GOVERNANCE.md
@@ -73,4 +81,4 @@ O CI obrigatório cobre lint, typecheck, arquitetura, vulnerabilidades, secret s
 5. distinguir as sete fases históricas do reescopo das etapas operacionais atuais de dados;
 6. para alteração de código: branch → alteração → PR → gates verdes → merge;
 7. nunca fazer merge com gate pendente ou falhando;
-8. depois do merge, confirmar sincronização, publicar se necessário e validar produção.
+8. depois do merge, registrar o commit integrado; confirmar sincronização e validar publicação quando essas operações pertencerem à entrega do roadmap.
