@@ -1,12 +1,22 @@
 # Motor de Inteligência Esportiva — estado canônico
 
-> Atualizado: 04/10/2026  
+> Identidade revisada: 11/10/2026; registros operacionais abaixo preservam suas datas de origem.  
 > Repositório: kauefsantos12-creator/intelig-ncia-esportiva  
-> Produção: https://value-bet-engine.lovable.app  
+> Última produção registrada: https://value-bet-engine.lovable.app — HTTP 404 em 11/10/2026; endereço atual pendente.  
+> Lovable conectado: 428fa571-e363-4bbf-ab2c-058451eba7dc; workspace a6f6ab0ce77b5538cbf7.  
 > Lovable Cloud (Supabase): hefuvmocohhpmnhwpkac  
 > Histórico: até 01/10/2026 o projeto vivia em kauefsantos12-creator/quant-football-insights (Lovable 28664075-…, Supabase vsygkpwptoppbrlnrpcp, produção quant-football-insights.lovable.app).
 
 Este documento registra o estado vigente do produto. Auditorias e migrations antigas preservam a trilha histórica, mas não representam o runtime atual quando contradizem o main ou o estado vivo do Lovable Cloud.
+
+## IE-00.01 — verificação da identidade em 11/10/2026
+
+- GitHub `main` e projeto Lovable conectado: `4696c8eb400a088b226dce0653eb775b64383490`, mesmo commit na consulta.
+- `supabase/config.toml` e fallback público do cliente, no GitHub e no projeto conectado, apontam para `hefuvmocohhpmnhwpkac`. `.lovable/project.json` descreve o template; não contém o ID do projeto e não foi usado para inferi-lo.
+- Banco habilitado no projeto; consulta SELECT respondeu em 11/10/2026 às 21:24:34 de Brasília e encontrou `sports_fixtures` e `sports_match_reviews`. Isso comprova conectividade, sem homologar cobertura, RLS, jobs ou recuperação.
+- Endereço registrado `https://value-bet-engine.lovable.app`: HTTP 404, página “Project not found”. Preview informado pelo projeto: HTTP 401, sem sessão nesta verificação. Metadados `ready`/`is_published=true` não comprovam o endereço público atual.
+- **Estado da ação: AGUARDANDO INSUMO.** Falta identificar a URL atualmente usada por Kauê e confrontar esse runtime com o banco PRIMARY. A IE-00.02 continua dependente do fechamento desta ação.
+- Registro detalhado: [IE_00_01_PROJECT_IDENTITY_2026-10-11.md](governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md). Sem mensagem ao Lovable, deploy, migration ou escrita no banco.
 
 ## Remix de 01/10/2026 e recuperação
 
