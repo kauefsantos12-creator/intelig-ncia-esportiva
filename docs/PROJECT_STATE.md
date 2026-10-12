@@ -2,7 +2,7 @@
 
 > Identidade revisada: 11/10/2026; registros operacionais abaixo preservam suas datas de origem.  
 > Repositório: kauefsantos12-creator/intelig-ncia-esportiva  
-> Última produção registrada: https://value-bet-engine.lovable.app — HTTP 404 em 11/10/2026; endereço atual pendente.  
+> Fase atual: desenvolvimento por commits neste repositório; sem endereço de publicação, conforme definição de Kauê em 11/10/2026.
 > Lovable conectado: 428fa571-e363-4bbf-ab2c-058451eba7dc; workspace a6f6ab0ce77b5538cbf7.  
 > Lovable Cloud (Supabase): hefuvmocohhpmnhwpkac  
 > Histórico: até 01/10/2026 o projeto vivia em kauefsantos12-creator/quant-football-insights (Lovable 28664075-…, Supabase vsygkpwptoppbrlnrpcp, produção quant-football-insights.lovable.app).
@@ -15,8 +15,13 @@ Este documento registra o estado vigente do produto. Auditorias e migrations ant
 - `supabase/config.toml` e fallback público do cliente, no GitHub e no projeto conectado, apontam para `hefuvmocohhpmnhwpkac`. `.lovable/project.json` descreve o template; não contém o ID do projeto e não foi usado para inferi-lo.
 - Banco habilitado no projeto; consulta SELECT respondeu em 11/10/2026 às 21:24:34 de Brasília e encontrou `sports_fixtures` e `sports_match_reviews`. Isso comprova conectividade, sem homologar cobertura, RLS, jobs ou recuperação.
 - Endereço registrado `https://value-bet-engine.lovable.app`: HTTP 404, página “Project not found”. Preview informado pelo projeto: HTTP 401, sem sessão nesta verificação. Metadados `ready`/`is_published=true` não comprovam o endereço público atual.
-- **Estado da ação: AGUARDANDO INSUMO.** Falta identificar a URL atualmente usada por Kauê e confrontar esse runtime com o banco PRIMARY. A IE-00.02 continua dependente do fechamento desta ação.
-- Registro detalhado: [IE_00_01_PROJECT_IDENTITY_2026-10-11.md](governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md). Sem mensagem ao Lovable, deploy, migration ou escrita no banco.
+- **Estado da ação: CONCLUÍDO no escopo de identidade da fase de desenvolvimento.** Kauê confirmou que não existe endereço de publicação e autorizou continuidade por commits no repositório. A ausência de URL não é insumo pendente nem comprovação de serviço publicado; os gates de publicação e homologação continuam futuros.
+- Roadmap versionado neste repositório: [INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md). Próxima ação: IE-00.02 — separar estado atual de histórico.
+- Registro detalhado: [IE_00_01_PROJECT_IDENTITY_2026-10-11.md](governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md). A alteração integra somente após CI aprovado. Sem mensagem ao Lovable, deploy, migration ou escrita no banco.
+
+### Manutenção necessária para integrar a primeira ação
+
+O CI da PR #19 detectou quatro avisos de vulnerabilidade em dependências transitivas, sem alteração dessas dependências no primeiro commit documental. Foram fixadas versões corretivas em overrides e regenerado o lockfile: seroval 1.6.8 (também a cópia aninhada 1.5.6), shell-quote 1.11.0 e source-map-js 1.2.2. A guarda de idade mínima de 24 horas foi preservada. Audit, testes e build devem aprovar antes do merge; não houve relaxamento de gates.
 
 ## Remix de 01/10/2026 e recuperação
 
@@ -168,5 +173,5 @@ O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas
 4. antes de qualquer status da Etapa 3, fazer consulta fresca dos 116 elencos;
 5. não assumir sincronização ou execução de automações;
 6. para código: branch → alteração → PR → gates verdes → merge;
-7. depois do merge: confirmar sincronização, publicar se necessário e validar produção;
+7. depois do merge: registrar o commit; confirmar sincronização e validar publicação no escopo da entrega correspondente do roadmap;
 8. manter migrations/auditorias antigas como trilha histórica, sem tratá-las como arquitetura ativa.
