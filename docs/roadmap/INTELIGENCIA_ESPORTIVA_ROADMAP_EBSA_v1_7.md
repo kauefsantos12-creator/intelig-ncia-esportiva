@@ -6,7 +6,7 @@
 **Projeto:** [kauefsantos12-creator/intelig-ncia-esportiva](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva)  
 **Baseline do código:** main, commit [4696c8eb400a088b226dce0653eb775b64383490](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva/commit/4696c8eb400a088b226dce0653eb775b64383490), de 05/10/2026.  
 **Modelo da agenda consultado:** main, commit 111b66dbd84da2cdfe224183f4457d81161482fd.  
-**Estado deste documento:** planejamento e registro de execução; IE-00.01 concluída no escopo de identidade. IE-00.02 concluída no escopo documental desta revisão de 15/10/2026; vigência na main depende da integração por PR com gates verdes. Desenvolvimento por commits neste repositório, sem endereço de publicação, conforme Kauê em 11/10/2026.
+**Estado deste documento:** IE-00.01 e IE-00.02 integradas. IE-00.03 registra a decisão de Kauê em 15/10/2026: **Resenha diária como prioridade**. Decisão concluída no escopo desta revisão; integração por PR exige gates verdes. Próxima: IE-00.04 — baseline das superfícies. Desenvolvimento por commits, sem endereço público nesta fase.
 
 ## 1. Propósito e forma de trabalhar
 
@@ -14,7 +14,7 @@ Este projeto é um hobby especialmente importante para Kauê. A finalidade é re
 
 O roadmap precisa proteger três coisas: **prazer em usar**, **confiança no que aparece** e **continuidade do histórico pessoal**. Uma tela bonita com estatística incompleta não cumpre esse objetivo; uma base grande que exige manutenção constante também precisa ser revista à luz do uso pessoal.
 
-A proposta de primeira entrega é fechar o ciclo **ler a resenha → escolher jogos → registrar o que assistiu**. Essa ordem é uma proposta de planejamento, não uma preferência adicional já aprovada. Elo e Analytics continuam no escopo, com trilhas independentes e critérios próprios.
+**Prioridade confirmada por Kauê em 15/10/2026: Resenha diária.** A primeira rotina a melhorar e validar é a leitura da resenha. O ciclo **ler a resenha → escolher jogos → registrar o que assistiu** permanece proposta de evolução; a escolha não aprova automaticamente o escopo completo da candidata R1. Hoje, Anotações, Elo e Analytics continuam no projeto, com suas dependências e critérios próprios.
 
 O projeto vigente contém Noticiário, Hoje, Elo, Anotações, Analytics e Conta/Privacidade. O reescopo documentado encerrou o runtime de apostas. Odds, banca, picks e execução financeira não fazem parte deste roadmap. Código e documentos antigos permanecem como histórico; sua existência não autoriza reativação.
 
@@ -116,7 +116,7 @@ Se INTERNO for aprovado, o núcleo EBSA traz como padrão **SLO 99,5%, RTO 240 m
 
 ### Decisões a conduzir uma por vez
 
-1. Primeira experiência a consolidar e definição do que Kauê quer preservar neste hobby.
+1. **Decidido em 15/10/2026: Resenha diária primeiro.** Preservar prazer de uso, confiança no conteúdo e memória pessoal já definidos neste roadmap; demais preferências continuam abertas.
 2. Audiência, classe de serviço e perda tolerável de anotações.
 3. Orçamento de APIs/IA e prioridade de cobertura.
 4. Necessidade e finalidade de réplica externa.
@@ -162,7 +162,7 @@ Os códigos IE identificam ações e capítulos. Os únicos gates EBSA continuam
 
 ### Ordem de preparação
 
-IE-00 → IE-LP1 → IE-01 → IE-02. Depois da base comum, as trilhas Resenha, Hoje, Elo e Elencos podem avançar conforme dependências e evidências próprias. Anotações acompanha Hoje; Analytics depende de coleta individual e consistência de projeções.
+IE-00 → IE-LP1 → IE-01 → IE-02. **Resenha (IE-05) é a primeira prioridade funcional escolhida por Kauê.** Após a base comum, avançar essa trilha conforme suas dependências; Hoje, Elo e Elencos mantêm trilhas próprias. Anotações acompanha Hoje; Analytics depende da coleta individual e consistência de projeções. Uma resenha útil não precisa aguardar todos os elencos.
 
 ### Candidatas propostas
 
@@ -173,7 +173,7 @@ IE-00 → IE-LP1 → IE-01 → IE-02. Depois da base comum, as trilhas Resenha, 
 | R3 — Exploração individual | Elencos/jogadores e comparações rastreáveis | Base comum + IE-03, IE-LP2, IE-08; reabrir IE-LP3/IE-09 | Expansão de ligas fora do piloto |
 | R4 — Expansões escolhidas | Novas categorias, indicadores ou comodidades | Escolha de Kauê + avaliação de contratos, quota/custo e gates afetados | Nenhuma funcionalidade é incluída automaticamente |
 
-R1, R2 e R3 são propostas. O escopo de cada candidata deve ser fechado em IE-00.03/IE-LP3.01. Uma ação comum já validada pode ser reutilizada quando commit, dados, ambiente e finalidade não tiverem mudado materialmente.
+R1, R2 e R3 continuam propostas de composição de entrega. IE-00.03 confirmou **Resenha primeiro**; IE-LP3.01 deve registrar o escopo concreto da candidata a partir dessa prioridade, preservando os controles e dependências aplicáveis. Uma ação comum já validada pode ser reutilizada quando commit, dados, ambiente e finalidade não tiverem mudado materialmente.
 
 O fechamento de IE-LP3 é preparação da auditoria. G10.5 definitivo ocorre em IE-09 após G8 e G10 da candidata correspondente. R1 exige os finais de Resenha, Hoje e Anotações e a consistência integrada IE-LP2.07. IE-06/IE-08 só entram na dependência quando estiverem na candidata.
 
@@ -190,7 +190,7 @@ O fechamento de IE-LP3 é preparação da auditoria. G10.5 definitivo ocorre em 
 | CONCLUÍDO | Critério de saída atendido e evidência válida registrada |
 | NÃO SE APLICA | Condição inativa comprovada; não é atalho para UNKNOWN |
 
-Na baseline de planejamento, os checkboxes estavam abertos porque eram compromissos de validação/entrega deste novo roadmap. Os registros datados abaixo distinguem IE-00.01 (identidade) e IE-00.02 (documentação); as demais ações continuam abertas. Isso **não significa que o projeto atual está 0% implementado**. Reaproveitar a baseline e os testes existentes em vez de reconstruir o que já funciona.
+Na baseline de planejamento, os checkboxes estavam abertos porque eram compromissos de validação/entrega deste novo roadmap. Os registros datados abaixo distinguem IE-00.01 (identidade), IE-00.02 (documentação) e IE-00.03 (prioridade Resenha); as demais ações continuam abertas. Isso **não significa que o projeto atual está 0% implementado**. Reaproveitar a baseline e os testes existentes em vez de reconstruir o que já funciona.
 
 Progresso da candidata = ações concluídas / ações aplicáveis no escopo fechado da candidata. NÃO VERIFICADO e AGUARDANDO DECISÃO não contam como concluídos. N/A justificado sai do denominador, mas fica no histórico. Mostrar quantidade e escopo junto do percentual; progresso de tarefas não substitui cobertura de dados.
 
@@ -218,8 +218,8 @@ Cada capítulo apresenta finalidade, dependências, referências EBSA e condiç�
 
 ### IE-00.03 — Definir a experiência pessoal prioritária
 
-- [ ] Registrar com Kauê o que torna o hobby especial e qual rotina ele quer melhorar primeiro. A proposta inicial é leitura da resenha → escolha dos jogos → anotações; preferências adicionais e funcionalidades novas aguardam decisão.
-- **Estado inicial:** AGUARDANDO DECISÃO. **Depende de:** IE-00.02.
+- [x] Registrar com Kauê o que torna o hobby especial e qual rotina ele quer melhorar primeiro. **Decisão em 15/10/2026: Resenha diária**, em resposta direta à escolha entre resenha, jogos e anotações. Preservar os princípios pessoais já registrados; ciclo completo e preferências adicionais permanecem sujeitos às decisões próprias.
+- **Estado inicial:** AGUARDANDO DECISÃO. **Estado atual:** CONCLUÍDO no escopo da decisão desta revisão; integração por PR com gates verdes. Evidência: [IE_00_03_REVIEW_PRIORITY_2026-10-15.md](../governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md). **Depende de:** IE-00.02.
 
 ### IE-00.04 — Registrar a baseline de cada superfície
 
@@ -935,7 +935,7 @@ As páginas abaixo foram lidas na baseline indicada, exceto a API de checks, con
 
 ## 11. Ordem inicial e próximo passo
 
-Na preparação inicial, começar por **IE-00.01 e IE-00.02**, consolidando identidade e documentação vigente. Em 15/10, IE-00.01 está integrada e IE-00.02 possui revisão documental validada localmente; sua integração exige CI aprovado. Após integrar, conduzir **IE-00.03** com uma pergunta pessoal por vez, para decidir qual experiência fecha a primeira candidata. Preparar IE-00.04 sem antecipar contagens do banco atual.
+IE-00.01 e IE-00.02 estão integradas. Kauê escolheu **Resenha diária** em IE-00.03. Após integrar esse registro, seguir para **IE-00.04**: mapear o que existe, o que funciona no ambiente atual e as lacunas de cada superfície, destacando as que afetam a resenha. Presença no código e registro histórico não substituem verificação atual.
 
 O primeiro avanço técnico observável será uma baseline coerente: endereço certo, banco certo, escopo certo e lista honesta do que já funciona. A partir dela, corrigir a programação que confunde falha com vazio e validar uma edição editorial completa, mantendo as suas anotações protegidas.
 
@@ -974,3 +974,11 @@ Verificações locais: preservação dos três corpos, links locais de 11 docume
 **Progresso documental nesta revisão:** IE-00.01 e IE-00.02, duas de 104 ações de origem; não mede cobertura nem aprovação do capítulo ou serviço. Evidência: `docs/governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md`.
 
 **Próxima ação após integração:** IE-00.03 — definir com Kauê a experiência pessoal prioritária. Nenhuma preferência adicional foi presumida.
+
+## Execução — IE-00.03 — 15/10/2026
+
+Kauê respondeu **“Resenha”** à pergunta sobre qual rotina melhorar primeiro: resenha diária, escolha dos jogos ou anotações. A prioridade funcional é **Resenha diária / Noticiário (IE-05)**. Preservam-se os princípios pessoais já registrados: prazer de uso, confiança no conteúdo e memória esportiva.
+
+A decisão orienta a baseline e as melhorias: cobertura dos acontecimentos elegíveis, explicação nos três eixos aprovados, fatos rastreáveis e leitura clara. São objetivos de validação, não qualidades já comprovadas. O ciclo R1 completo segue como proposta; o escopo concreto da candidata será fechado em IE-LP3.01. Mantidas a base comum, as dependências, as fontes e a proteção das anotações.
+
+Evidência: [IE_00_03_REVIEW_PRIORITY_2026-10-15.md](../governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md). Mudança documental; CI e integração registrados na PR correspondente. **Três de 104 ações de origem no escopo desta revisão**, sem homologar capítulo, edição, candidata ou runtime. **Próxima: IE-00.04 — baseline de cada superfície**, com atenção às lacunas da Resenha.
