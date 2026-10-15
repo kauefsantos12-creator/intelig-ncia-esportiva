@@ -1,177 +1,96 @@
 # Motor de Inteligência Esportiva — estado canônico
 
-> Identidade revisada: 11/10/2026; registros operacionais abaixo preservam suas datas de origem.  
-> Repositório: kauefsantos12-creator/intelig-ncia-esportiva  
-> Fase atual: desenvolvimento por commits neste repositório; sem endereço de publicação, conforme definição de Kauê em 11/10/2026.
-> Lovable conectado: 428fa571-e363-4bbf-ab2c-058451eba7dc; workspace a6f6ab0ce77b5538cbf7.  
-> Lovable Cloud (Supabase): hefuvmocohhpmnhwpkac  
-> Histórico: até 01/10/2026 o projeto vivia em kauefsantos12-creator/quant-football-insights (Lovable 28664075-…, Supabase vsygkpwptoppbrlnrpcp, produção quant-football-insights.lovable.app).
+> Revisão: 15/10/2026, IE-00.02. Baseline: main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`.
+> Fase definida por Kauê: desenvolvimento por commits, sem endereço público nesta preparação.
 
-Este documento registra o estado vigente do produto. Auditorias e migrations antigas preservam a trilha histórica, mas não representam o runtime atual quando contradizem o main ou o estado vivo do Lovable Cloud.
+## Identidade e fontes de verdade
 
-## IE-00.01 — verificação da identidade em 11/10/2026
+| Item | Referência | Evidência e limite |
+| --- | --- | --- |
+| Código canônico | `kauefsantos12-creator/intelig-ncia-esportiva`, main | Consultado em 15/10/2026 |
+| Projeto Lovable | `428fa571-e363-4bbf-ab2c-058451eba7dc`; workspace `a6f6ab0ce77b5538cbf7` | Registrado na IE-00.01 em 11/10; sincronização de hoje não consultada |
+| PRIMARY configurado | Lovable Cloud `hefuvmocohhpmnhwpkac` | Conectividade SQL observada em 11/10; sem nova consulta nesta revisão |
+| Publicação | Não se aplica à preparação atual | Decisão de Kauê em 11/10; homologação/publicação pertencem à entrega correspondente |
+| Tempo | `America/Sao_Paulo` | Referência operacional |
 
-- GitHub `main` e projeto Lovable conectado: `4696c8eb400a088b226dce0653eb775b64383490`, mesmo commit na consulta.
-- `supabase/config.toml` e fallback público do cliente, no GitHub e no projeto conectado, apontam para `hefuvmocohhpmnhwpkac`. `.lovable/project.json` descreve o template; não contém o ID do projeto e não foi usado para inferi-lo.
-- Banco habilitado no projeto; consulta SELECT respondeu em 11/10/2026 às 21:24:34 de Brasília e encontrou `sports_fixtures` e `sports_match_reviews`. Isso comprova conectividade, sem homologar cobertura, RLS, jobs ou recuperação.
-- Endereço registrado `https://value-bet-engine.lovable.app`: HTTP 404, página “Project not found”. Preview informado pelo projeto: HTTP 401, sem sessão nesta verificação. Metadados `ready`/`is_published=true` não comprovam o endereço público atual.
-- **Estado da ação: CONCLUÍDO no escopo de identidade da fase de desenvolvimento.** Kauê confirmou que não existe endereço de publicação e autorizou continuidade por commits no repositório. A ausência de URL não é insumo pendente nem comprovação de serviço publicado; os gates de publicação e homologação continuam futuros.
-- Roadmap versionado neste repositório: [INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md). Próxima ação: IE-00.02 — separar estado atual de histórico.
-- Registro detalhado: [IE_00_01_PROJECT_IDENTITY_2026-10-11.md](governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md). A alteração integra somente após CI aprovado. Sem mensagem ao Lovable, deploy, migration ou escrita no banco.
+GitHub governa código, contratos, testes, migrations e documentação. Lovable Cloud governa dados e operação vivos. Configuração, sincronização e disponibilidade são evidências distintas.
 
-### Manutenção necessária para integrar a primeira ação
+`quant-football-insights`, Lovable `28664075-…`, banco `vsygkpwptoppbrlnrpcp` e URLs anteriores pertencem ao histórico. Não criar outro projeto para continuar este produto.
 
-O CI da PR #19 detectou quatro avisos de vulnerabilidade em dependências transitivas, sem alteração dessas dependências no primeiro commit documental. Foram fixadas versões corretivas em overrides e regenerado o lockfile: seroval 1.6.8 (também a cópia aninhada 1.5.6), shell-quote 1.11.0 e source-map-js 1.2.2. A guarda de idade mínima de 24 horas foi preservada. Audit, testes e build devem aprovar antes do merge; não houve relaxamento de gates.
+`implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção`.
 
-## Remix de 01/10/2026 e recuperação
+**Código verificado** significa presença/estrutura observada na baseline. **Registro histórico** conserva data e ambiente. **Não verificado** não equivale a zero, cobertura completa ou aprovação.
 
-Em 01/10/2026 o projeto foi remixado para outra conta Lovable (commit `f600756`, "Add integration configuration from remix"). O remix:
+## Produto e implementação observada
 
-- apontou o app para um novo Lovable Cloud (`hefuvmocohhpmnhwpkac`), que recebeu o esquema mas nenhum dado;
-- apagou `supabase/migrations/` do repositório (o estado completo continua em `f600756~1`);
-- regenerou `src/integrations/supabase/auth-middleware.ts`, removendo `is_approved_app_user` e o prazo absoluto de 30 dias no servidor;
-- não copiou gatilhos de `auth.users`, segredos do Vault nem jobs do `pg_cron`.
+Central pessoal de inteligência esportiva, sem jornada ativa de apostas, odds, banca, picks ou execução financeira. Reescopo de setembro e remix de outubro são eventos distintos; implementação anterior não comprova os dados do PRIMARY novo.
 
-Recuperação de 04/10/2026:
+| Superfície | Referência no código | Ambiente atual |
+| --- | --- | --- |
+| Noticiário | `src/routes/index.tsx`, `src/lib/news-overview.functions.ts`; `editorial-explanatory-v3` | Edição completa e cobertura não revalidadas |
+| Hoje | `src/routes/hoje.tsx`, `src/lib/today-overview.functions.ts`; programação também na Home | Completude e confirmação oficial de transmissão não revalidadas |
+| Elo | `src/routes/elo.tsx`, `src/lib/elo-explorer.functions.ts` | Cobertura, freshness e histórico não revalidados |
+| Anotações | `src/routes/anotacoes.tsx`, `src/lib/notes-overview.functions.ts` | Ownership, continuidade e restore não revalidados |
+| Analytics | `src/routes/analytics.tsx`, `src/lib/analytics-overview.functions.ts`; consulta a player-season | Reconciliação com coleta por fixture e temporada por competição pendentes |
+| Conta/Privacidade | Rotas próprias e middleware Google/allowlist/prazo de sessão | Acesso por recurso não ensaiado nesta ação |
 
-- `scripts/diagnostico-remix.sql`: diagnóstico somente leitura do banco;
-- `scripts/recuperacao-remix.sql`: segredos do Vault, gatilhos de auth, dados de configuração das migrations originais e os 20 jobs `pg_cron` finais — aplicado e validado no Lovable Cloud em 04/10/2026;
-- `scripts/carga-inicial.sql` / `scripts/status-carga.sql`: carga inicial (5Dollar ontem/hoje/amanhã + Elo temporário a cada 2 min) e acompanhamento;
-- `auth-middleware.ts` restaurado a partir de `f600756~1` (allowlist via `is_approved_app_user` + sessão de 30 dias).
+Esta leitura não conclui IE-00.04 nem auditorias funcionais. Ver [arquitetura](ARCHITECTURE.md) e [governança](GOVERNANCE.md).
 
-O Dia Zero da coleta prospectiva (Etapa 4) foi reiniciado em 04/10/2026 no banco novo. Pendente: restaurar `supabase/migrations/` no repositório sem reaplicá-las ao banco novo.
+## Roadmap
 
-## Fontes de verdade
+- **IE-00.01 — CONCLUÍDA no escopo de identidade:** PR #19 integrada na main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`. [Evidência datada](governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md). Ajustes de dependências necessários ao CI integram essa entrega histórica.
+- **IE-00.02 — CONCLUÍDA no escopo documental desta revisão:** documentos vigentes separados dos snapshots históricos e verificações locais aprovadas. [Evidências e limites](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md). Vigência na main exige gates aprovados e merge confirmado na PR correspondente.
+- **Próxima após integração: IE-00.03 — definir com Kauê a experiência prioritária.** Resenha → escolha dos jogos → anotações é proposta, ainda não decisão aprovada.
 
-- **GitHub main**: código, testes, migrations, contratos e documentação versionados.
-- **Lovable Cloud**: banco/runtime e estado operacional vivos.
-- **Lovable**: aplicação canônica ligada a este repositório.
+O [roadmap EBSA 1.7](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md) mantém códigos e dependências. Esta revisão não fecha IE-00, o perfil ou gates de liberação.
 
-Regra obrigatória: implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção.
+## Dados e coleta: desenho não equivale a cobertura atual
 
-## Produto vigente
+| Fluxo | Desenho versionado/documentado | Prova atual pendente |
+| --- | --- | --- |
+| Catálogo | 5Dollar para fixtures/dados gerais; agenda independente de completar elencos | Competições, temporadas, conjunto esperado e cobertura |
+| Elencos | API-Football; piloto documentado de seis primeiras divisões | Clubes/jogadores completos e atualizados hoje |
+| Prospectivo | Dia Zero, reconciliação, lineups e dados individuais por fixture; sem backfill individual automático | Dia Zero persistido, escopo, quota e execução completa |
+| Editorial | 14 veículos aprovados, números SofaScore e três eixos explicativos | Fontes recebidas, edição completa e qualidade factual |
+| Transmissão | FutNaTV e fallback agregador no código; confirmação oficial no roadmap | Política do fallback e confirmação nominal |
+| Elo | Rating local, liga, global e histórico separados | Contagem, finalize, auditoria, lag e corte atuais |
 
-O sistema é um **Motor de Inteligência Esportiva**, sem fluxo ativo de apostas, odds, banca, picks, stake ou execução financeira.
+Etapas 3/4/4.5/5 dos registros antigos descrevem coleta; Fases 1–7 descrevem reescopo; códigos IE descrevem o roadmap atual. A ordem e as dependências vigentes são as do roadmap. Gargalo de elenco não bloqueia automaticamente Resenha/Hoje.
 
-Superfícies atuais:
+### Contagens históricas
 
-1. **Noticiário** — resenha diária, fact packs e movimentos relevantes de Elo.
-2. **Hoje** — agenda, transmissão e contexto pré-jogo.
-3. **Elo** — clubes, ligas, filtros e histórico point-in-time.
-4. **Anotações** — fila pós-jogo, watched/not watched, comentários, notas pessoais e campinho.
-5. **Analytics 2026/27** — times, competições, elenco, jogadores e recortes por torneio.
-6. **Conta/Privacidade** — autenticação single-user e controles de privacidade.
+| Registro | Data e origem | Limite |
+| --- | --- | --- |
+| 116/116 clubes com elencos | 19/09; banco anterior ao remix | Não comprova cobertura do PRIMARY novo |
+| 681 clubes, 32 ligas e 9 continentais | 20/09; auditoria Elo anterior ao remix | Não é o ranking de hoje |
+| 27 jogos prioritários, 54 equipes, 123 evidências em 74 fixtures | 20/09; auditoria Hoje anterior ao remix | Não comprova agenda/transmissão atuais |
+| 15 clubes com linhas de elenco, 676 clubes Elo | 04/10; [SQUAD_COLLECTION_PACING](governance/SQUAD_COLLECTION_PACING_2026-10-04.md), PRIMARY após recuperação | Linhas não provam elenco completo; contagens não renovadas |
+| 20 jobs recuperados | 04/10; [REMIX_RECOVERY](governance/REMIX_RECOVERY_2026-10-04.md) | Não comprova configuração/execução hoje |
 
-## Duas numerações que não devem ser confundidas
+Auditorias, medições e PRs do texto anterior estão no [snapshot integral](history/ie-00-02-2026-10-15/PROJECT_STATE.md). Números de PR do repositório antigo não devem ser resolvidos por suposição no novo.
 
-Existem dois conjuntos de etapas documentados no repositório:
+## Remix, migrations e recuperação
 
-- **Fases 1–7 do reescopo de produto (15–16/09):** fundação, Elo, Hoje, Anotações, Analytics, Noticiário e corte do runtime antigo. Essas sete fases estão concluídas e representam a transformação do produto.
-- **Etapas operacionais atuais de dados (19/09 em diante):** sequência de consolidação de elencos, coleta prospectiva por partida, agenda e analytics vivos.
+O remix de 01/10 (`f600756`) mudou conta/projeto e PRIMARY. A recuperação de 04/10 registrou restauração do middleware, configurações, jobs e carga inicial. Os relatórios preservam suas datas em [REMIX_RECOVERY](governance/REMIX_RECOVERY_2026-10-04.md) e [PLATFORM_DATA_RECOVERY](governance/PLATFORM_DATA_RECOVERY_2026-10-04.md).
 
-Portanto, quando este documento disser **Etapa 3** abaixo, significa **elencos**, não a antiga Fase 3 = Hoje.
+**Inventário nesta baseline:** 135 SQLs em `supabase/migrations_archive/` e duas migrations editoriais novas em `supabase/migrations/`. O arquivo histórico já está restaurado no Git; a antiga pendência de restaurá-lo deixou de se aplicar. O CI recompõe o histórico para reconstrução isolada e regressões. Não reaplicar automaticamente no Cloud nem editar a tabela de migrations.
 
-## Estado operacional atual de dados
+Executor remoto, aplicação das migrations novas e correspondência entre Git e schema vivo continuam não verificados. Scripts de recuperação são procedimentos contextualizados, não autorização de execução.
 
-### Etapa 3 — Elencos
+## Pendências preservadas
 
-**Concluída e validada: 116/116 clubes com elenco fresco.**
+- IE-04.03: falha da programação na Home pode virar “Sem jogos previstos”; não é ausência real comprovada.
+- IE-04.04–06: agregador não prova transmissão oficial; substituição de evidências precisa de integridade/recuperação.
+- IE-03/IE-08: revalidar identidade de competição, escopo individual, titularidades, quota e coleta completa. Relato antigo de correção não demonstra estado atual.
+- IE-LP2/IE-08: reconciliar player-season e estatísticas por fixture; conferir `2026/27` por competição.
+- IE-01/IE-06: comprovar acesso, permissões, backup/restore, capacidade e Elo.
+- IE-00.05/06: perfil, responsáveis, tolerância de perda e classificação dos dados continuam abertos.
 
-| Liga | Clubes |
-| --- | ---: |
-| Premier League | 20 |
-| Ligue 1 | 18 |
-| Brasileirão Série A | 20 |
-| Bundesliga | 18 |
-| Serie A italiana | 20 |
-| La Liga | 20 |
-| **Total** | **116** |
+## Continuidade
 
-A API-Football é a camada de jogador/elenco. Não há necessidade de detalhamento individual para competições sem elenco carregado nesta etapa.
-
-### Etapa 4 — Dia Zero prospectivo
-
-Objetivo: construir histórico próprio daqui para frente, sem backfill histórico.
-
-Regras canônicas:
-
-- apenas fixtures com kickoff posterior ao Dia Zero persistido;
-- coleta detalhada via API-Football somente nas seis ligas da Etapa 3;
-- pipeline por fixture: reconciliação → lineups → fixtures/players → persistência em sports_fixture_player_stats;
-- estatísticas gerais de equipe continuam no fluxo canônico da 5Dollar;
-- endpoint player-season é utilitário legado, não caminho primário do worker;
-- copas, continentais, segundas divisões e demais torneios podem permanecer na agenda/base geral, mas não consomem o detalhamento individual desta Etapa 4.
-
-A migration de restrição de escopo está no PR #26 enquanto este documento é atualizado; só pode ser considerada ativa após gates verdes, merge, sincronização e validação no Lovable Cloud.
-
-### Etapa 4.5 — Agenda/Programação
-
-Depois que a primeira partida real da Etapa 4 atravessar o pipeline completo, auditar:
-
-- completude dos jogos do escopo acompanhado;
-- horário e data em America/Sao_Paulo;
-- adiamentos, cancelamentos e mudança de horário;
-- duplicidades;
-- mandante/visitante, competição e ordenação cronológica;
-- transição entre agendado/ao vivo/encerrado;
-- camada de transmissão separada da fonte de agenda.
-
-A agenda oficial vem de sports_fixtures/catálogo canônico. Evidência de transmissão fica em sports_broadcast_evidence. FutNaTV é fonte editorial de transmissão, não fonte de verdade para existência ou horário da partida.
-
-### Etapa 5 — Analytics
-
-Somente depois da validação da coleta prospectiva e da agenda: consolidar participação, minutos, titularidades, notas, forma recente, comparações e demais indicadores para as superfícies analíticas.
-
-## Backend e dados
-
-O Lovable Cloud contém competições, equipes, fixtures, eventos, estatísticas, jogadores, elencos, lineups, transmissões, fact packs, analytics, reviews pessoais, jobs e Elo. Integrações esportivas permanecem normalizadas e server-side. Jobs usam idempotência, leases/retries e proteção contra processamento duplicado.
-
-### Auditoria incremental do Noticiário — 20/09/2026
-
-- **Resultados recentes:** o recorte prioritário passou a ocorrer no banco antes do limite, e clubes reconciliados com API-Football fornecem escudos com fallback visual no frontend.
-- **Movimentos de Elo:** a correção em auditoria passa a consultar somente o Elo local canônico `elo-v1-w020`, aplicar `|delta| >= 2` e ordenar por impacto antes do limite de 8 movimentos. A superfície deixa explícito que este card é Elo local, enquanto `/elo` permanece a referência para Elo global/hierárquico.
-- Implementação, testes e documentação versionados não equivalem a produção: considerar o segundo item concluído somente após gates verdes, merge e validação do runtime.
-
-
-### Auditoria incremental da aba Elo — 20/09/2026
-
-- **Saúde do backend:** auditoria hierárquica diária `OK`; 32/32 ligas domésticas sincronizadas; 9/9 competições cross-league sincronizadas; 0 violações de hierarquia e 0 problemas de integridade no ledger.
-- **Ranking atual por clube — concluído em produção:** o snapshot inicial encontrou 737 linhas para 681 clubes únicos e 56 clubes duplicados por preservarem o rating local da divisão anterior após promoção/rebaixamento.
-- **Read-model atual:** `elo_global_team_ratings` agora expõe exatamente uma linha por `team_id`, escolhendo o contexto com `last_fixture_at` mais recente e preservando todas as 737 linhas históricas em `elo_team_ratings`.
-- **Validação runtime pós-merge:** 681 linhas atuais / 681 clubes distintos / 0 duplicidades / 0 divergências da fórmula; a aba Hoje permaneceu com 54/54 equipes com Elo atual.
-- **Fórmula preservada:** `global_rating = league_rating + (local_rating - 1500)`.
-- **Item 1 do plano Elo:** concluído e validado.
-- **Item 2 — referência temporal:** auditoria runtime confirmou fechamento diário às 05:05 de Brasília, 32/32 ligas domésticas + 9/9 cross-league concluídas e lag de 0 minuto entre a última fixture elegível antes do fechamento e a última fixture Elo processada.
-- **Item 2 — concluído e validado:** `getEloDirectory()` lê `elo_sync_state`; a UI mostra horário real do snapshot, última partida considerada e cobertura da rodada. Pós-merge, Lovable sincronizado no commit `7411b8d...`, runtime permaneceu `OK`, 32/32 domésticas + 9/9 cross-league e lag 0 minuto. A chamada manual de deploy foi disparada, mas a API ainda reportava `pending`.
-- **Item 3 — concluído e validado:** PR #62 mergeado no commit `d6444f9...`; Lovable sincronizado nesse commit, `ready` e publicado. O ranking vivo permanece em 681/681 clubes, 32 ligas, 22 países, 4 regiões e 2 divisões. A tabela deixou de usar `slice(0, 100)`, pagina 50 resultados, oferece filtros por liga/divisão e ordenações controladas, preservando a posição global original. A chamada manual de deploy `b1f187c1-a2a3-47dc-9105-9dedf70a83b0` ainda retornava `pending`.
-- **Item 4 — UX do ranking em implementação:** a auditoria visual encontrou ranking correto, porém pouco identificável por clube. Dos 681 clubes Elo, 164 já possuem `logo_url` canônico em `sports_teams` e 517 não possuem. A correção usa escudo quando disponível e fallback por iniciais, reforça posição global, contexto do clube selecionado e legibilidade mobile sem alterar cálculo Elo.
-
-### Auditoria incremental da aba Hoje — 20/09/2026
-
-- **Transmissões:** concluídas em produção. O FutNaTV permanece como guia primário e `futebol.tv.br` atua como fallback agregador com proveniência explícita. O teste real pós-merge gravou 123 evidências em 74 fixtures; 26/27 jogos prioritários do snapshot tinham transmissão, e Norwich x Bolton permaneceu corretamente como “ainda não confirmada”.
-- **Agenda viva:** concluída em produção. `get_today_tracked_fixtures(...)` aplica `always_track` no banco antes da ordenação/limite e retornou os 27 jogos prioritários do snapshot.
-- **Consulta da forma recente:** concluída em produção. `get_recent_team_fixtures(...)` recebe apenas as equipes presentes na agenda e não apresentou divergências entre histórico disponível e histórico retornado.
-- **Completude histórica da forma:** o snapshot inicial mostrou 54 equipes, 19 com algum jogo anterior persistido e nenhuma com 5 jogos completos. Depois do seed por liga, 54/54 passaram a ter histórico e 30/54 chegaram a 5 jogos. O complemento cross-competition levou 48/54 a 5 jogos dentro de 90 dias; para Bayer Leverkusen, Fulham, Leeds, Paderborn, RB Leipzig e TSG Hoffenheim o quinto jogo disponível era de maio. A consulta/deficiência passa a usar guarda de 365 dias para entregar os últimos 5 jogos de verdade.
-- **Seed em auditoria:** `enqueue_today_recent_form_backfill(...)` cria um job `FIVE_DOLLAR_RECENT_FORM_LEAGUE` por liga deficiente. Cada job usa a liga como primeira camada e, apenas para times ainda abaixo de 5 jogos, complementa via histórico do próprio time em outras competições. O seed continua persistindo somente fixture/placar/equipes/competição, sem backfill de lineups, jogadores ou estatísticas individuais, preservando a regra de Dia Zero da Etapa 4.
-- **Escudos:** concluídos em produção. Bolton, Norwich, West Brom e Wolverhampton foram reconciliados via `API_FOOTBALL_TEAM_MEDIA_LINK`; a agenda ficou com 54/54 equipes com `logo_url`, sem ampliar a coleta detalhada da Championship.
-- **Forma recente:** concluída em produção com 54/54 equipes contendo ao menos 5 jogos candidatos na guarda de 365 dias; o frontend exibe os últimos 5 anteriores ao kickoff.
-- **Status/placar intradiário:** o E2E final encontrou o catálogo congelado no snapshot das 04:35. Um refresh manual corrigiu imediatamente jogos encerrados/ao vivo; a correção em versionamento adiciona refresh canônico a cada 15 minutos entre 06:00 e 23:45 de São Paulo.
-
-## Limitações e pendências conhecidas
-
-- Em 19/09, o teste real Tottenham x Aston Villa revelou uma falha de identidade de competição: algumas fixtures das seis ligas estão ligadas ao registro canônico 5Dollar, enquanto os IDs API-Football podem estar em um registro irmão da mesma liga. A função de escopo deve reconhecer ambas as identidades de provedor. A correção está sendo versionada em migration própria e deve reabrir apenas jobs prospectivos que foram mortos por esse bug.
-- A correção de **titularidades (starts)** foi versionada na branch `fix/stage4-rate-limit-starts`: a view passa a derivar titularidade de `sports_fixture_lineups.is_starting`, em vez de inferi-la do JSON de stats. Só considerar resolvido após gates, merge e validação no Lovable Cloud.
-- O teste Osasuna x Rayo confirmou rate limit **por minuto** da API-Football (`Too many requests... per minute`), não cota diária. A correção reduz o teto distribuído, espaça chamadas, prioriza `API_FOOTBALL_FIXTURE_DATA` e amplia a tolerância de retry dos jobs pós-jogo.
-- A Etapa 4 só deve ser encerrada após pelo menos uma partida real completar automaticamente o fluxo de coleta detalhada.
-- Depois disso, executar a auditoria da Agenda/Programação (Etapa 4.5).
-
-## Protocolo para continuidade
-
-1. consultar main, README e este documento;
-2. consultar o commit atual no Lovable;
-3. consultar o Lovable Cloud para banco/jobs/dados;
-4. antes de qualquer status da Etapa 3, fazer consulta fresca dos 116 elencos;
-5. não assumir sincronização ou execução de automações;
-6. para código: branch → alteração → PR → gates verdes → merge;
-7. depois do merge: registrar o commit; confirmar sincronização e validar publicação no escopo da entrega correspondente do roadmap;
-8. manter migrations/auditorias antigas como trilha histórica, sem tratá-las como arquitetura ativa.
+1. Consultar main, README, este documento e a ação do roadmap.
+2. Confrontar referências no código; consultar projeto conectado quando sincronização for relevante.
+3. Para dados, jobs, acesso e schema, obter evidência fresca do PRIMARY; declarar limites do que não foi verificado.
+4. Seguir branch → alteração → PR → gates verdes → merge, preservando história publicada.
+5. Registrar integração e validar sincronização/publicação no escopo da entrega.
+6. Preservar memória pessoal e evidências datadas; não converter percentuais antigos em cobertura atual.

@@ -6,7 +6,7 @@
 **Projeto:** [kauefsantos12-creator/intelig-ncia-esportiva](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva)  
 **Baseline do código:** main, commit [4696c8eb400a088b226dce0653eb775b64383490](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva/commit/4696c8eb400a088b226dce0653eb775b64383490), de 05/10/2026.  
 **Modelo da agenda consultado:** main, commit 111b66dbd84da2cdfe224183f4457d81161482fd.  
-**Estado deste documento:** planejamento e registro de execução; IE-00.01 concluída no escopo de identidade. Desenvolvimento por commits neste repositório, sem endereço de publicação, conforme Kauê em 11/10/2026.
+**Estado deste documento:** planejamento e registro de execução; IE-00.01 concluída no escopo de identidade. IE-00.02 concluída no escopo documental desta revisão de 15/10/2026; vigência na main depende da integração por PR com gates verdes. Desenvolvimento por commits neste repositório, sem endereço de publicação, conforme Kauê em 11/10/2026.
 
 ## 1. Propósito e forma de trabalhar
 
@@ -190,7 +190,7 @@ O fechamento de IE-LP3 é preparação da auditoria. G10.5 definitivo ocorre em 
 | CONCLUÍDO | Critério de saída atendido e evidência válida registrada |
 | NÃO SE APLICA | Condição inativa comprovada; não é atalho para UNKNOWN |
 
-Na baseline de planejamento, os checkboxes estavam abertos porque eram compromissos de validação/entrega deste novo roadmap. A execução datada abaixo registra o fechamento da IE-00.01; as demais ações continuam abertas. Isso **não significa que o projeto atual está 0% implementado**. Reaproveitar a baseline e os testes existentes em vez de reconstruir o que já funciona.
+Na baseline de planejamento, os checkboxes estavam abertos porque eram compromissos de validação/entrega deste novo roadmap. Os registros datados abaixo distinguem IE-00.01 (identidade) e IE-00.02 (documentação); as demais ações continuam abertas. Isso **não significa que o projeto atual está 0% implementado**. Reaproveitar a baseline e os testes existentes em vez de reconstruir o que já funciona.
 
 Progresso da candidata = ações concluídas / ações aplicáveis no escopo fechado da candidata. NÃO VERIFICADO e AGUARDANDO DECISÃO não contam como concluídos. N/A justificado sai do denominador, mas fica no histórico. Mostrar quantidade e escopo junto do percentual; progresso de tarefas não substitui cobertura de dados.
 
@@ -213,8 +213,8 @@ Cada capítulo apresenta finalidade, dependências, referências EBSA e condiç�
 
 ### IE-00.02 — Separar estado atual de histórico
 
-- [ ] Revisar README, ARCHITECTURE, GOVERNANCE e PROJECT_STATE. Identificar conteúdos anteriores ao remix e ao encerramento das apostas; preservar histórico com indicação de que não governa o produto atual.
-- **Estado inicial:** PENDENTE. **Depende de:** IE-00.01.
+- [x] Revisar README, ARCHITECTURE, GOVERNANCE e PROJECT_STATE. Identificar conteúdos anteriores ao remix e ao encerramento das apostas; preservar histórico com indicação de que não governa o produto atual.
+- **Estado inicial:** PENDENTE. **Estado em 15/10/2026:** CONCLUÍDO no escopo documental desta revisão, com verificações locais aprovadas; vigência na main condicionada à integração por PR com gates verdes. Evidência em `docs/governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md`. **Depende de:** IE-00.01.
 
 ### IE-00.03 — Definir a experiência pessoal prioritária
 
@@ -933,9 +933,9 @@ As páginas abaixo foram lidas na baseline indicada, exceto a API de checks, con
 
 **Integridade da referência EBSA:** SHA-256 do núcleo anexado = bcc705c77cd17d169f92694aab83bdae43fc73ef539c23a1677239a851863e30, correspondente às matrizes do pacote. A igualdade de hash comprova identidade dos bytes, não conformidade do projeto.
 
-## 11. Próximo passo concreto
+## 11. Ordem inicial e próximo passo
 
-Começar por **IE-00.01 e IE-00.02**, consolidando identidade e documentação vigente. Conduzir **IE-00.03** com uma pergunta pessoal por vez, para decidir qual experiência fecha a primeira candidata. Em paralelo, preparar a matriz de evidências de IE-00.04, sem antecipar contagens do banco atual.
+Na preparação inicial, começar por **IE-00.01 e IE-00.02**, consolidando identidade e documentação vigente. Em 15/10, IE-00.01 está integrada e IE-00.02 possui revisão documental validada localmente; sua integração exige CI aprovado. Após integrar, conduzir **IE-00.03** com uma pergunta pessoal por vez, para decidir qual experiência fecha a primeira candidata. Preparar IE-00.04 sem antecipar contagens do banco atual.
 
 O primeiro avanço técnico observável será uma baseline coerente: endereço certo, banco certo, escopo certo e lista honesta do que já funciona. A partir dela, corrigir a programação que confunde falha com vazio e validar uma edição editorial completa, mantendo as suas anotações protegidas.
 
@@ -962,3 +962,15 @@ A evidência detalhada e os limites estão em [IE_00_01_PROJECT_IDENTITY_2026-10
 **Próxima ação:** IE-00.02 — separar estado atual de histórico. Não foi executada nesta entrega. A revisão integral de ARCHITECTURE, GOVERNANCE e registros operacionais permanece para ela.
 
 **Controle de integração:** [PR #19](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva/pull/19); merge somente após CI obrigatório aprovado. A PR #9 da agenda foi encerrada sem merge. Sem mensagem ao agente Lovable, deploy, migration ou alteração de dados pessoais.
+
+## Execução — IE-00.02 — 15/10/2026
+
+README, ARCHITECTURE, GOVERNANCE, PROJECT_STATE e índice documental foram reconciliados com a main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`. Os textos anteriores de arquitetura, governança e estado foram preservados integralmente após aviso em `docs/history/ie-00-02-2026-10-15/`.
+
+Contagens de 19/09, 20/09 e 04/10 conservam data e ambiente; não certificam o PRIMARY atual. A antiga pendência de restaurar migrations foi corrigida no escopo Git: 135 arquivos históricos arquivados e duas migrations novas; aplicação no Cloud não comprovada nesta ação.
+
+Verificações locais: preservação dos três corpos, links locais de 11 documentos, referências de código, inventário de migrations, diff sem erro de whitespace, lint sem erros (avisos existentes), tipagem e fronteiras de arquitetura aprovados. A revisão é exclusivamente documental, sem alteração de runtime, banco, fontes ou dados pessoais. CI remoto e commit integrado são registrados na PR; vigência na main depende de todos os gates obrigatórios verdes e merge confirmado.
+
+**Progresso documental nesta revisão:** IE-00.01 e IE-00.02, duas de 104 ações de origem; não mede cobertura nem aprovação do capítulo ou serviço. Evidência: `docs/governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md`.
+
+**Próxima ação após integração:** IE-00.03 — definir com Kauê a experiência pessoal prioritária. Nenhuma preferência adicional foi presumida.
