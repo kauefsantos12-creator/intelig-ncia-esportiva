@@ -1,340 +1,61 @@
-# Arquitetura — Motor de Decisão Esportiva
-
-## Objetivo
+# Arquitetura — Motor de Inteligência Esportiva
 
-Este documento apresenta a arquitetura do sistema em uma visão de portfólio: principais camadas, boundaries, fontes de verdade e decisões que permitem combinar velocidade low-code com regras de negócio versionadas.
+> Revisão documental: 15/10/2026, IE-00.02. Referência: main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`.
+> A estrutura observada no código não certifica dados, acesso, jobs ou disponibilidade do ambiente vivo.
 
----
+## Produto e fontes de verdade
 
-## Visão de alto nível
+O produto reúne Noticiário, Hoje, Elo, Analytics e Anotações, com Conta/Privacidade. A navegação está em `src/components/AppShell.tsx`. A jornada de CSV, odds, picks e banca pertence ao produto anterior, descomissionado em setembro. Código, tipos e tabelas legados não autorizam sua reativação.
 
-```mermaid
-flowchart TB
-    subgraph UX[Experiência do usuário]
-        A[Upload CSV]
-        B[Processamento]
-        C[Conferência de odds]
-        D[Sugestões]
-        E[Em andamento]
-        F[Desempenho]
-    end
+GitHub main de `kauefsantos12-creator/intelig-ncia-esportiva` governa código, contratos, testes e documentação. Lovable Cloud é a autoridade sobre dados e operação vivos. O PRIMARY configurado é `hefuvmocohhpmnhwpkac`; o projeto conectado registrado na IE-00.01 é `428fa571-e363-4bbf-ab2c-058451eba7dc`. A fase definida por Kauê é desenvolvimento por commits, sem endereço público nesta preparação. Configuração, sincronização e disponibilidade são evidências distintas.
 
-    subgraph APP[Aplicação TanStack / TypeScript]
-        G[Routes e Components]
-        H[Server Functions]
-        I[Adapters]
-        J[Quant Engine]
-        K[Portfolio / Bankroll]
-    end
+Ver [estado canônico](PROJECT_STATE.md), [governança](GOVERNANCE.md) e [arquitetura anterior preservada](history/ie-00-02-2026-10-15/ARCHITECTURE.md).
 
-    subgraph DATA[Dados]
-        L[(Supabase / PostgreSQL)]
-        M[Migrations]
-        N[RPCs / Triggers / RLS]
-    end
+## Camadas observadas no código
 
-    subgraph EXT[Fontes externas]
-        O[5DollarFootballAPI]
-        P[Bet365 feed]
-    end
+| Camada | Responsabilidade | Referências |
+| --- | --- | --- |
+| Interface React/TanStack | Navegação e leitura esportiva, filtros e registros pessoais | `src/routes/`, `src/components/AppShell.tsx` |
+| Server Functions | Projeções e operações autenticadas de cada superfície | `news-overview.functions.ts`, `today-overview.functions.ts`, `elo-explorer.functions.ts`, `analytics-overview.functions.ts`, `notes-overview.functions.ts`, em `src/lib/` |
+| Ingestão e worker | Reconciliação, cache, quota, leases, heartbeat e retry | `src/lib/sports/`, `src/lib/adapters/` |
+| Editorial | Evidência factual, fontes aprovadas, números SofaScore e refinamento | `editorial-policy.ts`, `editorial-source-sync.server.ts`, `sofascore-editorial-sync.server.ts`, `editorial-ai-refinement.server.ts`, em `src/lib/sports/` |
+| Elo e lógica pura | Ratings de clube/liga e histórico, separados da persistência | `src/lib/engine/`, `src/lib/elo-sync.server.ts` |
+| Persistência e acesso | Catálogo, projeções, RPCs, permissões, notas e estado dos jobs | Lovable Cloud/PostgreSQL; `src/integrations/supabase/`, `src/lib/admin-db.ts`, `src/lib/sports/sports-db.server.ts` |
 
-    A --> G
-    G --> H
-    H --> I
-    I --> O
-    O --> P
-    I --> J
-    J --> K
-    H --> L
-    K --> L
-    M --> L
-    N --> L
-    L --> G
-    G --> B --> C --> D --> E --> F
-```
-
----
-
-## Camadas
-
-### 1. Interface
-
-Responsável por:
-
-- upload e validação do CSV;
-- estados de processamento;
-- conferência de preços;
-- resultado da análise;
-- acompanhamento de apostas;
-- analytics.
-
-A interface foi iterada com apoio do Lovable, mas continua versionada no GitHub como React/TypeScript.
-
-### 2. Server Functions
-
-As ações que dependem de credenciais, banco ou regras críticas são executadas no servidor.
-
-Exemplos:
-
-- preparar uma análise;
-- buscar odds automáticas;
-- avaliar valor;
-- confirmar uma aposta registrada externamente;
-- encerrar uma aposta;
-- calcular analytics.
-
-### 3. Adapters
-
-Os adapters isolam particularidades das fontes externas.
-
-Eles são responsáveis por:
-
-- chamadas à API;
-- paginação;
-- normalização de estruturas;
-- tratamento de indisponibilidade;
-- compatibilização de identificadores;
-- preservação de metadados de origem.
-
-Isso evita que o motor quantitativo dependa diretamente do formato de um fornecedor.
-
-### 4. Quant Engine
-
-A camada `src/lib/engine/` concentra regras puras e testáveis.
-
-Ela inclui:
-
-- modelos de gols;
-- escanteios;
-- cartões;
-- Elo local e ajuste hierárquico;
-- política de mercados;
-- cálculo de valor;
-- validação de features;
-- seleção de portfólio;
-- CLV.
+## Fluxos atuais e limites conhecidos
 
-O baseline cross-league é construído com histórico doméstico dos clubes. Quando existe evidência suficiente entre ligas, a camada Elo converte Elo local + força da liga em rating global point-in-time e redistribui os lambdas de gols sem alterar a expectativa total da partida.
+- **Hoje:** catálogo canônico de fixtures, forma, Elo e evidências de transmissão. Existência e horário da partida não vêm do guia de TV. Na Home, falha da programação pode virar vazio; evidência de agregador ainda não comprova a confirmação oficial exigida. Achados permanecem em IE-04.03–06.
+- **Noticiário:** edições e itens editoriais seguem `editorial-explanatory-v3` e os três eixos aprovados: resenha explicativa, contraste entre placar e desempenho e protagonista dentro do jogo. Elo é uma superfície separada e não entra na redação.
+- **Elo:** distingue rating local, rating de liga, fotografia global atual e histórico por partida. O cliente não redefine a fórmula; cobertura, freshness e histórico exigem a trilha IE-06.
+- **Anotações:** reviews vinculados ao usuário, assistiu/não assistiu, comentários, notas pessoais e campinho persistido. Nota pessoal, nota do provedor e estatística observada têm significados distintos.
+- **Analytics:** o detalhe atual consulta `sports_player_season_stats`, enquanto a coleta prospectiva documenta estatísticas por fixture. Reconciliação das projeções permanece aberta em IE-LP2/IE-08.
+- **Automação:** coletores alimentam dados normalizados e jobs persistidos. O worker contém o recorte `2026/27`; sua correspondência com cada competição, inclusive o Brasil, precisa de validação. Rota ou função presente não comprova cron ativo.
 
-Sempre que possível, a lógica é mantida determinística e desacoplada de UI e banco.
+## Papel das fontes
 
-### 5. Banco e integridade
+| Finalidade | Referência atual |
+| --- | --- |
+| Catálogo, resultados e dados gerais | 5Dollar, com normalização e proveniência |
+| Elencos, escalações e dados individuais | API-Football, no escopo e quota validados |
+| Números de desempenho da resenha | Exclusivamente SofaScore; ausência implica omissão |
+| Contexto jornalístico | Os 14 veículos de `editorial-policy.ts`; RSS parcial não equivale à matéria completa |
+| Descoberta de transmissão | FutNaTV; fallback `futebol.tv.br` existe no código e tem política pendente |
+| Confirmação de transmissão no Brasil | Mapa de direitos e grade/site oficial identificando o confronto, conforme o roadmap |
 
-O PostgreSQL/Supabase não é usado apenas como armazenamento.
+Agenda/resenha e coleta individual têm escopos independentes. Esta revisão não amplia fontes, scraping, APIs ou chamadas reais, nem modifica a implementação da confirmação de transmissão.
 
-Ele também participa da proteção das regras por meio de:
+## Segurança e dados
 
-- migrations versionadas;
-- RLS;
-- RPCs;
-- triggers;
-- locks e operações atômicas;
-- constraints e validações transacionais;
-- históricos point-in-time para reproduzir decisões quantitativas.
+As funções de produto usam middleware e acesso ao banco no servidor. O cliente público do browser atende à autenticação; credenciais privilegiadas permanecem server-only. O middleware versionado verifica token, provedor Google em `app_metadata`, sessão, prazo absoluto e `is_approved_app_user`.
 
----
+Essas fronteiras no código não comprovam autorização por recurso no Cloud atual. RLS, grants, views, ownership e RPCs exigem ensaio próprio em IE-01.02/03, especialmente nos caminhos administrativos. Tipos gerados também não comprovam o schema vivo.
 
-## Fluxo de análise
+Na baseline há **135 SQLs históricos em `supabase/migrations_archive/`** e **duas migrations editoriais novas em `supabase/migrations/`**. O CI copia o arquivo histórico para reconstrução isolada e regressões. Não reaplicá-lo automaticamente ao Cloud nem editar `supabase_migrations.schema_migrations`. Executor remoto, correspondência de schema e backup/restore permanecem para IE-01.
 
-```mermaid
-sequenceDiagram
-    participant U as Usuário
-    participant UI as Frontend
-    participant S as Server Functions
-    participant API as 5DollarFootball
-    participant Q as Quant Engine
-    participant DB as PostgreSQL
+## Qualidade e liberação
 
-    U->>UI: Envia CSV
-    UI->>S: Criar / processar run
-    S->>DB: Persistir análise
-    S->>API: Resolver e coletar dados
-    API-->>S: Fixtures, histórico e odds
-    S->>Q: Dados normalizados
-    Q-->>S: Probabilidades e oportunidades
-    S->>DB: Persistir previsões
-    UI->>S: Solicitar odds disponíveis
-    S->>API: Consultar preços seguros
-    API-->>S: Odds Bet365
-    S->>Q: Avaliar preço / EV
-    Q-->>S: Candidatos e seleção
-    S->>DB: Persistir resultado
-    S-->>UI: Sugestões da rodada
-```
+Os workflows versionados cobrem estática/tipagem/arquitetura, dependências, segredos, documentação, reconstrução de banco e regressões, testes, build, orçamento de bundle, smoke HTTP e navegadores/acessibilidade.
 
----
+`implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção`.
 
-## Separação entre Motor 1 e Motor 2
-
-Uma das decisões mais importantes do sistema é separar previsão esportiva e avaliação de preço.
-
-```mermaid
-flowchart LR
-    A[Dados pré-jogo] --> B[Motor 1: Probabilidade]
-    B --> C[Probabilidade / distribuição]
-    C --> D[Motor 2: Preço e EV]
-    E[Odd real] --> D
-    D --> F[Seleção final]
-```
-
-### Motor 1
-
-- não recebe odd como feature;
-- trabalha apenas com dados temporalmente válidos;
-- aplica Elo apenas como feature esportiva quando os requisitos são comprovados;
-- pode bloquear um mercado por falta de dados ou validação.
-
-### Motor 2
-
-- recebe uma previsão já pronta;
-- compara probabilidade e odd;
-- calcula fair odd, edge e EV;
-- expõe a base da probabilidade usada na decisão (`RAW_EXPERIMENTAL`, `CONSERVATIVE_CALIBRATED` ou `OUTCOME_DISTRIBUTION`);
-- aplica regras de execução e portfólio.
-
----
-
-## Estratégia low-code
-
-A arquitetura foi pensada para permitir mudanças rápidas sem colocar a lógica central dentro do construtor visual.
-
-```text
-Lovable
-  └─ acelera UI, iteração e publicação
-
-GitHub / TypeScript
-  └─ protege regras, testes e histórico
-
-Supabase / PostgreSQL
-  └─ protege dados, transações e permissões
-```
-
-Essa combinação reduz lock-in operacional e facilita auditoria.
-
----
-
-## Fontes de verdade
-
-### Lovable Cloud
-
-Fonte de verdade para:
-
-- runtime publicado;
-- banco em uso;
-- ambiente operacional.
-
-### GitHub `main`
-
-Fonte de verdade para:
-
-- código;
-- migrations;
-- testes;
-- contratos de mercado;
-- regras quantitativas;
-- documentação técnica.
-
----
-
-## Segurança por camadas
-
-```mermaid
-flowchart LR
-    A[Usuário autenticado] --> B[Frontend]
-    B --> C[Server Functions]
-    C --> D[Autorização server-side]
-    D --> E[Service role server-only]
-    E --> F[(PostgreSQL)]
-
-    F --> G[RLS]
-    F --> H[RPCs e triggers]
-```
-
-Controles principais:
-
-- autenticação Google;
-- allowlist validada no servidor;
-- service role fora do bundle do cliente;
-- browser sem acesso operacional direto às tabelas;
-- RLS habilitado;
-- fallback HTTP de sync Elo protegido por Bearer secret;
-- rotina principal Elo executada por jobs no PostgreSQL;
-- CSP e headers de segurança;
-- operações financeiras do piloto protegidas no banco.
-
----
-
-## Observabilidade e rastreabilidade
-
-O projeto registra contexto suficiente para reconstruir decisões importantes:
-
-- `run_id`;
-- `prediction_id` versionado;
-- dados de origem;
-- timestamps e `prediction_at`;
-- modelo e versão da política;
-- contexto Elo e lambdas quando aplicável;
-- preços usados;
-- estado da aposta;
-- histórico de banca.
-
-A intenção é que uma decisão não exista apenas como resultado visual, mas como registro explicável.
-
----
-
-## Qualidade
-
-O pipeline de CI valida o repositório a cada mudança relevante:
-
-```mermaid
-flowchart LR
-    A[PR / Push] --> B[Install]
-    B --> C[Secret boundary]
-    C --> D[Engine E2E]
-    D --> E[Unit tests]
-    E --> F[Production build]
-```
-
-Além do CI, o sistema passou por auditorias independentes de:
-
-- RLS;
-- segurança;
-- backend;
-- frontend;
-- Elo e integração cross-league;
-- limpeza de código pós-auditoria.
-
----
-
-## Estrutura principal
-
-```text
-src/
-  components/               componentes de produto
-  integrations/             Supabase / Lovable
-  lib/adapters/             fontes e normalização
-  lib/engine/               domínio quantitativo
-  lib/*.functions.ts        operações server-side
-  routes/                   experiência e navegação
-
-supabase/
-  migrations/               evolução do schema
-  tests/                    segurança e RLS
-
-docs/
-  CASE_STUDY.md             narrativa de portfólio
-  ARCHITECTURE.md           este documento
-  ELO.md                    arquitetura canônica do Elo
-  ELO_RUNBOOK.md            operação do Elo
-  PROJECT_STATE.md          continuidade operacional
-```
-
----
-
-## Princípio central
-
-A arquitetura busca equilibrar duas coisas que normalmente entram em conflito:
-
-> **velocidade de construção** e **controle técnico**.
-
-O low-code acelera a camada de produto; regras, dados, segurança e qualidade permanecem explícitos, testáveis e versionados.
+CI aprovado em revisão documental não homologa runtime. Critérios por entrega estão no [roadmap](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md); evidências desta revisão em [IE-00.02](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md).

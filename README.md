@@ -45,16 +45,17 @@ implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validad
 
 O projeto nasceu a partir de um motor quantitativo ligado a apostas. Em 16/09/2026, esse runtime foi descomissionado de forma governada. Migrations e documentos históricos foram preservados como trilha de auditoria.
 
-## Estado operacional atual — trilha de dados esportivos
+## Estado documental e dados — revisão de 15/10/2026
 
-A numeração abaixo é **operacional da coleta de dados atual** e não substitui as sete fases históricas do reescopo do produto.
+A IE-00.02 separa a arquitetura e a governança atuais dos [registros históricos](docs/history/README.md). Presença no código, evidência datada e funcionamento no ambiente vivo têm significados distintos.
 
-- **Etapa 3 — Elencos:** concluída e validada em 19/09/2026 com **116/116 clubes** das seis ligas prioritárias: Premier League (20), Ligue 1 (18), Brasileirão Série A (20), Bundesliga (18), Serie A italiana (20) e La Liga (20).
-- **Etapa 4 — Dia Zero prospectivo:** coleta detalhada por fixture a partir do Dia Zero, sem backfill histórico. O detalhamento via API-Football é exclusivo dessas seis ligas e inclui vínculo da fixture, lineups e fixtures/players, com persistência de estatísticas individuais.
-- **Etapa 4.5 — Agenda/Programação:** próxima validação operacional depois da primeira coleta real da Etapa 4; auditar completude da agenda, horários em America/Sao_Paulo, adiamentos/cancelamentos, duplicidades, ordenação e camada separada de transmissão.
-- **Etapa 5 — Analytics:** consolidar os dados prospectivos em leitura de forma, participação, minutos, desempenho e demais superfícies analíticas.
+- **Elencos:** 116/116 clubes é uma validação de 19/09 no banco anterior ao remix. Não comprova cobertura no PRIMARY atual. O registro pós-remix de 04/10 encontrou 15 clubes com linhas de elenco; também não é uma contagem de hoje nem prova de elencos completos.
+- **Coleta prospectiva:** o desenho usa Dia Zero e detalhamento por fixture via API-Football no escopo individual. Dia Zero persistido, quota, completude e execução automática exigem nova evidência.
+- **Agenda/Resenha:** possuem escopo próprio; não precisam aguardar todos os elencos. Falha versus vazio e confirmação oficial de transmissão permanecem no roadmap.
+- **Analytics:** reconciliação de player-season com dados por fixture e temporada por competição permanece pendente; a etiqueta 2026/27 não comprova correspondência de todas as ligas.
+- **Migrations:** os 135 SQLs históricos já estão em `supabase/migrations_archive/`; as duas migrations editoriais novas ficam em `supabase/migrations/`. Reconstrução isolada no CI não autoriza replay no Cloud.
 
-A agenda geral continua baseada no catálogo canônico de fixtures. O detalhamento individual da Etapa 4 não define quais jogos existem na agenda; ele apenas enriquece partidas das seis ligas com elencos validados.
+Fases históricas do reescopo, etapas antigas de coleta e códigos IE do roadmap são numerações distintas. Situação, origem e limites de cada evidência: [PROJECT_STATE.md](docs/PROJECT_STATE.md). Após integrar esta revisão, a próxima ação é IE-00.03 — definir com Kauê a experiência pessoal prioritária.
 
 ## Qualidade e segurança
 
@@ -64,6 +65,9 @@ O CI obrigatório cobre lint, typecheck, arquitetura, vulnerabilidades, secret s
 
 - [Roadmap pessoal e operacional — EBSA 1.7](docs/roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md)
 - [Evidência de identidade — IE-00.01](docs/governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md)
+- [Separação entre estado e histórico — IE-00.02](docs/governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md)
+- [Índice da documentação](docs/README.md)
+- [Histórico preservado](docs/history/README.md)
 - docs/PROJECT_STATE.md
 - docs/ARCHITECTURE.md
 - docs/GOVERNANCE.md

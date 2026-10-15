@@ -1,84 +1,80 @@
-# Governança de dados e do sistema
+# Governança — Motor de Inteligência Esportiva
 
-## Fontes de verdade
-- Lovable Cloud: runtime, banco e ambiente operacional.
-- GitHub `main`: código, migrations, testes, contratos e documentação versionada.
+> Revisão documental: 15/10/2026, IE-00.02. Referência: main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`.
+> Medições e auditorias anteriores conservam sua data e seu ambiente.
 
-## Domínios e responsáveis
-| Domínio | Data owner | Responsável técnico | Regra de mudança |
+## Escopo e autoridade
+
+O produto vigente reúne Noticiário, Hoje, Elo, Analytics, Anotações e Conta/Privacidade. Apostas, odds, banca, picks e execução financeira pertencem ao produto descomissionado. Sua presença em código, tabelas ou documentos não autoriza reativação.
+
+- **GitHub main:** código, migrations, testes, contratos e documentação versionada.
+- **Lovable Cloud:** dados e operação vivos; PRIMARY configurado `hefuvmocohhpmnhwpkac`.
+- **Lovable conectado:** projeto `428fa571-e363-4bbf-ab2c-058451eba7dc`, registrado na IE-00.01. Não criar ou remixar projeto paralelo.
+- **Fase atual:** desenvolvimento por commits, sem endereço público, conforme decisão de Kauê em 11/10/2026. Publicação é verificada na entrega correspondente.
+
+Código demonstra implementação; teste/consulta do ambiente demonstra execução. Documento histórico não prevalece sobre o escopo atual nem comprova o ambiente vivo. Consultar [PROJECT_STATE](PROJECT_STATE.md) e [histórico](history/README.md).
+
+## Domínios e responsabilidades
+
+Kauê decide o produto. Os papéis abaixo representam responsabilidades; a atribuição nominal completa e o perfil formal permanecem em IE-00.05.
+
+| Domínio | Papel de decisão | Responsável técnico | Regra de mudança |
 | --- | --- | --- | --- |
-| Fontes | Product/Data Owner | Repository Maintainer | PR + CI + revisão do catálogo |
-| Modelos | Quantitative Model Owner | Repository Maintainer | testes + evidência point-in-time/OOS quando aplicável |
-| Elo | Quantitative Model Owner | Repository Maintainer | regressão/auditoria Elo |
-| Banca/Analytics | Product/Data Owner | Repository Maintainer | versão/dicionário da métrica |
-| Segurança/Acessos | System Owner | Repository Maintainer | revisão trimestral |
-| Schema | Data/System Owner | Repository Maintainer | migration + testes do banco |
-| Desempenho/Escalabilidade | System Owner | Repository Maintainer | budget + medição + rollback |
+| Fontes/ingestão | Product/Data Owner | Repository Maintainer | PR + CI + contrato, catálogo, quota e proveniência |
+| Editorial/transmissão | Product/Data Owner | Repository Maintainer | Fontes aprovadas, evidência e confirmação nominal quando exigida |
+| Elo/métricas esportivas | Quantitative Model Owner | Repository Maintainer | Semântica versionada, regressões e evidência temporal/OOS quando aplicável |
+| Analytics | Product/Data Owner | Repository Maintainer | Versão, amostra, temporada e reconciliação |
+| Anotações/memória pessoal | Product/Data Owner | Repository Maintainer | Ownership, preservação, exportação e recuperação |
+| Segurança/acessos | System Owner | Repository Maintainer | Revisão trimestral e prova no alvo correto |
+| Schema | Data/System Owner | Repository Maintainer | Migration + testes de banco; executor e destino conhecidos |
+| Desempenho/capacidade | System Owner | Repository Maintainer | Budget + medição + rollback |
 
-Enquanto o projeto for single-maintainer, o `CODEOWNERS` aponta para o mantenedor atual. Não se exige uma segunda pessoa inexistente; quando houver outro responsável, o ruleset deve passar a exigir code-owner approval.
+Enquanto houver um mantenedor, `CODEOWNERS` aponta para ele; não exigir uma segunda pessoa inexistente. Quando outro responsável existir, ajustar o ruleset para exigir revisão aplicável. CI existente não comprova proteção técnica da main: IE-01.07/IE-09.01 permanecem responsáveis por essa verificação.
 
-## Mudanças
-Toda mudança relevante deve entrar por PR e informar impacto, evidência e rollback. Alterações de banco fazem parte do `test-and-build`, portanto não podem ser mergeadas se migrations/pgTAP falharem.
+## Mudança, evidência e rollback
 
-## Métricas
-Definições canônicas ficam em `docs/METRICS_GLOSSARY.md` e em `public.metric_definitions`. Mudanças semânticas criam nova versão; não reescrevem o significado histórico.
+Toda mudança relevante entra por branch e PR com problema, comportamento final, impacto, validação e rollback. Todos os gates obrigatórios devem estar verdes antes do merge, inclusive migrations/pgTAP. Preservar história publicada; rollback usa novo commit de reversão.
 
-## Fontes e linhagem
-O catálogo canônico é `public.source_definitions`, complementado por `docs/DATA_CATALOG.md`. Novas observações/fetches devem usar uma combinação `source + definition_version` registrada.
+Registrar commit, ambiente, data e método da prova. Distinguir `PASS`, `FAIL`, `UNVERIFIED` e `N/A` justificado. Contagens precisam de data, origem, escopo e numerador/denominador. Consulta sem erro não comprova completude.
 
-## Histórico de alterações
-Código/schema: Git + migrations + `app_schema_releases`.
-Configurações governadas: `governance_change_log` registra INSERT/UPDATE/DELETE com before/after, papel de banco, usuário quando disponível e timestamp.
+`implementado ≠ testado ≠ mergeado ≠ sincronizado ≠ publicado ≠ validado em produção`.
 
-`governance_change_log` é **append-only**: o `service_role` não possui `UPDATE` ou `DELETE`, e um trigger de imutabilidade rejeita mutações de linhas existentes. Correções de histórico exigem uma migration explícita, nunca edição operacional silenciosa.
+A conclusão documental não fecha validação de dados, acesso ou recuperação. Após merge registrar integração; confirmar sincronização/publicação quando fizerem parte da entrega.
 
-## Revisão de acessos
-Revisão mínima trimestral para aplicação, GitHub e Lovable. Superfícies externas não verificáveis pela automação ficam com status `REVIEW_REQUIRED`, nunca presumidas como conformes.
+## Fontes e semântica
 
-## Cadência
-- Fontes/modelos/Elo/analytics/schema: revisão a cada 90 dias ou quando houver mudança material.
-- Acessos: trimestral.
-- Itens externos sem evidência: nova tentativa em até 30 dias.
+- Definições: `docs/METRICS_GLOSSARY.md` e `public.metric_definitions`. Mudança semântica cria versão; nunca reescrever significado histórico.
+- Linhagem: `public.source_definitions` e `docs/DATA_CATALOG.md`; observações/fetches usam `source + definition_version` registrado.
+- Comportamento quantitativo novo exige testes e evidência point-in-time/OOS quando aplicável. Distinguir Elo local, liga e fotografia global.
+- Editorial: `editorial-explanatory-v3`, três eixos aprovados e 14 veículos em `editorial-policy.ts`. Números de desempenho da resenha vêm apenas do SofaScore; ausência implica omissão.
+- Transmissão: FutNaTV para descoberta → mapa de direitos → confirmação nominal oficial. O fallback `futebol.tv.br` existe no código; sua política permanece pendente. Não ampliar fontes automaticamente.
+- Agenda/resenha, Elo e coleta individual têm contratos próprios. Cobertura de um fluxo não prova cobertura dos demais.
 
-## Integration and automation resilience (2026-09-12)
+Esta revisão não muda catálogo ou contratos em runtime nem substitui a homologação de IE-LP1.
 
-External integrations and scheduled jobs are governed as recoverable distributed work. FiveDollar transient failures use bounded retries through the shared provider rate budget; API-Football uses the same distributed cache/rate primitives as its fallback path. Background analysis uses renewable short leases, heartbeat and fenced state transitions. Analysis-ready notifications are durable outbox events rather than best-effort side effects. HTTP pg_cron/pg_net dispatches are recorded in `automation_runs` and reconciled against the pg_net response table so dispatch success is not confused with endpoint success. Football local-time interpretation is anchored to the IANA zone `America/Sao_Paulo`, including historical DST.
+## Acesso, privacidade e integridade
 
-## UX/UI e fluxo de decisão (2026-09-12)
+Autenticação, autorização por recurso e acesso administrativo são verificações distintas. Credenciais privilegiadas ficam no servidor; ownership, RLS, grants, views e RPCs precisam de prova no ambiente alvo.
 
-A jornada principal é governada como um fluxo único e server-backed em quatro macroetapas: **Enviar e validar → Preparar → Conferir e escolher → Revisar e registrar**. O frontend não deve criar uma segunda fonte de verdade para resultado, seleção, limite diário ou progresso crítico.
+Revisão mínima trimestral de aplicação, GitHub e Lovable. Evidência externa indisponível permanece `REVIEW_REQUIRED`; nova tentativa em até 30 dias.
 
-Regras de governança da interface:
-- o limite ativo é de até **3 escolhas por `target_date` em qualquer dia da semana**;
-- reload/retomada deve recuperar estado persistido antes de repetir preparação, cotação ou seleção;
-- falha de carregamento nunca pode ser apresentada como “nenhuma opção”;
-- `localStorage` não é fonte de verdade para resultados ou escolhas do fluxo ativo;
-- linguagem técnica de integrações, cache, rate limit e infraestrutura deve ficar em detalhes/diagnóstico, não na tarefa principal;
-- métricas esperadas e realizadas devem ser nomeadas de forma distinta, por exemplo **EV esperado** versus **ROI realizado**;
-- ações que alteram banca ou encerram aposta exigem confirmação e bloqueio contra duplo clique;
-- mudanças em `AppShell`, fluxo de resultado, registro de aposta ou navegação devem manter os contratos de UX em `src/frontend-ux-contract.test.ts` verdes.
+O desenho versionado mantém `governance_change_log` append-only, com before/after, papel de banco, usuário disponível e timestamp, e releases em `app_schema_releases`. Efetividade no Cloud atual não foi revalidada nesta ação. Não editar silenciosamente histórico operacional nem `supabase_migrations.schema_migrations`.
 
-O relatório de referência desta revisão é `docs/UX_UI_AUDIT_2026-09-12.md`.
+Comentários, avaliações e campinho não herdam descarte de observações técnicas. Retenção, exportação e backup/restore próprios permanecem em IE-00.06/IE-01.05, preservando a memória esportiva.
 
-## Desempenho e escalabilidade (2026-09-12)
+## Integrações, interface e qualidade
 
-Desempenho passa a ser tratado como contrato de produção, não apenas otimização eventual. O CI deve impedir regressões materiais de bundle e executar um smoke de concorrência HTTP; a matriz de navegador mantém um smoke de navegação e estabilidade visual. Métricas LCP, CLS e INP de sessões autenticadas são armazenadas sem identificador de conta e retidas por 30 dias para diagnóstico agregado.
+- Cache, quota compartilhada, retries limitados, leases e heartbeat fazem parte do desenho recuperável. Dispatch HTTP não equivale a execução concluída.
+- Código não transfere automaticamente configuração de cron, segredos ou permissões. Comprovar cada operação no alvo correto.
+- Usar `America/Sao_Paulo`; distinguir edição, kickoff, coleta e corte Elo.
+- Distinguir vazio real, falha, parcialidade e desatualização; falha não pode aparecer como ausência de jogos.
+- A UI não cria uma segunda fonte de verdade para dados persistidos. Infraestrutura fica no diagnóstico, salvo quando ajuda uma decisão do usuário.
+- Preservar testes de navegação/UX, fronteiras de código, orçamento de bundle, smoke de concorrência e matriz de navegadores/acessibilidade. Ajuste de budget exige justificativa explícita; não relaxar gates para obter aprovação.
 
-Regras operacionais:
-- consultas por `run_id`, owner/status e tracking devem possuir índices compatíveis com o padrão de acesso observado em produção;
-- a Home deve usar agregação no banco em vez de transferir todo o histórico de runs/apostas para calcular contagens e saldo;
-- `raw_observations` de análises finalizadas/completas tem retenção operacional de 90 dias; os produtos derivados (stats normalizadas, modelos, decisões e resultados) permanecem disponíveis;
-- `source_fetches` e `pipeline_logs` de runs finalizadas têm retenção de 180 dias; Web Vitals, 30 dias;
-- jobs de Elo e manutenção externa devem ceder enquanto houver `analysis_jobs` em `QUEUED`/`RUNNING` e usar advisory lock para evitar sobreposição;
-- o limite do provedor externo continua sendo teto físico compartilhado; retries nunca podem contornar a cota distribuída;
-- qualquer alteração que aumente deliberadamente o bundle acima do orçamento deve justificar o impacto no PR e ajustar o budget de forma explícita, nunca silenciosamente.
+## Retenção técnica, cadência e histórico
 
-Baseline medida antes deste pacote: banco ~296 MB, `raw_observations` ~239 MB, análise recente ~381–390 s, consulta de 22.788 raws ~2,53 s e maiores chunks client ~100/90 KiB gzip. A comparação pós-ajuste deve usar a mesma família de medições.
+As políticas históricas de `raw_observations` (90 dias), `source_fetches`/`pipeline_logs` (180 dias), Web Vitals (30 dias) e precedência de `analysis_jobs` estão preservadas no [snapshot de governança](history/ie-00-02-2026-10-15/GOVERNANCE.md). Esta revisão não altera prazos nem desativa controles. Aplicação efetiva ao Cloud atual exige inventário; não estender regras a dados pessoais ou jobs novos por analogia.
 
-## Arquitetura e qualidade do código (2026-09-12)
+Fontes, modelos, Elo, Analytics e schema: revisão a cada 90 dias ou mudança material. Custos, capacidade, backup e objetivos de serviço dependem do perfil aprovado e da comprovação de IE-00/IE-01.
 
-As fronteiras críticas do motor são governadas por tipagem explícita e separação de responsabilidades. A fila de decisão não pode depender de `any`; RPCs mais novos que o snapshot gerado do Lovable Cloud ficam encapsulados em repositories server-only e o schema runtime conhecido deve permanecer tipado. O gate `check:architecture` cobre a fronteira da decision queue além das camadas application/domain/repositories.
-
-O fluxo de mercados experimentais deve manter responsabilidades separadas entre construção de datasets, serviço de predição, persistência e avaliação/tracking. Refatorações dessa área não podem alterar silenciosamente thresholds, probabilidades, EV, edge, limite canônico de 3 seleções, máximo de uma escolha principal por partida ou máximo de duas por família. O seletor de portfólio recebe somente os candidatos; `MAX_SELECTIONS` é a fonte única do limite operacional.
-
-A ordem de substituição das previsões também faz parte do comportamento: previsões experimentais antigas são limpas antes do novo cálculo, preservando a semântica histórica de falha e impedindo que dados antigos permaneçam aparentando ser resultado de uma tentativa nova que falhou.
+O [índice histórico](history/README.md) preserva documentos e medições anteriores. Jornada de upload/odds, três picks e métricas financeiras não governam a navegação atual. Os controles gerais reaproveitados estão explicitados acima; regras quantitativas preservadas no legado continuam vinculadas à sua versão histórica.
