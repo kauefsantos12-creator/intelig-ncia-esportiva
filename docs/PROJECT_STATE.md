@@ -1,6 +1,6 @@
 # Motor de Inteligência Esportiva — estado canônico
 
-> Revisão: 15/10/2026, IE-00.02. Baseline: main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`.
+> Revisão: 15/10/2026, IE-00.03. Baseline consultada: main `77cb71654a2b5f755630b5f6a8089220480e0225`.
 > Fase definida por Kauê: desenvolvimento por commits, sem endereço público nesta preparação.
 
 ## Identidade e fontes de verdade
@@ -40,7 +40,8 @@ Esta leitura não conclui IE-00.04 nem auditorias funcionais. Ver [arquitetura](
 
 - **IE-00.01 — CONCLUÍDA no escopo de identidade:** PR #19 integrada na main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`. [Evidência datada](governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md). Ajustes de dependências necessários ao CI integram essa entrega histórica.
 - **IE-00.02 — CONCLUÍDA no escopo documental desta revisão:** documentos vigentes separados dos snapshots históricos e verificações locais aprovadas. [Evidências e limites](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md). Vigência na main exige gates aprovados e merge confirmado na PR correspondente.
-- **Próxima após integração: IE-00.03 — definir com Kauê a experiência prioritária.** Resenha → escolha dos jogos → anotações é proposta, ainda não decisão aprovada.
+- **IE-00.03 — CONCLUÍDA no escopo da decisão desta revisão:** Kauê escolheu **Resenha diária** em 15/10/2026. Primeiro foco funcional: Noticiário/IE-05, após a base comum. [Evidência da escolha](governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md). Integração por PR com gates verdes.
+- **Próxima após integração: IE-00.04 — registrar a baseline das superfícies**, destacando as lacunas que afetam a Resenha. O ciclo completo Resenha → Hoje → Anotações continua proposta de composição da candidata, não um escopo automaticamente aprovado.
 
 O [roadmap EBSA 1.7](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md) mantém códigos e dependências. Esta revisão não fecha IE-00, o perfil ou gates de liberação.
 

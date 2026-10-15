@@ -55,7 +55,7 @@ A IE-00.02 separa a arquitetura e a governança atuais dos [registros histórico
 - **Analytics:** reconciliação de player-season com dados por fixture e temporada por competição permanece pendente; a etiqueta 2026/27 não comprova correspondência de todas as ligas.
 - **Migrations:** os 135 SQLs históricos já estão em `supabase/migrations_archive/`; as duas migrations editoriais novas ficam em `supabase/migrations/`. Reconstrução isolada no CI não autoriza replay no Cloud.
 
-Fases históricas do reescopo, etapas antigas de coleta e códigos IE do roadmap são numerações distintas. Situação, origem e limites de cada evidência: [PROJECT_STATE.md](docs/PROJECT_STATE.md). Após integrar esta revisão, a próxima ação é IE-00.03 — definir com Kauê a experiência pessoal prioritária.
+Fases históricas do reescopo, etapas antigas de coleta e códigos IE do roadmap são numerações distintas. Situação, origem e limites de cada evidência: [PROJECT_STATE.md](docs/PROJECT_STATE.md). A prioridade escolhida por Kauê em 15/10/2026 é **Resenha diária** (IE-00.03). A próxima ação é IE-00.04 — registrar a baseline de cada superfície, com atenção às lacunas da Resenha. A base comum e os critérios de qualidade permanecem aplicáveis.
 
 ## Qualidade e segurança
 
@@ -66,6 +66,7 @@ O CI obrigatório cobre lint, typecheck, arquitetura, vulnerabilidades, secret s
 - [Roadmap pessoal e operacional — EBSA 1.7](docs/roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md)
 - [Evidência de identidade — IE-00.01](docs/governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md)
 - [Separação entre estado e histórico — IE-00.02](docs/governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md)
+- [Prioridade pessoal — IE-00.03: Resenha diária](docs/governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md)
 - [Índice da documentação](docs/README.md)
 - [Histórico preservado](docs/history/README.md)
 - docs/PROJECT_STATE.md
