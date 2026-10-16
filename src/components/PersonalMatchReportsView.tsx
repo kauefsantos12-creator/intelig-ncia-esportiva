@@ -1,5 +1,5 @@
 import { NotebookPen, Plus, Save } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { SurfaceCard } from "@/components/ProductSurface";
 import {
   fromBrazilDateTimeInput,
@@ -59,6 +59,7 @@ export function PersonalMatchReportsView({
   onReload?: () => void;
   onDirtyChange?: (dirty: boolean) => void;
 }) {
+  const notesId = useId();
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const baseline = useRef(JSON.stringify(draft));
   const [saving, setSaving] = useState(false);
@@ -253,9 +254,12 @@ export function PersonalMatchReportsView({
                 />
               </label>
             </div>
-            <label className="block type-meta font-medium">
-              Seu relato
+            <div>
+              <label htmlFor={notesId} className="block type-meta font-medium">
+                Seu relato
+              </label>
               <textarea
+                id={notesId}
                 value={draft.notes}
                 onChange={(event) => change("notes", event.target.value)}
                 maxLength={4000}
@@ -263,7 +267,7 @@ export function PersonalMatchReportsView({
                 className={fieldClass}
                 placeholder="Suas impressões, lances e observações ao longo da partida."
               />
-            </label>
+            </div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="type-caption text-muted-foreground">
                 {draft.notes.length}/4.000 caracteres ·{" "}
