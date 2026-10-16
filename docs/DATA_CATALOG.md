@@ -22,6 +22,10 @@ Cada fonte deve ter: `source`, `definition_version`, provider, data owner, data 
 
 Novos registros de `raw_observations` e `source_fetches` são aceitos somente quando `source + definition_version` estiver cadastrado. Registros históricos anteriores ao controle podem permanecer como legado até reconciliação, mas não autorizam novas fontes não catalogadas.
 
+### Recuperação factual pontual — 16/10/2026
+
+`official / official-match-squad-v1` foi registrado no PRIMARY para Mirassol x Internacional e os elencos publicados pelos dois clubes, a pedido de Kauê. URLs, horários, hashes e limite entre elenco e escalação estão no [registro da carga](governance/MIRASSOL_INTERNACIONAL_2026-10-16.md). Foram preservadas 50 identidades e criadas 16 chaves oficiais sem ID de API inventado; a conciliação entre provedores dessas novas chaves continua pendente. A fonte não fornece métricas esportivas nesta ação nem altera as fontes editoriais ou a automação diária. Não foram inseridos registros de `raw_observations` ou `source_fetches`; a procedência acompanha a fixture e os vínculos de elenco.
+
 ## Noticiário — definição editorial de 05/10/2026
 
 `editorial_rss` usa `editorial-rss-v2`: exatamente dois veículos por país, com Kicker/BILD Sport, Marca/AS, BBC Sport/Sky Sports, L'Équipe/RMC Sport, Gazzetta/Corriere dello Sport, A Bola/Record e ge/UOL Esporte. A coleta usa feeds RSS próprios; a atribuição e o domínio do publisher precisam ser aprovados antes da persistência. Trechos de RSS não constituem leitura integral da matéria. Evidências históricas permanecem intactas; fontes fora da lista não alimentam novos textos.
