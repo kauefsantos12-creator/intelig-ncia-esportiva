@@ -1,4 +1,5 @@
 import { useServerFn } from "@tanstack/react-start";
+import { useBlocker } from "@tanstack/react-router";
 import { NotebookPen, Plus, Save } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
@@ -56,6 +57,12 @@ export function PersonalMatchReports() {
   const [reports, setReports] = useState<PersonalMatchReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const confirmLeave = useCallback(
+    () => !window.confirm("Há alterações ainda não salvas. Deseja sair deste rascunho?"),
+    [],
+  );
+  useBlocker({ shouldBlockFn: confirmLeave, disabled: !dirty, enableBeforeUnload: false });
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
@@ -88,6 +95,7 @@ export function PersonalMatchReports() {
       loadError={loadError}
       onReload={() => void refresh()}
       onSave={persist}
+      onDirtyChange={setDirty}
     />
   );
 }
@@ -98,12 +106,14 @@ export function PersonalMatchReportsView({
   loading = false,
   loadError = false,
   onReload,
+  onDirtyChange,
 }: {
   reports: PersonalMatchReport[];
   onSave: (input: PersonalMatchReportInput) => Promise<PersonalReportSaveResult>;
   loading?: boolean;
   loadError?: boolean;
   onReload?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const baseline = useRef(JSON.stringify(draft));
@@ -111,6 +121,10 @@ export function PersonalMatchReportsView({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dirty = baseline.current !== JSON.stringify(draft);
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+    return () => onDirtyChange?.(false);
+  }, [dirty, onDirtyChange]);
   useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => {

@@ -46,6 +46,11 @@ test("failed save and conflicting session preserve the unsaved text", async ({ p
     "Este texto precisa continuar aqui.",
   );
   await expect(page.getByText("Relato salvo.", { exact: false })).toHaveCount(0);
+  page.once("dialog", (dialog) => void dialog.dismiss());
+  await page.getByRole("button", { name: "Novo relato", exact: true }).click();
+  await expect(page.getByLabel("Seu relato", { exact: true })).toHaveValue(
+    "Este texto precisa continuar aqui.",
+  );
   await page.evaluate(() => {
     window.reportFailure = "CONFLICT";
   });
