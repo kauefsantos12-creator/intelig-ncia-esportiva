@@ -3,6 +3,8 @@
 > Revisão: 15/10/2026, IE-00.04. Baseline consultada: main `6d78f07f9689b4c31ca1bd76189c970e6c30c949`.
 > Fase definida por Kauê: desenvolvimento por commits, sem endereço público nesta preparação.
 
+**Atualização pontual em 16/10 às 16h46 BRT:** Mirassol x Internacional de hoje às 20h foi gravado no PRIMARY e retornou na RPC usada por Hoje. Os elencos oficiais publicados pelos clubes têm 39 jogadores do Mirassol e 27 do Internacional no recorte do Analytics, sem inferir escalação ou métricas. [Procedimento, evidência e limites](governance/MIRASSOL_INTERNACIONAL_2026-10-16.md). Essa recuperação pontual não comprova retomada do coletor automático nem validação visual autenticada/publicação; as baselines datadas abaixo permanecem históricas.
+
 ## Identidade e fontes de verdade
 
 | Item | Referência | Evidência e limite |
