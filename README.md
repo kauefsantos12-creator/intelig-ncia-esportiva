@@ -55,7 +55,7 @@ A IE-00.02 separa a arquitetura e a governança atuais dos [registros histórico
 - **Analytics:** reconciliação de player-season com dados por fixture e temporada por competição permanece pendente; a etiqueta 2026/27 não comprova correspondência de todas as ligas.
 - **Migrations:** os 135 SQLs históricos já estão em `supabase/migrations_archive/`; as duas migrations editoriais novas ficam em `supabase/migrations/`. Reconstrução isolada no CI não autoriza replay no Cloud.
 
-Fases históricas do reescopo, etapas antigas de coleta e códigos IE do roadmap são numerações distintas. Situação, origem e limites de cada evidência: [PROJECT_STATE.md](docs/PROJECT_STATE.md). A prioridade escolhida por Kauê em 15/10/2026 é **Resenha diária** (IE-00.03). A próxima ação é IE-00.04 — registrar a baseline de cada superfície, com atenção às lacunas da Resenha. A base comum e os critérios de qualidade permanecem aplicáveis.
+Fases históricas do reescopo, etapas antigas de coleta e códigos IE do roadmap são numerações distintas. Situação, origem e limites de cada evidência: [PROJECT_STATE.md](docs/PROJECT_STATE.md). A prioridade escolhida por Kauê em 15/10/2026 é **Resenha diária** (IE-00.03). A IE-00.04 registrou a [baseline atual das superfícies](docs/governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md): seis edições recentes FAILED, coleta esportiva sem progresso desde 08/10 e respostas HTTP 404 no processamento. A próxima ação é IE-00.05 — confirmar o PROJECT_PROFILE. A base comum e os critérios de qualidade permanecem aplicáveis.
 
 ## Qualidade e segurança
 
@@ -67,6 +67,7 @@ O CI obrigatório cobre lint, typecheck, arquitetura, vulnerabilidades, secret s
 - [Evidência de identidade — IE-00.01](docs/governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md)
 - [Separação entre estado e histórico — IE-00.02](docs/governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md)
 - [Prioridade pessoal — IE-00.03: Resenha diária](docs/governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md)
+- [Baseline atual das superfícies — IE-00.04](docs/governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md)
 - [Índice da documentação](docs/README.md)
 - [Histórico preservado](docs/history/README.md)
 - docs/PROJECT_STATE.md
