@@ -5,6 +5,8 @@
 
 **Atualização pontual em 16/10 às 16h46 BRT:** Mirassol x Internacional de hoje às 20h foi gravado no PRIMARY e retornou na RPC usada por Hoje. Os elencos oficiais publicados pelos clubes têm 39 jogadores do Mirassol e 27 do Internacional no recorte do Analytics, sem inferir escalação ou métricas. [Procedimento, evidência e limites](governance/MIRASSOL_INTERNACIONAL_2026-10-16.md). Essa recuperação pontual não comprova retomada do coletor automático nem validação visual autenticada/publicação; as baselines datadas abaixo permanecem históricas.
 
+**Escalação informada às 19h47 e gravada às 19h51 BRT:** os prints do ge enviados por Kauê foram vinculados à partida: 11 titulares e 12 reservas por equipe, Mirassol 4-4-2 e Internacional 3-5-2. Fonte manual atribuída, hashes e treinadores registrados; sem alterar elenco geral ou fabricar participação/estatística. [Evidência no registro da partida](governance/MIRASSOL_INTERNACIONAL_2026-10-16.md). A leitura no banco não homologa visualização da escalação ou escrita autenticada no aplicativo.
+
 ## Identidade e fontes de verdade
 
 | Item | Referência | Evidência e limite |

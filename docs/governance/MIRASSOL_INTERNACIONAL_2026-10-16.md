@@ -58,3 +58,28 @@ A coleta automática permanece sem recuperação comprovada. Esta carga não cor
 Para conferir novamente, começar por SELECTs da partida, fonte e vínculos deste `recovery_id`. O script permite repetição somente em 16/10 e aborta se a identidade, versão da fonte ou conjunto visível divergir; outra data exige nova conferência das fontes. Não substituir a chave oficial por um ID de API sem prova de correspondência e controle de duplicidade.
 
 Reversão deve preservar qualquer avaliação ou nota criada depois desta carga. Não há `DELETE` automático de jogadores ou fixture: auditar dependências antes de desativar vínculos oficiais, restaurar nomes anteriores ou conciliar registros. Não apagar histórico ou executar cascata sobre dados pessoais.
+
+## Escalação informada por screenshots — 19h51 BRT
+
+Kauê enviou quatro screenshots do ge às 19h47 de 16/10: `IMG_8828.png`, `IMG_8829.png`, `IMG_8831.png` e `IMG_8832.png`. Os relógios nas imagens mostram 19h45–19h47. A leitura visual identificou 11 titulares e 12 reservas de cada equipe, treinadores e formações. Esta é evidência atribuída ao material enviado pelo usuário, sem alegar consulta direta à API ou confirmação adicional pelo clube.
+
+| Equipe | Formação e técnico | Titulares informados |
+| --- | --- | --- |
+| Mirassol | 4-4-2; Rafael Guanaes | Walter 22; Igor Formiga 32; João Victor 34; Willian Machado 3; Reinaldo 6; Denilson 27; Neto Moura 25; Eduardo 33; Shaylon 7; Edson Carioca 95; Bruno Santos 30 |
+| Internacional | 3-5-2; Eduardo Baptista | Matheus Cunha 23; Bruno Gomes 15; Mercado 25; Juninho 18; Aguirre 35; Villagra 5; Thiago Maia 29; Bernabei 26; Matheus Bahia 6; Vitinho 28; Alerrandro 9 |
+
+Reservas do Mirassol: Thomazella 90; Daniel Borges 20; Lucas Oliveira 2; Gabriel Knesowitsch 44; Japa 5; Wallisson 80; Chico Kim 10; André Luís 9; Fernandinho 17; Alesson 77; Carlos Eduardo 96; Zé Roberto 99.
+
+Reservas do Internacional: Kauan Jesus 22; Félix Torres 4; Victor Gabriel 41; Luiz Felipe 53; Bruno Henrique 8; Ronaldo 16; Paulinho 27; Calebe 30; Carbonero 7; Eliasson 17; João Victor 44; João Bezerra 49.
+
+O [SQL da escalação](../../scripts/operations/2026-10-16-mirassol-inter-lineup.sql), SHA-256 `2f982ca38cfe4ef2707c616cc144bfef537d254971860cafe7c75c5c8a8e9b86`, inclui a transcrição e os hashes dos quatro arquivos. Os arquivos originais permanecem com o usuário; imagens e detalhes de tela alheios ao jogo não foram copiados para o Git.
+
+Registrou-se a fonte `manual / user-ge-lineup-v1` e gravaram-se **46 linhas** em `sports_fixture_lineups`, com procedência, arquivo/hash, nome exibido, função e número específicos da partida. GOL/LAD/ZAD/ZAG/ZAE/LAE/VOL/MEC/ATA permanecem nos metadados; a coluna de posição usa G/D/M/F e nenhuma coordenada de campo foi inferida. Os treinadores foram associados aos metadados da fixture.
+
+Reutilizadas **45 identidades** já vinculadas aos clubes. João Victor do Inter corresponde explicitamente ao registro anterior `Victor Joao`, mesmo clube/camisa 44; João Bezerra corresponde a `J. Bezerra`, mesmo clube/camisa 49. Os nomes originais não foram reescritos; os nomes do print ficam em `metadata.display_name`. Luiz Felipe 53 ganhou uma identidade manual sem ID externo inventado e com conciliação externa pendente. Não confundir o João Victor 44 do Inter com o João Victor 34 do Mirassol.
+
+Os números do jogo foram preservados sem modificar o elenco geral: Denilson 27 e André Luís 9 diferem dos números na página do clube. As flags de reserva indicam banco informado, sem atestar entrada em campo; não se criaram minutos, participação efetiva, estatísticas, nota ou resultado.
+
+Dois ensaios do mesmo corpo em transação revertida passaram, preservando 249 linhas anteriores e 247 estatísticas após rollback, com zero linha alvo, jogador novo ou fonte manual remanescente. Depois do COMMIT às **19h51 BRT**, a leitura confirmou 11 titulares + 12 reservas por time, formações corretas, 295 linhas totais de escalação e 247 estatísticas preservadas; zero estatística criada nesta partida. O estado esportivo da fixture e os elencos gerais não foram alterados. A gravação antecede as 20h; CI, integração Git e visualização autenticada são evidências separadas, registradas na PR desta carga.
+
+A operação é DML pontual, sem schema, RLS, autenticação, worker, publicação ou audiência. Não resolve a coleta automática nem comprova exposição da escalação na interface. Reversão deve conciliar somente as linhas manuais desta operação e suas dependências, preservando notas e histórico; não apagar identidades por cascata.
