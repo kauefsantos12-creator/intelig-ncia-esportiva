@@ -1,6 +1,6 @@
 # Registro de operações de tratamento de dados pessoais
 
-Última revisão: 15/09/2026.
+Última revisão: 16/10/2026 — inclusão dos relatos pessoais independentes do catálogo.
 
 A fonte executável correspondente é `public.privacy_processing_activities` no Lovable Cloud. Este registro descreve o escopo pessoal do Motor de Inteligência Esportiva após a retirada das funcionalidades de apostas.
 
@@ -11,6 +11,7 @@ A fonte executável correspondente é `public.privacy_processing_activities` no 
 | Ownership | UUID nas superfícies pessoais | associar Anotações e controles ao titular correto | execução do serviço | Lovable Cloud | vida da conta | account erasure |
 | Web Push | endpoint, p256dh, auth, user-agent | notificações opcionais do sistema | recurso opcional solicitado | Apple/FCM/Mozilla | até desativação/invalidação ou 90 dias inativo | self-service + cleanup |
 | Anotações de partidas | watched/não watched, comentário opcional, fixture ID | diário pessoal dos jogos acompanhados | funcionalidade solicitada | Lovable Cloud | vida da conta | account erasure |
+| Relatos pessoais de partidas | UUID do titular, times e competição informados pelo usuário, horário, texto e versão | diário pessoal antes, durante ou depois do jogo | funcionalidade solicitada | Lovable Cloud; sem envio a provedores esportivos ou IA nesse fluxo | vida da conta | erase_user_application_data e cascade da conta Auth |
 | Notas pessoais de jogadores | player ID, nota pessoal 0–10 em passos de 0,5 | histórico pessoal de avaliação de atuações | funcionalidade solicitada | Lovable Cloud | vida da conta | cascade da Anotação/conta |
 | Error telemetry | rota/erro/stack sanitizados | diagnóstico | segurança e confiabilidade | runtime Lovable quando disponível | sem identificadores pessoais crus intencionais | redaction antes do envio |
 | Governance audit | actor UUID, before/after, timestamp | accountability e investigação | segurança/auditoria | Lovable Cloud | 365 dias | cleanup controlado |
@@ -33,3 +34,9 @@ Os dados compartilhados de partidas, competições, clubes, jogadores, estatíst
 ## Mudanças futuras
 
 Qualquer nova coluna ou integração que possa conter dado pessoal deve atualizar este registro e `docs/PRIVACY.md` no mesmo PR. O CI considera autenticação, privacidade, telemetria e migrations de privacidade como mudanças governadas.
+
+## Relatos pessoais — 16/10/2026
+
+`sports_personal_match_reports` mantém relatos informados pelo próprio usuário, separados de fixtures oficiais, placares, métricas e perfis de jogadores. A gravação usa sessão autenticada aprovada, RLS por owner e RPC SECURITY INVOKER, sem cliente administrativo. O usuário pode salvar um rascunho pré-jogo e reabrir/editar posteriormente. Não há autosave ou persistência do texto no armazenamento do navegador; a confirmação depende da resposta do banco. Falhas e conflitos preservam o texto enquanto o formulário estiver aberto. A lista mostra os últimos 100 relatos e não aplica descarte automático.
+
+A exclusão de dados da aplicação agora inclui esses relatos, e a FK de owner para Auth usa ON DELETE CASCADE. A retenção da conta não representa backup comprovado: RPO/RTO escolhidos continuam sujeitos ao ensaio próprio. Este fluxo não coleta lesões nem cadastros/estatísticas individuais da base. Os caminhos antigos de ingestão e sua adequação seguem pendentes no roadmap.

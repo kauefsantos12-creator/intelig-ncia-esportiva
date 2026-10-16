@@ -97,3 +97,11 @@ Executor remoto, aplicação das migrations novas e correspondência entre Git e
 4. Seguir branch → alteração → PR → gates verdes → merge, preservando história publicada.
 5. Registrar integração e validar sincronização/publicação no escopo da entrega.
 6. Preservar memória pessoal e evidências datadas; não converter percentuais antigos em cobertura atual.
+
+## Entrega prioritária — primeiro relato em 16/10/2026 às 20h
+
+Kauê pediu implementação funcional para seu primeiro jogo às 20h de São Paulo, antecipando o fluxo pessoal sem fechar os campos pendentes do PROJECT_PROFILE/IE-00.05 (PR #23 em rascunho). Foi constatado zero fixtures armazenadas para 16/10; a coleta automática não foi recuperada nesta entrega.
+
+A proposta acrescenta Relatos pessoais em Anotações: informar times, competição opcional, data/hora de Brasília e texto; salvar, reabrir e editar antes, durante ou depois do jogo. Dados pessoais ficam em tabela própria, sem fabricar fixtures oficiais ou métricas. Login aprovado, RLS e RPC invoker permanecem obrigatórios. Repetir uma gravação após perda da resposta é idempotente; versão desatualizada não sobrescreve o relato.
+
+Migration `20261016123224_personal_match_reports.sql`, regressões pgTAP e testes do editor acompanham a PR. CI, integração, aplicação no PRIMARY e publicação têm provas distintas; consultar o [registro de entrega](governance/FIRST_MATCH_REPORT_2026-10-16.md). A fila pós-jogo, notas e campinho existentes continuam disponíveis. Nenhum capítulo do roadmap é fechado por esta entrega parcial.
