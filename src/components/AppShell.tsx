@@ -1,13 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
-  BarChart3,
-  CalendarDays,
   LogOut,
-  Newspaper,
   NotebookPen,
   ShieldCheck,
-  TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,11 +19,7 @@ type ProductNavItem = {
 };
 
 const PRODUCT_NAV: ProductNavItem[] = [
-  { stage: "news", to: "/", label: "Noticiário", icon: Newspaper },
-  { stage: "today", to: "/hoje", label: "Hoje", icon: CalendarDays },
-  { stage: "elo", to: "/elo", label: "Elo", icon: TrendingUp },
-  { stage: "analytics", to: "/analytics", label: "Analytics", icon: BarChart3 },
-  { stage: "notes", to: "/anotacoes", label: "Anotações", icon: NotebookPen },
+  { stage: "notes", to: "/", label: "Meus Jogos", icon: NotebookPen },
 ];
 
 export function AppShell({ stage, children }: { stage: ShellStage; children: ReactNode }) {
@@ -67,11 +59,11 @@ export function AppShell({ stage, children }: { stage: ShellStage; children: Rea
 
       <header className="app-shell-header sticky top-0 z-30 border-b pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1440px] items-center gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
-          <Link to="/" className="touch-target flex min-h-11 min-w-0 shrink-0 items-center gap-2.5" aria-label="Ir para o Noticiário">
+          <Link to="/" className="touch-target flex min-h-11 min-w-0 shrink-0 items-center gap-2.5" aria-label="Ir para Meus Jogos">
             <img src="/icons/favicon-32.png" alt="" className="product-brand-mark size-9 shrink-0 rounded-2xl ring-1 ring-border/70" aria-hidden />
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold tracking-tight text-foreground">INTELIGÊNCIA ESPORTIVA</span>
-              <span className="hidden text-xs text-muted-foreground xl:block">Futebol, Elo e leitura de jogo</span>
+              <span className="hidden text-xs text-muted-foreground xl:block">Seu caderno de partidas</span>
             </span>
           </Link>
 
@@ -115,7 +107,7 @@ export function AppShell({ stage, children }: { stage: ShellStage; children: Rea
 
       {!keyboardOpen ? (
         <nav className="product-mobile-nav fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden" aria-label="Navegação principal">
-          <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 px-2 py-2">
+          <div className="mx-auto grid max-w-xl grid-cols-1 gap-1 px-2 py-2">
             {PRODUCT_NAV.map((item) => {
               const Icon = item.icon;
               const active = stage === item.stage;

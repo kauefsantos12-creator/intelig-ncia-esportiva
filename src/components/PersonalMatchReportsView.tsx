@@ -1,3 +1,4 @@
+import type { MyGame } from "@/lib/my-games";
 import { NotebookPen, Plus, Save } from "lucide-react";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { SurfaceCard } from "@/components/ProductSurface";
@@ -46,6 +47,8 @@ function toDraft(report: PersonalMatchReport): Draft {
 
 export function PersonalMatchReportsView({
   reports,
+  fixtures = [],
+  onFixtureChosen,
   onSave,
   loading = false,
   loadError = false,
@@ -53,6 +56,8 @@ export function PersonalMatchReportsView({
   onDirtyChange,
 }: {
   reports: PersonalMatchReport[];
+  fixtures?: MyGame[];
+  onFixtureChosen?: (id: string) => void;
   onSave: (input: PersonalMatchReportInput) => Promise<PersonalReportSaveResult>;
   loading?: boolean;
   loadError?: boolean;
@@ -60,6 +65,8 @@ export function PersonalMatchReportsView({
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const notesId = useId();
+  const [selectedFixtureId, setSelectedFixtureId] = useState("");
+  const selectedFixture = fixtures.find((game) => game.id === selectedFixtureId);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const baseline = useRef(JSON.stringify(draft));
   const [saving, setSaving] = useState(false);
@@ -82,11 +89,12 @@ export function PersonalMatchReportsView({
 
   function choose(next: Draft) {
     if (dirty && !window.confirm("Há alterações ainda não salvas. Deseja sair deste rascunho?"))
-      return;
+      return false;
     baseline.current = JSON.stringify(next);
     setDraft(next);
     setError(null);
     setMessage(null);
+    return true;
   }
   function change<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -140,6 +148,46 @@ export function PersonalMatchReportsView({
       title="Relatos pessoais"
       description="Comece antes ou durante o jogo e continue depois. Os dados desta partida são informados por você."
     >
+      {fixtures.length ? (
+        <div className="mb-5 flex flex-col gap-3 rounded-xl border border-border/60 p-3 sm:flex-row sm:items-end">
+          <label className="min-w-0 flex-1 type-meta font-medium">
+            Preencher com uma partida carregada
+            <select
+              value={selectedFixtureId}
+              onChange={(event) => setSelectedFixtureId(event.target.value)}
+              disabled={saving}
+              className={fieldClass}
+            >
+              <option value="">Escolha a partida</option>
+              {fixtures.map((game) => (
+                <option key={game.id} value={game.id}>
+                  {game.homeTeam} × {game.awayTeam}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            disabled={!selectedFixture || saving}
+            className="touch-target min-h-11 rounded-xl border border-primary/60 px-4 py-2 type-meta font-medium disabled:opacity-50"
+            onClick={() => {
+              if (
+                selectedFixture &&
+                choose({
+                  ...emptyDraft(),
+                  homeTeam: selectedFixture.homeTeam,
+                  awayTeam: selectedFixture.awayTeam,
+                  competition: selectedFixture.competition,
+                  localKickoff: toBrazilDateTimeInput(selectedFixture.kickoffAt),
+                })
+              )
+                onFixtureChosen?.(selectedFixture.id);
+            }}
+          >
+            Usar partida selecionada
+          </button>
+        </div>
+      ) : null}
       <div className="grid gap-5 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.4fr)]">
         <div className="min-w-0 space-y-3">
           <button

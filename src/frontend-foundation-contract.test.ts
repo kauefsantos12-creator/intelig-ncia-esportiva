@@ -14,10 +14,13 @@ const PRODUCT_ROUTES = [
 ];
 
 describe("frontend product foundation", () => {
-  it("keeps the canonical five-surface navigation", () => {
+  it("keeps Meus Jogos as the only active product surface", () => {
     const shell = source("./components/AppShell.tsx");
-    for (const label of ["Noticiário", "Hoje", "Elo", "Analytics", "Anotações"]) {
+    for (const label of ["Meus Jogos"]) {
       expect(shell).toContain(`label: "${label}"`);
+    }
+    for (const label of ["Noticiário", "Hoje", "Elo", "Analytics", "Anotações"]) {
+      expect(shell).not.toContain(`label: "${label}"`);
     }
     expect(shell).toContain('aria-label="Navegação principal"');
     expect(shell).toContain("safe-area-inset-bottom");

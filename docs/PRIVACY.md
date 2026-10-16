@@ -58,7 +58,7 @@ Antes de qualquer envio aos hooks de runtime, `lovable-error-reporting.ts` remov
 
 ## Domínio pessoal atual
 
-O domínio pessoal da aplicação é restrito principalmente a autenticação, Web Push e à aba **Anotações**: indicação de jogo assistido/não assistido, comentário opcional e notas pessoais de jogadores.
+O domínio pessoal inclui autenticação, Web Push, **Meus Jogos** (relatos privados antes, durante ou depois da partida) e o histórico de **Anotações**: indicação de jogo assistido/não assistido, comentário opcional e notas pessoais de jogadores. A mudança de entrada em 16/10/2026 reutiliza o armazenamento privado existente e mantém ownership, RLS e controles de exclusão.
 
 As notas dos jogadores são apagadas por cascade quando a Anotação correspondente é removida. Dados esportivos compartilhados, ratings Elo, fixtures, estatísticas e informações de transmissão pertencem ao catálogo esportivo e não identificam o titular por desenho da aplicação.
 

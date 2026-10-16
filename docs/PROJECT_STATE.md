@@ -7,6 +7,12 @@
 
 **Escalação informada às 19h47 e gravada às 19h51 BRT:** os prints do ge enviados por Kauê foram vinculados à partida: 11 titulares e 12 reservas por equipe, Mirassol 4-4-2 e Internacional 3-5-2. Fonte manual atribuída, hashes e treinadores registrados; sem alterar elenco geral ou fabricar participação/estatística. [Evidência no registro da partida](governance/MIRASSOL_INTERNACIONAL_2026-10-16.md). A leitura no banco não homologa visualização da escalação ou escrita autenticada no aplicativo.
 
+## Foco vigente — 16/10/2026
+
+**Meus Jogos apenas**, conforme a nova decisão de Kauê. Substitui a prioridade de Resenha abaixo, mantida como baseline histórica. A entrada e a navegação principal passam a reunir partida, titulares/reservas e relatos privados; o histórico anterior continua acessível. Evolução de Resenha, Hoje separado, Elo e Analytics pausada, sem desligamento de crons ou automações externas.
+
+A nova leitura usa sessão do usuário e RLS; não depende de editorial ou de nova coleta. O salvamento privado existente é preservado. A validação completa exige login e gravação/reabertura pela aplicação real; a implementação e testes de componentes não comprovam essa homologação. Ver [escopo e aceite](governance/MEUS_JOGOS_SCOPE_2026-10-16.md). IE-00.05 segue pendente.
+
 ## Identidade e fontes de verdade
 
 | Item | Referência | Evidência e limite |
@@ -27,11 +33,11 @@ GitHub governa código, contratos, testes, migrations e documentação. Lovable 
 
 ## Produto e implementação observada
 
-Central pessoal de inteligência esportiva, com Resenha como prioridade. Levantamento somente leitura em 15/10/2026, aproximadamente 20:58–21:04 BRT; data UTC passou a 16/10. Código e dados foram confrontados, mas nenhuma jornada autenticada foi homologada.
+Baseline histórica com Resenha como prioridade em 15/10, superada pelo escopo Meus Jogos de 16/10. Levantamento somente leitura em 15/10/2026, aproximadamente 20:58–21:04 BRT; data UTC passou a 16/10. Código e dados foram confrontados, mas nenhuma jornada autenticada foi homologada.
 
 | Superfície | Referência no código | Baseline atual e limite |
 | --- | --- | --- |
-| Noticiário | `src/routes/index.tsx`, `src/lib/news-overview.functions.ts` | Seis edições de 09 a 14/10 FAILED por ausência de itens; última PUBLISHED em 08/10 com um item |
+| Noticiário | `src/components/LegacyNewsPage.tsx` (preservada, fora da entrada), `src/lib/news-overview.functions.ts` | Seis edições de 09 a 14/10 FAILED por ausência de itens; última PUBLISHED em 08/10 com um item |
 | Hoje | `src/routes/hoje.tsx`, `src/lib/today-overview.functions.ts` | Zero fixtures registradas para 14/10 e 15/10 locais; catálogo defasado não prova ausência de jogos |
 | Elo | `src/routes/elo.tsx`, `src/lib/elo-explorer.functions.ts` | 676 clubes únicos; sync PARTIAL em 15/10; completude e jornadas não homologadas |
 | Anotações | `src/routes/anotacoes.tsx`, `src/lib/notes-overview.functions.ts` | 170 reviews AUTO_CLOSED; zero preenchimento pessoal nas contagens consultadas; persistência/restore não exercitados |
@@ -45,7 +51,7 @@ A [baseline completa](governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md) regist
 - **IE-00.02 — CONCLUÍDA no escopo documental desta revisão:** documentos vigentes separados dos snapshots históricos e verificações locais aprovadas. [Evidências e limites](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md). Vigência na main exige gates aprovados e merge confirmado na PR correspondente.
 - **IE-00.03 — CONCLUÍDA no escopo da decisão desta revisão:** Kauê escolheu **Resenha diária** em 15/10/2026. Primeiro foco funcional: Noticiário/IE-05, após a base comum. [Evidência da escolha](governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md). Integração por PR com gates verdes.
 - **IE-00.04 — CONCLUÍDA no escopo de inventário desta revisão:** [baseline das superfícies](governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md), com evidência atual, falhas e limites. Integração por PR com gates verdes.
-- **Próxima após integração: IE-00.05 — confirmar o PROJECT_PROFILE.** A prioridade Resenha orienta os próximos controles e a recuperação futura do worker.
+- **Próxima após integração: IE-00.05 — confirmar o PROJECT_PROFILE.** A prioridade vigente é Meus Jogos; a recuperação da Resenha fica pausada.
 
 O [roadmap EBSA 1.7](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md) mantém códigos e dependências. Esta revisão não fecha IE-00, o perfil ou gates de liberação.
 
