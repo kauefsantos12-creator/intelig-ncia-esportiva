@@ -1,3 +1,4 @@
+import type { MyGame } from "@/lib/my-games";
 import { useServerFn } from "@tanstack/react-start";
 import { useBlocker } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
@@ -12,7 +13,13 @@ import {
   type PersonalReportSaveResult,
 } from "@/lib/personal-match-report";
 
-export function PersonalMatchReports() {
+export function PersonalMatchReports({
+  fixtures = [],
+  onFixtureChosen,
+}: {
+  fixtures?: MyGame[];
+  onFixtureChosen?: (id: string) => void;
+}) {
   const load = useServerFn(getPersonalMatchReports);
   const save = useServerFn(savePersonalMatchReport);
   const [reports, setReports] = useState<PersonalMatchReport[]>([]);
@@ -52,6 +59,8 @@ export function PersonalMatchReports() {
   return (
     <PersonalMatchReportsView
       reports={reports}
+      fixtures={fixtures}
+      {...(onFixtureChosen ? { onFixtureChosen } : {})}
       loading={loading}
       loadError={loadError}
       onReload={() => void refresh()}

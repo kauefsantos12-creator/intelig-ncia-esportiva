@@ -2,6 +2,8 @@
 
 Data: 15/10/2026, America/Sao_Paulo. Decisor: Kauê.
 
+> Prioridade substituída em 16/10/2026 por **Meus Jogos apenas**. Este documento preserva a decisão histórica. A execução vigente segue [o novo escopo](MEUS_JOGOS_SCOPE_2026-10-16.md).
+
 ## Decisão e evidência
 
 Após concluir IE-00.02, foi perguntado qual rotina deveria melhorar primeiro: resenha diária, escolha dos jogos ou anotações. Kauê respondeu **“Resenha”** em 15/10/2026. Isso confirma **Resenha diária / Noticiário (IE-05)** como primeira prioridade funcional.

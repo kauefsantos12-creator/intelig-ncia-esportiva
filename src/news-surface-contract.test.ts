@@ -5,7 +5,7 @@ function source(path: string) {
   return readFileSync(new URL(path, import.meta.url), "utf8");
 }
 
-describe("Noticiário sports intelligence contract", () => {
+describe("Noticiário preservado fora do escopo ativo", () => {
   it("loads news data only through an authenticated server boundary", () => {
     const server = source("./lib/news-overview.functions.ts");
     expect(server).toContain('createServerFn({ method: "GET" })');
@@ -46,7 +46,7 @@ describe("Noticiário sports intelligence contract", () => {
   });
 
   it("renders published editorial content separately from factual fallbacks", () => {
-    const route = source("./routes/index.tsx");
+    const route = source("./components/LegacyNewsPage.tsx");
     expect(route).toContain("useServerFn(getNewsOverview)");
     expect(route).toContain("A resenha ainda não foi publicada");
     expect(route).toContain("Resultados recentes");
@@ -56,7 +56,7 @@ describe("Noticiário sports intelligence contract", () => {
   });
 
   it("keeps the briefing as the primary reading surface and renders the editorial hierarchy as an article", () => {
-    const route = source("./routes/index.tsx");
+    const route = source("./components/LegacyNewsPage.tsx");
     expect(route).toContain("function briefingTitle");
     expect(route).toContain("Resenha de ontem —");
     expect(route).toContain('title={briefing?briefingTitle(briefing.date,overview.observedAt):"Resenha esportiva"}');
@@ -83,7 +83,7 @@ describe("Noticiário sports intelligence contract", () => {
   });
 
   it("keeps recent results scannable with real team logos and local-day grouping", () => {
-    const route = source("./routes/index.tsx");
+    const route = source("./components/LegacyNewsPage.tsx");
     expect(route).toContain("function ResultTeam");
     expect(route).toContain("result.homeTeamLogo");
     expect(route).toContain("result.awayTeamLogo");
@@ -97,7 +97,7 @@ describe("Noticiário sports intelligence contract", () => {
   });
 
   it("keeps secondary factual context visible but subordinate", () => {
-    const route = source("./routes/index.tsx");
+    const route = source("./components/LegacyNewsPage.tsx");
     expect(route).toContain("overview.recentResults.length");
     expect(route).toContain("overview.eloMovements.length");
     expect(route).toContain("xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]");
@@ -107,7 +107,7 @@ describe("Noticiário sports intelligence contract", () => {
   });
 
   it("keeps loading, retry and refresh states explicit", () => {
-    const route = source("./routes/index.tsx");
+    const route = source("./components/LegacyNewsPage.tsx");
     expect(route).toContain("<LoadingState");
     expect(route).toContain("<ErrorState");
     expect(route).toContain("onRetry={()=>void refresh()}");

@@ -1,16 +1,14 @@
 # Motor de Inteligência Esportiva
 
-> Plataforma full-stack de inteligência esportiva para futebol, com dados canônicos, Elo hierárquico, agenda, análises, noticiário e anotações pós-jogo.
+> Caderno pessoal de futebol: partidas acompanhadas, escalações disponíveis e seus relatos.
 
 O produto atual não possui fluxo de apostas, odds, banca, picks ou execução financeira.
 
 ## Produto atual
 
-- **Noticiário** — resenha diária, fatos de partidas e movimentos relevantes de Elo.
-- **Hoje** — agenda de jogos, transmissões e contexto pré-jogo.
-- **Elo** — ranking de clubes e ligas, filtros geográficos e histórico point-in-time.
-- **Analytics 2026/27** — recortes por time, competição, elenco e jogadores.
-- **Anotações** — fila pós-jogo, assistiu/não assistiu, comentários, notas pessoais e campinho persistente.
+**Meus Jogos é o único foco ativo**, por decisão de Kauê em 16/10/2026: escolher a partida, consultar titulares/reservas disponíveis e guardar seu relato antes, durante ou depois do jogo. A entrada `/` reúne escalação e relatos pessoais; o formulário manual continua disponível quando a leitura esportiva falha. Conta/Privacidade e o histórico anterior são preservados.
+
+A evolução de Resenha/Noticiário, Hoje separado, Elo e Analytics fica pausada. A pausa não desativa jobs ou a automação externa do ChatGPT. [Decisão, implementação e aceite](docs/governance/MEUS_JOGOS_SCOPE_2026-10-16.md).
 
 ## Identidade canônica
 
@@ -55,7 +53,7 @@ A IE-00.02 separa a arquitetura e a governança atuais dos [registros histórico
 - **Analytics:** reconciliação de player-season com dados por fixture e temporada por competição permanece pendente; a etiqueta 2026/27 não comprova correspondência de todas as ligas.
 - **Migrations:** os 135 SQLs históricos já estão em `supabase/migrations_archive/`; as duas migrations editoriais novas ficam em `supabase/migrations/`. Reconstrução isolada no CI não autoriza replay no Cloud.
 
-Fases históricas do reescopo, etapas antigas de coleta e códigos IE do roadmap são numerações distintas. Situação, origem e limites de cada evidência: [PROJECT_STATE.md](docs/PROJECT_STATE.md). A prioridade escolhida por Kauê em 15/10/2026 é **Resenha diária** (IE-00.03). A IE-00.04 registrou a [baseline atual das superfícies](docs/governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md): seis edições recentes FAILED, coleta esportiva sem progresso desde 08/10 e respostas HTTP 404 no processamento. A próxima ação é IE-00.05 — confirmar o PROJECT_PROFILE. A base comum e os critérios de qualidade permanecem aplicáveis.
+Fases históricas do reescopo, etapas antigas de coleta e códigos IE do roadmap são numerações distintas. Situação, origem e limites de cada evidência: [PROJECT_STATE.md](docs/PROJECT_STATE.md). A decisão de Resenha primeiro de 15/10 foi substituída por **Meus Jogos apenas** em 16/10. O PROJECT_PROFILE/IE-00.05 permanece pendente; a próxima entrega funcional é validar a partida, sua escalação e o salvamento/reabertura do relato na aplicação real. A base comum e os controles de qualidade seguem aplicáveis.
 
 ## Qualidade e segurança
 
@@ -66,7 +64,7 @@ O CI obrigatório cobre lint, typecheck, arquitetura, vulnerabilidades, secret s
 - [Roadmap pessoal e operacional — EBSA 1.7](docs/roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md)
 - [Evidência de identidade — IE-00.01](docs/governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md)
 - [Separação entre estado e histórico — IE-00.02](docs/governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md)
-- [Prioridade pessoal — IE-00.03: Resenha diária](docs/governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md)
+- [Prioridade anterior preservada — IE-00.03: Resenha diária](docs/governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md)
 - [Baseline atual das superfícies — IE-00.04](docs/governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md)
 - [Índice da documentação](docs/README.md)
 - [Histórico preservado](docs/history/README.md)

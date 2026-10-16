@@ -6,7 +6,7 @@
 **Projeto:** [kauefsantos12-creator/intelig-ncia-esportiva](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva)  
 **Baseline do código:** main, commit [4696c8eb400a088b226dce0653eb775b64383490](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva/commit/4696c8eb400a088b226dce0653eb775b64383490), de 05/10/2026.  
 **Modelo da agenda consultado:** main, commit 111b66dbd84da2cdfe224183f4457d81161482fd.  
-**Estado deste documento:** IE-00.01, IE-00.02 e IE-00.03 integradas. IE-00.04 registra a baseline atual das seis superfícies em 15/10/2026, com prioridade Resenha; concluída no escopo de inventário desta revisão, sujeita à integração por PR com gates verdes. Próxima: IE-00.05 — PROJECT_PROFILE. Desenvolvimento por commits, sem endereço público nesta fase.
+**Estado deste documento:** IE-00.01, IE-00.02 e IE-00.03 integradas. IE-00.04 registra a baseline atual das seis superfícies em 15/10/2026, com prioridade Resenha; concluída no escopo de inventário desta revisão, sujeita à integração por PR com gates verdes. Próxima: IE-00.05 — PROJECT_PROFILE. Desenvolvimento por commits, sem endereço público nesta fase. **Escopo vigente em 16/10: Meus Jogos apenas; Resenha e demais expansões pausadas.** Ver decisão e escopo da candidata abaixo.
 
 ## 1. Propósito e forma de trabalhar
 
@@ -14,9 +14,17 @@ Este projeto é um hobby especialmente importante para Kauê. A finalidade é re
 
 O roadmap precisa proteger três coisas: **prazer em usar**, **confiança no que aparece** e **continuidade do histórico pessoal**. Uma tela bonita com estatística incompleta não cumpre esse objetivo; uma base grande que exige manutenção constante também precisa ser revista à luz do uso pessoal.
 
-**Prioridade confirmada por Kauê em 15/10/2026: Resenha diária.** A primeira rotina a melhorar e validar é a leitura da resenha. O ciclo **ler a resenha → escolher jogos → registrar o que assistiu** permanece proposta de evolução; a escolha não aprova automaticamente o escopo completo da candidata R1. Hoje, Anotações, Elo e Analytics continuam no projeto, com suas dependências e critérios próprios.
+**Prioridade vigente, definida por Kauê em 16/10/2026: Meus Jogos apenas, com evolução gradual.** A decisão substitui Resenha primeiro, de 15/10. O ciclo inicial é escolher uma partida, consultar a escalação disponível e registrar/reabrir o relato pessoal. A evolução de Resenha, Hoje como produto separado, Elo e Analytics fica pausada; os dados e o histórico são preservados. A pausa não desativa crons nem a automação esportiva externa do ChatGPT.
 
-O projeto vigente contém Noticiário, Hoje, Elo, Anotações, Analytics e Conta/Privacidade. O reescopo documentado encerrou o runtime de apostas. Odds, banca, picks e execução financeira não fazem parte deste roadmap. Código e documentos antigos permanecem como histórico; sua existência não autoriza reativação.
+O produto ativo é Meus Jogos, com Conta/Privacidade e acesso ao histórico anterior. Noticiário/Resenha, Hoje, Elo e Analytics permanecem preservados como superfícies anteriores, com evolução pausada. Apostas, odds, banca, picks e execução financeira continuam fora do escopo.
+
+### Escopo vigente da candidata — Meus Jogos, 16/10/2026
+
+Esta decisão prevalece sobre as composições e dependências de superfície da candidata ampla R1 abaixo. Os 104 códigos estáveis e seus registros históricos são preservados, sem conclusão automática. Para Meus Jogos, os controles comuns de identidade, autenticação, autorização, ownership, privacidade, integridade, backup/recuperação e qualidade continuam obrigatórios. IE-00.05 segue pendente; a preparação do perfil não é aceite de produção.
+
+A candidata cobre leitura de partidas/escalação existentes e criação, edição e reabertura de relatos próprios. A origem informada dos dados deve aparecer; reserva relacionada não comprova participação. Não exige completar Resenha/IE-05, Elo/IE-06, Analytics/IE-08, todos os elencos ou recuperar a coleta automática. IE-07.05/07.07, IE-LP2 e IE-LP3 aplicam-se às regras, dados e jornadas efetivamente incluídos. Os finais de superfícies pausadas não são bloqueios desta candidata; seus controles permanecem para uma eventual retomada.
+
+O aceite exige uma jornada autenticada real: abrir a partida, ver titulares/reservas, escrever, salvar, recarregar e reabrir o mesmo conteúdo; exercitar erro e proteção de rascunho. Teste com transporte simulado e leitura SQL são evidências parciais. Publicação permanece uma etapa própria. Nenhum gate é encerrado por reduzir a navegação.
 
 ### Regras específicas deste hobby
 
@@ -116,7 +124,7 @@ Se INTERNO for aprovado, o núcleo EBSA traz como padrão **SLO 99,5%, RTO 240 m
 
 ### Decisões a conduzir uma por vez
 
-1. **Decidido em 15/10/2026: Resenha diária primeiro.** Preservar prazer de uso, confiança no conteúdo e memória pessoal já definidos neste roadmap; demais preferências continuam abertas.
+1. **Decidido em 16/10/2026: Meus Jogos apenas, gradualmente.** Substitui a prioridade Resenha de 15/10; preservar confiança, prazer de uso e memória pessoal.
 2. Audiência, classe de serviço e perda tolerável de anotações.
 3. Orçamento de APIs/IA e prioridade de cobertura.
 4. Necessidade e finalidade de réplica externa.
@@ -162,20 +170,20 @@ Os códigos IE identificam ações e capítulos. Os únicos gates EBSA continuam
 
 ### Ordem de preparação
 
-IE-00 → IE-LP1 → IE-01 → IE-02. **Resenha (IE-05) é a primeira prioridade funcional escolhida por Kauê.** Após a base comum, avançar essa trilha conforme suas dependências; Hoje, Elo e Elencos mantêm trilhas próprias. Anotações acompanha Hoje; Analytics depende da coleta individual e consistência de projeções. Uma resenha útil não precisa aguardar todos os elencos.
+IE-00 → IE-LP1 → IE-01 → IE-02 continuam a base comum. **Meus Jogos é a única prioridade funcional vigente.** Avançar a experiência pessoal e os controles aplicáveis da IE-07, com leitura de partida e escalação já disponíveis. Resenha, Elo, Analytics e ampliação da coleta ficam no backlog pausado.
 
 ### Candidatas propostas
 
 | Entrega | Valor para Kauê | Escopo necessário | Não precisa aguardar |
 | --- | --- | --- | --- |
-| R1 — Ciclo diário pessoal | Ler, escolher jogos e guardar impressões | IE-00, IE-LP1, IE-01, IE-02, IE-05, IE-04, IE-07; auditoria/liberação do escopo | Completar todos os elencos, histórico Elo de 60 dias ou Analytics |
-| R2 — Exploração de Elo | Ranking e histórico confiáveis | Base comum + IE-06; reabrir IE-LP3/IE-09 para essa candidata | Analytics individual |
-| R3 — Exploração individual | Elencos/jogadores e comparações rastreáveis | Base comum + IE-03, IE-LP2, IE-08; reabrir IE-LP3/IE-09 | Expansão de ligas fora do piloto |
+| R1 — Meus Jogos (escopo vigente) | Escolher a partida, consultar escalação e guardar/reabrir seu relato | Base comum; IE-07 e consistência/auditoria/liberação dos dados e jornadas incluídos | Resenha completa, Hoje separado, Elo, Analytics, elencos completos e coleta automática |
+| R2 — Exploração de Elo (pausada) | Ranking e histórico confiáveis | Base comum + IE-06; reabrir IE-LP3/IE-09 para essa candidata | Analytics individual |
+| R3 — Exploração individual (pausada) | Elencos/jogadores e comparações rastreáveis | Base comum + IE-03, IE-LP2, IE-08; reabrir IE-LP3/IE-09 | Expansão de ligas fora do piloto |
 | R4 — Expansões escolhidas | Novas categorias, indicadores ou comodidades | Escolha de Kauê + avaliação de contratos, quota/custo e gates afetados | Nenhuma funcionalidade é incluída automaticamente |
 
-R1, R2 e R3 continuam propostas de composição de entrega. IE-00.03 confirmou **Resenha primeiro**; IE-LP3.01 deve registrar o escopo concreto da candidata a partir dessa prioridade, preservando os controles e dependências aplicáveis. Uma ação comum já validada pode ser reutilizada quando commit, dados, ambiente e finalidade não tiverem mudado materialmente.
+A candidata atual é **Meus Jogos**, conforme decisão de 16/10. As propostas amplas anteriores e R2/R3 ficam pausadas. IE-LP3.01 registra os cenários concretos desta candidata; evidências comuns só podem ser reutilizadas se commit, ambiente, dados e finalidade continuarem aplicáveis.
 
-O fechamento de IE-LP3 é preparação da auditoria. G10.5 definitivo ocorre em IE-09 após G8 e G10 da candidata correspondente. R1 exige os finais de Resenha, Hoje e Anotações e a consistência integrada IE-LP2.07. IE-06/IE-08 só entram na dependência quando estiverem na candidata.
+O fechamento de IE-LP3 prepara a auditoria; G10.5 definitivo ocorre em IE-09 após G8 e G10 da candidata. Meus Jogos exige os finais dos fluxos incluídos e IE-LP2.07 no seu escopo. Finais de Resenha, Hoje separado, Elo e Analytics só voltam a ser dependências quando essas superfícies forem incluídas por nova decisão.
 
 ### Estados e progresso compatíveis com a agenda
 
@@ -624,7 +632,7 @@ Cada capítulo apresenta finalidade, dependências, referências EBSA e condiç�
 
 **Por que existe:** Garantir que o que Kauê vê corresponde ao que o servidor persistiu, sem uma segunda versão da verdade em cada aba.
 
-**Entrada:** IE-05.10, IE-04.08 e IE-07.07 para a R1.  
+**Entrada vigente para Meus Jogos:** finais dos fluxos pessoais incluídos (IE-07.07) e das leituras de partida/escalação; aplicar a precedência de escopo acima. IE-05.10 e IE-04.08 pertencem à composição ampla anterior, pausada.
 **Referências EBSA:** G4.5, G5, G6, G6.5, G7.  
 **Saída do capítulo:** Leituras e gravações coerentes; regras sensíveis protegidas e versões rastreáveis.
 
@@ -717,7 +725,7 @@ Na R1, a revisão cobre Resenha, Hoje e Anotações. Reabrir as métricas e proj
 
 **Por que existe:** Provar a experiência combinada e procurar números ou estados enganosos antes de liberar uma versão.
 
-**Entrada:** IE-LP2.07, após os finais de Resenha, Hoje e Anotações.  
+**Entrada vigente:** IE-LP2.07 após os finais dos fluxos incluídos em Meus Jogos. Resenha, Hoje separado, Elo e Analytics estão fora desta candidata.
 **Dependências adicionais por candidata:** candidata com Elo → IE-06.07; candidata com Analytics → IE-08.08.  
 **Referências EBSA:** G7, G10.5.  
 **Saída do capítulo:** Escopo da candidata auditado, resultados rastreáveis e nenhum bloqueador de integridade ou acesso.
@@ -890,7 +898,7 @@ Projeção cadastrada em 11/10/2026:
 | chapters | Os 14 capítulos IE deste documento, na ordem de leitura |
 | actions | Os 104 códigos estáveis, com detalhes e estado inicial |
 | dependsOn | As dependências explícitas das ações; conferir o escopo de candidata e condições de Elo/Analytics antes de projetar |
-| executionSteps | R1: IE-00 → LP1 → IE-01 → IE-02 → IE-05 → IE-04 → IE-07 → LP2 → LP3 → IE-09 → IE-10. Depois: IE-06 → IE-03 → IE-08 |
+| executionSteps | Vigente: base comum → Meus Jogos/IE-07 e leituras incluídas → LP2 → LP3 → IE-09 → IE-10. Demais trilhas pausadas. Projeção externa da agenda ainda requer atualização própria; este registro não a altera. |
 | baseline | Identidade, escopo, limitações e referências da leitura inicial |
 
 Os códigos devem ser estáveis para preservar progresso. Reordenar apresentação não renomeia ações. Evidência/aceite de cada candidata exige registro próprio; o percentual da agenda é apenas acompanhamento de trabalho.
@@ -935,9 +943,7 @@ As páginas abaixo foram lidas na baseline indicada, exceto a API de checks, con
 
 ## 11. Ordem inicial e próximo passo
 
-IE-00.01/02/03 estão integradas e a baseline IE-00.04 foi levantada nesta revisão, com Resenha como prioridade. Após integrar o diagnóstico, seguir para **IE-00.05 — confirmar o PROJECT_PROFILE**. A baseline identificou edições recentes FAILED, coleta defasada e falha de alcance HTTP do worker; sua recuperação deve respeitar as ações técnicas e os controles aplicáveis, sem publicar ou executar carga por inferência.
-
-O primeiro avanço técnico observável será uma baseline coerente: endereço certo, banco certo, escopo certo e lista honesta do que já funciona. A partir dela, corrigir a programação que confunde falha com vazio e validar uma edição editorial completa, mantendo as suas anotações protegidas.
+Próximo avanço: completar e validar **Meus Jogos**, com uma partida, escalação disponível e relato que persiste ao recarregar. Primeiro reunir a experiência na tela; depois comprovar login, leitura e escrita na aplicação real. Evoluir conforme o uso de Kauê. IE-00.05 e os controles aplicáveis seguem abertos; a recuperação da Resenha deixa de ser a próxima entrega.
 
 
 ## Execução — IE-00.01 — 11/10/2026
@@ -992,3 +998,9 @@ Baseline das seis superfícies confrontada com a main `6d78f07f9689b4c31ca1bd761
 **Dados atuais:** 584 fixtures e zero registros para 14 e 15/10 locais; 86/116 clubes do catálogo piloto com alguma linha ativa de elenco; 676 clubes Elo únicos, sync PARTIAL; seis fixtures com dados individuais e zero linhas de player-season/classificação; 170 reviews AUTO_CLOSED e nenhum preenchimento pessoal nas métricas consultadas. Presença de linhas não comprova completude ou atualização.
 
 Matriz, evidências e limites: [IE_00_04_SURFACE_BASELINE_2026-10-15.md](../governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md). A ação registra o diagnóstico e não corrige runtime, muda fontes, publica, reabre fila ou libera carga. CI e integração ficam na PR correspondente. **Quatro de 104 ações de origem no escopo desta revisão. Próxima: IE-00.05 — PROJECT_PROFILE.**
+
+## Execução — mudança de foco para Meus Jogos — 16/10/2026
+
+Kauê informou: “A resenha segue muito falha. Acredito que seja mais meus jogos apenas e vamos vendo”. A prioridade anterior de Resenha foi substituída. Primeira implementação: Meus Jogos na entrada e na navegação principal, leitura autenticada das partidas/escalações existentes, titulares e reservas separados, origem dos prints identificada e preenchimento de relato a partir da partida. O CRUD privado existente é reutilizado, com formulário manual disponível se a leitura esportiva falhar. Anotações/avaliações anteriores continuam acessíveis. Sem novo schema, ingestão, métricas ou alteração de crons.
+
+A validação automatizada e a integração desta implementação ficam registradas na PR correspondente; não equivalem a publicação ou homologação autenticada no ambiente real. [Decisão, limites e aceite](../governance/MEUS_JOGOS_SCOPE_2026-10-16.md). Nenhuma das 104 ações é fechada por esta mudança.

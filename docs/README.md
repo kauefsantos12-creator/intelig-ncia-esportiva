@@ -69,3 +69,5 @@ Trilha histórica de auditoria:
 Para estrutura implementada, confrontar código e migrations da main com os documentos atuais. Para dados, jobs e permissões, consultar o PRIMARY vivo; a presença de uma migration no Git não comprova aplicação. Para finalidade e mudanças, usar PROJECT_STATE, GOVERNANCE e roadmap. Definições de métricas/fontes mantêm suas versões; trechos legados não governam a jornada atual. Relatórios e snapshots comprovam apenas o escopo e a data que registram.
 
 Uma auditoria datada não vence automaticamente evidência do ambiente novo. Registro de separação e limites: [IE-00.02](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md).
+
+- [Meus Jogos — foco vigente, implementação e aceite (16/10/2026)](governance/MEUS_JOGOS_SCOPE_2026-10-16.md).

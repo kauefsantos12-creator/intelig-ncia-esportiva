@@ -24,7 +24,7 @@ function NotFoundComponent() {
         <h2 className="mt-4 text-xl font-semibold text-foreground">Página não encontrada</h2>
         <p className="mt-2 text-sm text-muted-foreground">O endereço acessado não existe ou foi movido.</p>
         <div className="mt-6">
-          <Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Voltar ao Noticiário</Link>
+          <Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Voltar para Meus Jogos</Link>
         </div>
       </div>
     </div>
@@ -42,10 +42,10 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
     <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-md text-center" role="alert">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">Esta página não carregou</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Algo não carregou como esperado. Tente novamente ou volte ao Noticiário.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Algo não carregou como esperado. Tente novamente ou volte para Meus Jogos.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button type="button" onClick={() => { router.invalidate(); reset(); }} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Tentar novamente</button>
-          <a href="/" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-input bg-white px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">Noticiário</a>
+          <a href="/" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-input bg-white px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">Meus Jogos</a>
         </div>
       </div>
     </div>

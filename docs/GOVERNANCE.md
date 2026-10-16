@@ -5,7 +5,7 @@
 
 ## Escopo e autoridade
 
-O produto vigente reúne Noticiário, Hoje, Elo, Analytics, Anotações e Conta/Privacidade. Apostas, odds, banca, picks e execução financeira pertencem ao produto descomissionado. Sua presença em código, tabelas ou documentos não autoriza reativação.
+O foco vigente em 16/10/2026 é **Meus Jogos apenas**, com Conta/Privacidade e histórico preservados. A evolução de Noticiário/Resenha, Hoje separado, Elo e Analytics fica pausada, sem desativar crons ou automações externas. A decisão substitui a prioridade de 15/10; ver [escopo e aceite](governance/MEUS_JOGOS_SCOPE_2026-10-16.md). Apostas, odds, banca, picks e execução financeira pertencem ao produto descomissionado. Sua presença em código, tabelas ou documentos não autoriza reativação.
 
 - **GitHub main:** código, migrations, testes, contratos e documentação versionada.
 - **Lovable Cloud:** dados e operação vivos; PRIMARY configurado `hefuvmocohhpmnhwpkac`.

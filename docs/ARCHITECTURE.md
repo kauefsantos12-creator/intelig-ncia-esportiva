@@ -5,7 +5,7 @@
 
 ## Produto e fontes de verdade
 
-O produto reúne Noticiário, Hoje, Elo, Analytics e Anotações, com Conta/Privacidade. A navegação está em `src/components/AppShell.tsx`. A jornada de CSV, odds, picks e banca pertence ao produto anterior, descomissionado em setembro. Código, tipos e tabelas legados não autorizam sua reativação.
+A entrada ativa é **Meus Jogos**, com Conta/Privacidade e histórico preservados, conforme decisão de 16/10/2026. Resenha, Hoje separado, Elo e Analytics têm evolução pausada. A navegação está em `src/components/AppShell.tsx`. A jornada de CSV, odds, picks e banca pertence ao produto anterior, descomissionado em setembro. Código, tipos e tabelas legados não autorizam sua reativação.
 
 GitHub main de `kauefsantos12-creator/intelig-ncia-esportiva` governa código, contratos, testes e documentação. Lovable Cloud é a autoridade sobre dados e operação vivos. O PRIMARY configurado é `hefuvmocohhpmnhwpkac`; o projeto conectado registrado na IE-00.01 é `428fa571-e363-4bbf-ab2c-058451eba7dc`. A fase definida por Kauê é desenvolvimento por commits, sem endereço público nesta preparação. Configuração, sincronização e disponibilidade são evidências distintas.
 
@@ -22,9 +22,15 @@ Ver [estado canônico](PROJECT_STATE.md), [governança](GOVERNANCE.md) e [arquit
 | Elo e lógica pura | Ratings de clube/liga e histórico, separados da persistência | `src/lib/engine/`, `src/lib/elo-sync.server.ts` |
 | Persistência e acesso | Catálogo, projeções, RPCs, permissões, notas e estado dos jobs | Lovable Cloud/PostgreSQL; `src/integrations/supabase/`, `src/lib/admin-db.ts`, `src/lib/sports/sports-db.server.ts` |
 
-## Fluxos atuais e limites conhecidos
+## Meus Jogos — implementação de 16/10/2026
 
-- **Hoje:** catálogo canônico de fixtures, forma, Elo e evidências de transmissão. Existência e horário da partida não vêm do guia de TV. Na Home, falha da programação pode virar vazio; evidência de agregador ainda não comprova a confirmação oficial exigida. Achados permanecem em IE-04.03–06.
+`src/routes/index.tsx` renderiza `MyGamesPage`. `my-games.functions.ts` consulta fixtures e escalações com o cliente da sessão, middleware e RLS existentes; `my-games.ts` projeta os nomes informados no snapshot, posição, titular/reserva, técnico, formação e atribuição da fonte, sem inferir entrada em campo. A data usa America/Sao_Paulo. Seleção concorrente não deixa uma resposta antiga substituir a partida atual.
+
+`PersonalMatchReports` mantém a persistência privada existente e pode preencher times/horário a partir da partida. Falha da agenda/escalação não desmonta o editor. Sem nova tabela, RPC, ingestão ou mudança de política. `/anotacoes` mantém o histórico anterior; a antiga Home foi preservada em `LegacyNewsPage.tsx`, fora da entrada e sem rota nova. Homologação autenticada real permanece pendente. [Escopo e aceite](governance/MEUS_JOGOS_SCOPE_2026-10-16.md).
+
+## Fluxos anteriores preservados e limites conhecidos
+
+- **Hoje:** catálogo canônico de fixtures, forma, Elo e evidências de transmissão. Existência e horário da partida não vêm do guia de TV. Na Home anterior, falha da programação podia virar vazio; evidência de agregador ainda não comprova a confirmação oficial exigida. Achados permanecem em IE-04.03–06.
 - **Noticiário:** edições e itens editoriais seguem `editorial-explanatory-v3` e os três eixos aprovados: resenha explicativa, contraste entre placar e desempenho e protagonista dentro do jogo. Elo é uma superfície separada e não entra na redação.
 - **Elo:** distingue rating local, rating de liga, fotografia global atual e histórico por partida. O cliente não redefine a fórmula; cobertura, freshness e histórico exigem a trilha IE-06.
 - **Anotações:** reviews vinculados ao usuário, assistiu/não assistiu, comentários, notas pessoais e campinho persistido. Nota pessoal, nota do provedor e estatística observada têm significados distintos.
