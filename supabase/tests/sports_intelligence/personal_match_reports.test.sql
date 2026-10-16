@@ -1,12 +1,14 @@
 begin;
 select plan(22);
 
--- Two fixture identities only in this rolled-back test transaction.
-alter table auth.users disable trigger enforce_single_google_user;
+-- Authorize each fixture identity during setup, inside this rolled-back transaction.
+-- The test runner has DML grants on Auth, but does not own its protected schema.
+update private.app_security_config set approved_user_id='12121212-1212-4212-8212-121212121212' where singleton;
 insert into auth.users(id,email,raw_app_meta_data,raw_user_meta_data) values
-('12121212-1212-4212-8212-121212121212','report-owner@example.test','{"provider":"google"}','{}'),
+('12121212-1212-4212-8212-121212121212','report-owner@example.test','{"provider":"google"}','{}');
+update private.app_security_config set approved_user_id='13131313-1313-4313-8313-131313131313' where singleton;
+insert into auth.users(id,email,raw_app_meta_data,raw_user_meta_data) values
 ('13131313-1313-4313-8313-131313131313','other-owner@example.test','{"provider":"google"}','{}');
-alter table auth.users enable trigger enforce_single_google_user;
 update private.app_security_config set approved_user_id='12121212-1212-4212-8212-121212121212' where singleton;
 insert into public.sports_personal_match_reports(id,owner_id,home_team,away_team,kickoff_at,notes)
 values('14141414-1414-4414-8414-141414141414','13131313-1313-4313-8313-131313131313','Other A','Other B',now(),'private other');
