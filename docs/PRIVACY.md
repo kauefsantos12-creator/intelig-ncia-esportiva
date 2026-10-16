@@ -35,12 +35,12 @@ A tela de autenticação apresenta apenas a identidade atual do produto e as sup
 |---|---|
 | Sessões Auth | 30 dias |
 | Web Push inativo | 90 dias sem atualização |
-| Anotações e notas pessoais de partidas | enquanto a conta estiver ativa |
+| Anotações, relatos pessoais e notas de partidas | enquanto a conta estiver ativa |
 | Dados esportivos compartilhados | conforme necessidade operacional do produto e políticas de fonte/cache |
 | Governance change log | 365 dias |
 | Identity/Auth | enquanto a conta estiver ativa |
 
-`public.run_privacy_retention_cleanup()` executa diariamente via `pg_cron`. A exclusão de conta remove imediatamente os dados pessoais de aplicação vinculados. `erase_user_application_data(user_id)` remove as Anotações/notas pessoais do usuário e suas assinaturas Web Push; os dados esportivos compartilhados não são dados pessoais do titular e permanecem no catálogo esportivo. O histórico de governança segue retenção limitada de 365 dias como evidência de segurança/accountability.
+`public.run_privacy_retention_cleanup()` executa diariamente via `pg_cron`. A exclusão de conta remove imediatamente os dados pessoais de aplicação vinculados. `erase_user_application_data(user_id)` remove as Anotações, relatos pessoais/notas do usuário e suas assinaturas Web Push; os dados esportivos compartilhados não são dados pessoais do titular e permanecem no catálogo esportivo. O histórico de governança segue retenção limitada de 365 dias como evidência de segurança/accountability.
 
 ## Direitos e controles
 
@@ -69,3 +69,7 @@ As notas dos jogadores são apagadas por cascade quando a Anotação corresponde
 - retenção interna de infraestrutura dos provedores além dos registros controlados pela aplicação.
 
 Esses itens não devem ser presumidos como conformes em uma futura oferta a terceiros; exigem revisão contratual antes de comercialização.
+
+## Relatos pessoais antes e durante o jogo
+
+A área Anotações permite informar uma partida e guardar um relato na própria conta mesmo quando a agenda não estiver disponível. Times, competição e horário informados pelo usuário não se tornam dados oficiais nem alimentam Elo ou Analytics. Somente a conta Google aprovada acessa seus relatos. Eles são mantidos em `sports_personal_match_reports`, com controle de versão para detectar gravações concorrentes, e incluídos na exclusão da aplicação e da conta. Este fluxo não envia o texto para IA ou provedores esportivos, nem o persiste no armazenamento do navegador. Use Salvar relato; confirmação visual só ocorre após resposta do banco. Sem confirmação, mantenha o formulário aberto e tente novamente.

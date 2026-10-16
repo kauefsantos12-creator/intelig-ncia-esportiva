@@ -4,6 +4,7 @@ import { CheckCircle2, ClipboardCheck, Goal, NotebookPen, RefreshCw, Star, Trash
 import { type MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
+import { PersonalMatchReports } from "@/components/PersonalMatchReports";
 import { StatusBadge } from "@/components/ProductControls";
 import { MetricPreview, ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
 import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState";
@@ -208,7 +209,7 @@ function NotesPage() {
         <ProductPageHeader
           eyebrow="Anotações"
           title="Seu caderno de jogo"
-          description="Fila pós-jogo pessoal para registrar o que você viu, avaliar participantes e guardar leituras visuais no campinho."
+          description="Registre seu relato antes, durante ou depois do jogo. A fila pós-jogo continua disponível para notas e campinho."
           aside={(
             <button
               type="button"
@@ -221,6 +222,8 @@ function NotesPage() {
             </button>
           )}
         />
+
+        <PersonalMatchReports />
 
         {overview ? (
           <div className="grid gap-3 sm:grid-cols-3">
