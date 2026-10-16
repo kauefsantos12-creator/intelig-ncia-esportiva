@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ebsa:project-profile:1.7",
+  "title": "Perfil de projeto EBSA",
+  "type": "object",
+  "required": [
+    "framework_version",
+    "project_name",
+    "human_interface",
+    "replica_enabled",
+    "auth_required",
+    "privileged_roles",
+    "personal_data",
+    "sensitive_data",
+    "children_or_adolescents_data",
+    "storage_files",
+    "external_integrations",
+    "public_api",
+    "payments_or_financial_impact",
+    "automated_decisioning",
+    "domain_rules_required",
+    "project_type",
+    "service_class",
+    "exposure",
+    "backend_type",
+    "primary_role",
+    "criticality",
+    "data_residency_constraints",
+    "owners",
+    "field_evidence",
+    "control_overrides",
+    "context"
+  ],
+  "properties": {
+    "framework_version": {
+      "const": "1.7"
+    },
+    "project_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "human_interface": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "replica_enabled": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "auth_required": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "privileged_roles": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "personal_data": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "sensitive_data": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "children_or_adolescents_data": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "storage_files": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "external_integrations": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "public_api": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "payments_or_financial_impact": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "automated_decisioning": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "domain_rules_required": {
+      "enum": [
+        true,
+        false,
+        "UNKNOWN"
+      ]
+    },
+    "project_type": {
+      "enum": [
+        "internal_web_app",
+        "public_web_app",
+        "service",
+        "UNKNOWN"
+      ]
+    },
+    "service_class": {
+      "enum": [
+        "LABORATORIO",
+        "INTERNO",
+        "OPERACIONAL",
+        "CRITICO",
+        "UNKNOWN"
+      ]
+    },
+    "exposure": {
+      "enum": [
+        "internal",
+        "restricted_external",
+        "public",
+        "UNKNOWN"
+      ]
+    },
+    "backend_type": {
+      "enum": [
+        "lovable_cloud",
+        "supabase_managed",
+        "other_approved",
+        "UNKNOWN"
+      ]
+    },
+    "primary_role": {
+      "enum": [
+        "lovable_cloud",
+        "supabase_managed",
+        "other_approved",
+        "UNKNOWN"
+      ]
+    },
+    "criticality": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL",
+        "UNKNOWN"
+      ]
+    },
+    "data_residency_constraints": {
+      "enum": [
+        "none_confirmed",
+        "constraints_identified",
+        "UNKNOWN"
+      ]
+    },
+    "owners": {
+      "type": "object",
+      "required": [
+        "business",
+        "technical",
+        "data",
+        "operations",
+        "security",
+        "privacy"
+      ],
+      "properties": {
+        "business": {
+          "type": "string",
+          "minLength": 1
+        },
+        "technical": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operations": {
+          "type": "string",
+          "minLength": 1
+        },
+        "security": {
+          "type": "string",
+          "minLength": 1
+        },
+        "privacy": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "field_evidence": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "control_overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "control_id",
+          "reason",
+          "owner",
+          "risk",
+          "compensating_control",
+          "approver",
+          "expires_on",
+          "evidence"
+        ],
+        "properties": {
+          "control_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risk": {
+            "type": "string",
+            "minLength": 1
+          },
+          "compensating_control": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approver": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expires_on": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "context": {
+      "enum": [
+        "PROJECT",
+        "DIDACTIC_EXAMPLE"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

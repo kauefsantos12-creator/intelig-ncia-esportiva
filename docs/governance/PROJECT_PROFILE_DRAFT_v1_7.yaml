@@ -1,0 +1,75 @@
+# RASCUNHO — IE-00.05 aberta; UNKNOWN material impede conclusão.
+# Objetivos de RPO/RTO e limites do estado atual constam no registro de decisões.
+framework_version: '1.7'
+project_name: Inteligência Esportiva
+project_type: internal_web_app
+service_class: UNKNOWN
+exposure: internal
+backend_type: lovable_cloud
+primary_role: lovable_cloud
+criticality: UNKNOWN
+data_residency_constraints: UNKNOWN
+human_interface: true
+replica_enabled: UNKNOWN
+auth_required: true
+privileged_roles: true
+personal_data: true
+sensitive_data: UNKNOWN
+children_or_adolescents_data: true
+storage_files: UNKNOWN
+external_integrations: true
+public_api: UNKNOWN
+payments_or_financial_impact: UNKNOWN
+automated_decisioning: UNKNOWN
+domain_rules_required: true
+owners:
+  business: Kauê
+  technical: Kauê
+  data: Kauê
+  operations: Kauê
+  security: Kauê
+  privacy: Kauê
+field_evidence:
+  framework_version: Schema PROJECT_PROFILE.schema.json copiado do framework EBSA 1.7 fornecido; perfil ainda em
+    rascunho.
+  project_name: README.md e docs/governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md.
+  project_type: Decisão de audiência exclusiva de Kauê em 16/10/2026; registro IE_00_05_PROFILE_DECISIONS_2026-10-16.md.
+  service_class: UNKNOWN. INTERNO é proposta, sem aceite formal; RPO/RTO de 60 minutos não confirmam automaticamente
+    classe ou SLO.
+  exposure: internal representa audiência pretendida exclusiva de Kauê; exposição técnica e efetividade da autorização
+    NÃO VERIFICADAS nesta preparação.
+  backend_type: 'IE_00_04_SURFACE_BASELINE_2026-10-15.md: Lovable Cloud no projeto conectado; consulta de 15/10/2026.'
+  primary_role: 'IE_00_04_SURFACE_BASELINE_2026-10-15.md e supabase/config.toml: PRIMARY hefuvmocohhpmnhwpkac; sem
+    nova consulta de runtime nesta preparação.'
+  criticality: UNKNOWN. Hobby pessoal não determina por si só a criticidade técnica; avaliação pendente.
+  data_residency_constraints: UNKNOWN. Restrições e localização efetiva dos provedores ainda não verificadas.
+  human_interface: src/routes/index.tsx, hoje.tsx, elo.tsx, anotacoes.tsx, analytics.tsx, conta.tsx.
+  replica_enabled: UNKNOWN operacional. Em 16/10 Kauê escolheu backups testados no plano inicial, avaliando réplica
+    se necessária às metas de 60 minutos; não comprova ausência de réplica atual.
+  auth_required: src/integrations/supabase/auth-middleware.ts implementa token, sessão e is_approved_app_user; audiência
+    exclusiva confirmada; validação funcional pendente.
+  privileged_roles: src/integrations/supabase/client.server.ts cria cliente administrativo no servidor; revisão
+    dos privilégios efetivos pendente.
+  personal_data: 'Conta Google, anotações e avaliações pessoais: docs/PRIVACY_DATA_REGISTER.md e IE-00.04. Conteúdo
+    pessoal não foi lido nesta preparação.'
+  sensitive_data: UNKNOWN. Lesões excluídas do escopo inicial em 16/10, mas api-football-sports-sync.server.ts ainda
+    prevê ingestão em sports_injuries; adequação, inventário e classificação pendentes.
+  children_or_adolescents_data: 'Flag preventiva positiva: cobertura editorial da base do Palmeiras pode identificar
+    menores. Em 16/10 foram excluídos perfis/estatísticas individuais da primeira versão; inventário e aplicação
+    ainda pendentes.'
+  storage_files: UNKNOWN. Busca não encontrou fluxo Storage/upload; ausência no código não prova ausência de objetos
+    em runtime.
+  external_integrations: 'Código em src/lib/adapters/ e src/lib/sports/: provedores esportivos, fontes editoriais
+    e IA; identidade Google e operação Cloud.'
+  public_api: UNKNOWN. Audiência pessoal não comprova inventário de REST/RPC e demais superfícies alcançáveis; revisão
+    de autenticação/autorização por endpoint pendente.
+  payments_or_financial_impact: UNKNOWN. Apostas retiradas do produto ativo; não inferir false para custos de APIs/IA/Cloud
+    ou demais impactos sem classificar.
+  automated_decisioning: UNKNOWN. Editorial por IA, rankings e transformações requerem avaliação de uso e significado
+    no framework; não preencher false por analogia.
+  domain_rules_required: 'docs/GOVERNANCE.md, METRICS_GLOSSARY.md, DATA_CATALOG.md e editorial-policy.ts: regras
+    esportivas e semântica versionada.'
+  owners: Kauê confirmou ser único responsável, com assistência do ChatGPT na execução, em 16/10/2026; registro
+    IE_00_05_PROFILE_DECISIONS_2026-10-16.md.
+control_overrides: []
+context: PROJECT

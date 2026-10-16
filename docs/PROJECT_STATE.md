@@ -1,6 +1,7 @@
 # Motor de Inteligência Esportiva — estado canônico
 
-> Revisão: 15/10/2026, IE-00.04. Baseline consultada: main `6d78f07f9689b4c31ca1bd76189c970e6c30c949`.
+> Revisão parcial: 16/10/2026, preparação IE-00.05. Base Git: main `70f37dd21dc481528766762fbba69f08a8f0cea2`.
+> A baseline dos dados vivos permanece datada de 15/10/2026; sem novas consultas de banco nesta preparação.
 > Fase definida por Kauê: desenvolvimento por commits, sem endereço público nesta preparação.
 
 **Atualização pontual em 16/10 às 16h46 BRT:** Mirassol x Internacional de hoje às 20h foi gravado no PRIMARY e retornou na RPC usada por Hoje. Os elencos oficiais publicados pelos clubes têm 39 jogadores do Mirassol e 27 do Internacional no recorte do Analytics, sem inferir escalação ou métricas. [Procedimento, evidência e limites](governance/MIRASSOL_INTERNACIONAL_2026-10-16.md). Essa recuperação pontual não comprova retomada do coletor automático nem validação visual autenticada/publicação; as baselines datadas abaixo permanecem históricas.
@@ -43,7 +44,7 @@ A [baseline completa](governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md) regist
 - **IE-00.02 — CONCLUÍDA no escopo documental desta revisão:** documentos vigentes separados dos snapshots históricos e verificações locais aprovadas. [Evidências e limites](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md). Vigência na main exige gates aprovados e merge confirmado na PR correspondente.
 - **IE-00.03 — CONCLUÍDA no escopo da decisão desta revisão:** Kauê escolheu **Resenha diária** em 15/10/2026. Primeiro foco funcional: Noticiário/IE-05, após a base comum. [Evidência da escolha](governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md). Integração por PR com gates verdes.
 - **IE-00.04 — CONCLUÍDA no escopo de inventário desta revisão:** [baseline das superfícies](governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md), com evidência atual, falhas e limites. Integração por PR com gates verdes.
-- **Próxima após integração: IE-00.05 — confirmar o PROJECT_PROFILE.** A prioridade Resenha orienta os próximos controles e a recuperação futura do worker.
+- **IE-00.05 — EM EXECUÇÃO:** [decisões parciais e pendências](governance/IE_00_05_PROFILE_DECISIONS_2026-10-16.md) e [perfil em rascunho](governance/PROJECT_PROFILE_DRAFT_v1_7.yaml). Uso exclusivo de Kauê, responsável único, RPO/RTO de 60 minutos e estratégia inicial de backups; lesões fora e base do Palmeiras apenas jogos/resenhas. UNKNOWN material e adequações técnicas permanecem abertos. Não certifica controles, backup, acesso ou coleta atuais.
 
 O [roadmap EBSA 1.7](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md) mantém códigos e dependências. Esta revisão não fecha IE-00, o perfil ou gates de liberação.
 

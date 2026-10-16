@@ -6,7 +6,7 @@
 **Projeto:** [kauefsantos12-creator/intelig-ncia-esportiva](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva)  
 **Baseline do código:** main, commit [4696c8eb400a088b226dce0653eb775b64383490](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva/commit/4696c8eb400a088b226dce0653eb775b64383490), de 05/10/2026.  
 **Modelo da agenda consultado:** main, commit 111b66dbd84da2cdfe224183f4457d81161482fd.  
-**Estado deste documento:** IE-00.01, IE-00.02 e IE-00.03 integradas. IE-00.04 registra a baseline atual das seis superfícies em 15/10/2026, com prioridade Resenha; concluída no escopo de inventário desta revisão, sujeita à integração por PR com gates verdes. Próxima: IE-00.05 — PROJECT_PROFILE. Desenvolvimento por commits, sem endereço público nesta fase.
+**Estado deste documento:** IE-00.01 a IE-00.04 concluídas nos escopos registrados. IE-00.05 EM EXECUÇÃO: decisões parciais de 15 e 16/10/2026 e PROJECT_PROFILE em rascunho, com campos materiais UNKNOWN. Esta proposta exige revisão e não encerra IE-00.05, gates ou validação de runtime. Desenvolvimento por commits.
 
 ## 1. Propósito e forma de trabalhar
 
@@ -91,37 +91,43 @@ Este quadro orienta I0.5. Não é um PROJECT_PROFILE aprovado e não encerra G3.
 
 | Campo / assunto | Valor preliminar / decisão |
 | --- | --- |
-| project_type | Aplicação web pessoal de inteligência esportiva; formalizar no schema |
-| service_class | PROPOSTA: INTERNO; confirmar tolerância a perda/indisponibilidade |
-| exposure | Uso pessoal autenticado documentado; confirmar exposição efetiva e audiência |
-| backend_type / primary_role | Lovable Cloud / PRIMARY documentados; confirmar ambiente vivo |
+| project_type | internal_web_app — aplicação web pessoal, primeira versão exclusiva de Kauê; formalizar no schema |
+| service_class | PROPOSTA: INTERNO; RPO de 60 minutos para anotações e RTO de 60 minutos para o aplicativo escolhidos; classe ainda pendente |
+| Objetivo de recuperação das anotações (RPO) | DECIDIDO por Kauê em 15/10/2026: até 60 minutos de registros; capacidade de backup/restore ainda NÃO VERIFICADA |
+| Tempo para recuperar o aplicativo (RTO) | DECIDIDO por Kauê em 15/10/2026: até 60 minutos para voltar a usar o aplicativo após falha; capacidade de recuperação ainda NÃO VERIFICADA |
+| Audiência da primeira versão | DECIDIDO por Kauê em 16/10/2026: somente ele; sem convidados ou público geral no escopo aprovado |
+| exposure | internal como perfil de uso pretendido; acesso exclusivo autenticado aprovado. Exposição técnica efetiva e autorização ainda precisam de validação |
+| backend_type / primary_role | lovable_cloud / lovable_cloud — PRIMARY hefuvmocohhpmnhwpkac confrontado com ambiente vivo na IE-00.04 em 15/10/2026; nenhuma nova consulta de runtime em 16/10 nesta revisão |
 | criticality | UNKNOWN técnico; importância pessoal elevada não basta para preencher a classe |
 | data_residency_constraints | UNKNOWN; identificar restrições aplicáveis |
 | human_interface | true — rotas e jornadas humanas presentes |
-| replica_enabled | UNKNOWN; não copiar a decisão de réplica tomada para NAT ou outro projeto |
+| Estratégia de proteção | DECIDIDO em 16/10/2026: começar com backups testados; avaliar réplica somente se necessária para cumprir RPO/RTO de 60 minutos |
+| replica_enabled | Sem réplica externa no planejamento inicial aprovado; estado operacional permanece UNKNOWN até inventário. A escolha de estratégia não comprova configuração atual ou capacidade de recuperação |
 | auth_required | true — middleware e perfil single-user documentados |
-| privileged_roles | UNKNOWN no perfil; existem caminhos com cliente administrativo a inventariar |
+| privileged_roles | true no desenho implementado — cliente administrativo server-side em src/integrations/supabase/client.server.ts; revisão dos privilégios efetivos continua pendente |
 | personal_data | true — conta, comentários e avaliações ligados ao usuário |
-| sensitive_data | UNKNOWN — avaliar ingestão de lesões e conteúdo privado |
-| children_or_adolescents_data | UNKNOWN — escopo editorial inclui base; identificar quais dados de atletas são tratados |
+| Escopo de lesões | DECIDIDO em 16/10/2026: fora da primeira versão; desativação da coleta, bloqueio de uso e testes ainda pendentes |
+| sensitive_data | UNKNOWN até conciliar o escopo com código e dados existentes. Exclusão de lesões aprovada para a primeira versão; a rotina de coleta ainda existe e nenhuma linha foi inventariada ou removida nesta decisão. Manter controles preventivos até comprovar o estado efetivo |
+| Escopo da base do Palmeiras | DECIDIDO em 16/10/2026: jogos e resenhas, sem perfis nem estatísticas individuais de atletas na primeira versão; adequação técnica ainda pendente |
+| children_or_adolescents_data | true para planejar os controles da cobertura editorial da base: nomes de menores podem aparecer nas resenhas. Sem perfis individuais não significa ausência de dados de menores; inventário e classificação detalhada ainda pendentes |
 | storage_files | UNKNOWN — distinguir arquivos próprios de imagens externas por URL |
 | external_integrations | true — provedores esportivos, fontes editoriais e IA |
 | public_api | UNKNOWN — distinguir endpoint alcançável de API liberada ao público |
 | payments_or_financial_impact | Fluxo financeiro de apostas não está ativo; classificar formalmente o campo e os custos operacionais de terceiros |
 | automated_decisioning | UNKNOWN — avaliar as transformações/rankings e o uso efetivo, sem inferir false |
 | domain_rules_required | true — tempo, escopo, métricas, editorial, notas e identidade |
-| owners | Kauê é usuário e decisor do produto; confirmar responsáveis técnico, dados, operação, segurança e privacidade |
+| owners | DECIDIDO em 16/10/2026: Kauê responde por negócio/produto, técnica, dados, operação, segurança e privacidade; assistência do ChatGPT na execução |
 
-Se INTERNO for aprovado, o núcleo EBSA traz como padrão **SLO 99,5%, RTO 240 minutos, RPO 1.440 minutos e ensaio semestral de restauração**. São objetivos candidatos, não medições alcançadas. Anotações podem exigir tolerância de perda menor; decidir explicitamente e provar com restore. Outro alvo para controle DEFAULT_WITH_ADR_EXCEPTION exige ADR e evidência; controles obrigatórios não são dispensados por ser hobby.
+Se INTERNO for aprovado, o núcleo EBSA traz como padrão **SLO 99,5%, RTO 240 minutos, RPO 1.440 minutos e ensaio semestral de restauração**. São objetivos candidatos, não medições alcançadas. **Kauê escolheu em 15/10/2026 perda máxima de 60 minutos de anotações (RPO) e até 60 minutos para recuperar o aplicativo (RTO); os padrões candidatos de 1.440 e 240 minutos, respectivamente, não representam essas decisões.** A capacidade de cumprir ambos os objetivos ainda precisa ser implementada e comprovada por restauração em IE-01.05; a classe de serviço e os demais objetivos continuam pendentes. Outro alvo para controle DEFAULT_WITH_ADR_EXCEPTION exige ADR e evidência; controles obrigatórios não são dispensados por ser hobby.
 
 ### Decisões a conduzir uma por vez
 
-1. **Decidido em 15/10/2026: Resenha diária primeiro.** Preservar prazer de uso, confiança no conteúdo e memória pessoal já definidos neste roadmap; demais preferências continuam abertas.
-2. Audiência, classe de serviço e perda tolerável de anotações.
+1. **Decidido em 15/10/2026: Resenha diária primeiro.** Preservar prazer de uso, confiança no conteúdo e memória pessoal já registrados; demais preferências continuam abertas.
+2. **Metas decididas: até 1 hora de perda de anotações (RPO) e até 1 hora para recuperar o aplicativo (RTO). Audiência e responsável único decididos em 16/10/2026: Kauê.** Classe de serviço permanece pendente.
 3. Orçamento de APIs/IA e prioridade de cobertura.
-4. Necessidade e finalidade de réplica externa.
+4. **Decidido em 16/10/2026: começar com backups testados.** Reavaliar réplica externa se a evidência mostrar necessidade para cumprir as metas de recuperação de 60 minutos.
 5. Política do fallback futebol.tv.br e evidência de confirmação nominal.
-6. Escopo de categorias do Palmeiras, seleções e outros esportes conforme fontes disponíveis.
+6. Escopo de categorias do Palmeiras, seleções e outros esportes conforme fontes disponíveis. **Decidido em 16/10/2026: lesões fora da primeira versão; base do Palmeiras com jogos e resenhas, sem perfis nem estatísticas individuais dos atletas.** Demais detalhamentos não são aprovados automaticamente.
 7. Retenção, exportação e regras de mudança de “assistiu” para “não assistiu”.
 
 As decisões não atrasam leitura e preparação independentes. Mudanças dependentes aguardam a resposta correspondente; silêncio não equivale a aceite.
@@ -229,7 +235,7 @@ Cada capítulo apresenta finalidade, dependências, referências EBSA e condiç�
 ### IE-00.05 — Confirmar o PROJECT_PROFILE
 
 - [ ] Preencher os campos materiais da seção de perfil, com evidência e responsáveis. Confirmar classe de serviço, exposição, réplica, uso de lesões/base, APIs e arquivos; UNKNOWN permanece pendente.
-- **Estado inicial:** AGUARDANDO DECISÃO. **Depende de:** IE-00.04.
+- **Estado inicial:** AGUARDANDO DECISÃO. **Estado atual (16/10/2026):** EM EXECUÇÃO. Uso exclusivo de Kauê, responsáveis, RPO/RTO de 60 minutos, estratégia inicial de backups e limites de lesões/base registrados. [Decisões e pendências](../governance/IE_00_05_PROFILE_DECISIONS_2026-10-16.md); [perfil em rascunho](../governance/PROJECT_PROFILE_DRAFT_v1_7.yaml). UNKNOWN material permanece pendente. **Depende de:** IE-00.04.
 
 ### IE-00.06 — Classificar dados e fronteiras de confiança
 
@@ -992,3 +998,8 @@ Baseline das seis superfícies confrontada com a main `6d78f07f9689b4c31ca1bd761
 **Dados atuais:** 584 fixtures e zero registros para 14 e 15/10 locais; 86/116 clubes do catálogo piloto com alguma linha ativa de elenco; 676 clubes Elo únicos, sync PARTIAL; seis fixtures com dados individuais e zero linhas de player-season/classificação; 170 reviews AUTO_CLOSED e nenhum preenchimento pessoal nas métricas consultadas. Presença de linhas não comprova completude ou atualização.
 
 Matriz, evidências e limites: [IE_00_04_SURFACE_BASELINE_2026-10-15.md](../governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md). A ação registra o diagnóstico e não corrige runtime, muda fontes, publica, reabre fila ou libera carga. CI e integração ficam na PR correspondente. **Quatro de 104 ações de origem no escopo desta revisão. Próxima: IE-00.05 — PROJECT_PROFILE.**
+
+
+## Preparação parcial — IE-00.05 — 16/10/2026
+
+As decisões de Kauê estão consolidadas no [registro do perfil](../governance/IE_00_05_PROFILE_DECISIONS_2026-10-16.md) e no PROJECT_PROFILE_DRAFT_v1_7.yaml, conforme schema EBSA 1.7. A classe de serviço e outros campos materiais continuam UNKNOWN; ação aberta. Metas, escolha de audiência e exclusões de escopo não certificam os mecanismos de recuperação, acesso ou ingestão atuais. Adequações técnicas deverão ser implementadas e testadas antes da entrega. Esta proposta não modifica runtime, reprocessa filas, publica ou autoriza descarte de histórico.
