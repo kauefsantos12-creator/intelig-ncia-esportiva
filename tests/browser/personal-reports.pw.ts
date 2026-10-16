@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const fixture = "/tests/browser/fixtures/personal-reports.html";
+const fixture = "http://127.0.0.1:4176/personal-reports.html";
 test("personal report can be saved, reopened and edited on desktop and touch", async ({ page }) => {
   await page.goto(fixture);
+  await expect(page.getByLabel("Mandante", { exact: true })).toBeVisible();
   const accessibility = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
     .analyze();
@@ -34,6 +35,7 @@ test("personal report can be saved, reopened and edited on desktop and touch", a
 
 test("failed save and conflicting session preserve the unsaved text", async ({ page }) => {
   await page.goto(fixture);
+  await expect(page.getByLabel("Mandante", { exact: true })).toBeVisible();
   await page.getByLabel("Mandante", { exact: true }).fill("Casa");
   await page.getByLabel("Visitante", { exact: true }).fill("Fora");
   await page.getByLabel("Seu relato", { exact: true }).fill("Este texto precisa continuar aqui.");

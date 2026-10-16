@@ -1,7 +1,7 @@
 // Dev-server fixture only. No auth bypass, production route or real database.
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { PersonalMatchReportsView } from "@/components/PersonalMatchReports";
+import { PersonalMatchReportsView } from "@/components/PersonalMatchReportsView";
 import {
   type PersonalMatchReport,
   type PersonalMatchReportInput,
