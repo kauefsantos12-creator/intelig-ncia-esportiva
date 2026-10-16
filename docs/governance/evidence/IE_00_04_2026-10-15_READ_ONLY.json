@@ -1,0 +1,3817 @@
+{
+  "action": "IE-00.04",
+  "reference_date_local": "2026-10-15",
+  "timezone": "America/Sao_Paulo",
+  "baseline_commit": "6d78f07f9689b4c31ca1bd76189c970e6c30c949",
+  "project": {
+    "id": "428fa571-e363-4bbf-ab2c-058451eba7dc",
+    "latest_commit_sha": "6d78f07f9689b4c31ca1bd76189c970e6c30c949",
+    "provisioning_status": "ready",
+    "database_enabled": true,
+    "configured_primary": "hefuvmocohhpmnhwpkac"
+  },
+  "scope": "Read-only database inventory and versioned code review. No authenticated UI exercise, external provider call, HTTP dispatch, secret output or runtime mutation.",
+  "original_schema": {
+    "sql": "SELECT table_name, jsonb_agg(jsonb_build_object('name',column_name,'type',data_type) ORDER BY ordinal_position) AS columns\nFROM information_schema.columns\nWHERE table_schema='public' AND table_name IN (\n'sports_competitions','sports_teams','sports_fixtures','sports_daily_briefings','sports_briefing_items','sports_fact_packs','sports_source_articles','sports_editorial_source_items','sports_broadcast_evidence','sports_team_squads','sports_players','sports_fixture_player_stats','sports_fixture_lineups','sports_player_season_stats','sports_match_reviews','sports_player_personal_ratings','sports_field_marks','sports_jobs','sports_sync_state','sports_api_sync_state','elo_global_team_ratings','elo_team_ratings','elo_league_ratings','elo_fixture_history','elo_sync_state','app_users')\nGROUP BY table_name ORDER BY table_name;",
+    "rows": [
+      {
+        "columns": [
+          {
+            "name": "model_version",
+            "type": "text"
+          },
+          {
+            "name": "league_id",
+            "type": "bigint"
+          },
+          {
+            "name": "league_key",
+            "type": "text"
+          },
+          {
+            "name": "league_name",
+            "type": "text"
+          },
+          {
+            "name": "fixture_id",
+            "type": "bigint"
+          },
+          {
+            "name": "kickoff_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "home_team_id",
+            "type": "bigint"
+          },
+          {
+            "name": "home_team_name",
+            "type": "text"
+          },
+          {
+            "name": "away_team_id",
+            "type": "bigint"
+          },
+          {
+            "name": "away_team_name",
+            "type": "text"
+          },
+          {
+            "name": "home_goals",
+            "type": "integer"
+          },
+          {
+            "name": "away_goals",
+            "type": "integer"
+          },
+          {
+            "name": "home_rating_before",
+            "type": "numeric"
+          },
+          {
+            "name": "away_rating_before",
+            "type": "numeric"
+          },
+          {
+            "name": "home_rating_after",
+            "type": "numeric"
+          },
+          {
+            "name": "away_rating_after",
+            "type": "numeric"
+          },
+          {
+            "name": "home_advantage_points",
+            "type": "numeric"
+          },
+          {
+            "name": "expected_home_score",
+            "type": "numeric"
+          },
+          {
+            "name": "actual_home_score",
+            "type": "numeric"
+          },
+          {
+            "name": "elo_delta",
+            "type": "numeric"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "elo_fixture_history"
+      },
+      {
+        "columns": [
+          {
+            "name": "team_model_version",
+            "type": "text"
+          },
+          {
+            "name": "league_id",
+            "type": "bigint"
+          },
+          {
+            "name": "league_key",
+            "type": "text"
+          },
+          {
+            "name": "league_name",
+            "type": "text"
+          },
+          {
+            "name": "team_id",
+            "type": "bigint"
+          },
+          {
+            "name": "team_name",
+            "type": "text"
+          },
+          {
+            "name": "local_rating",
+            "type": "numeric"
+          },
+          {
+            "name": "league_rating",
+            "type": "numeric"
+          },
+          {
+            "name": "global_rating",
+            "type": "numeric"
+          },
+          {
+            "name": "matches_processed",
+            "type": "integer"
+          },
+          {
+            "name": "first_fixture_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "last_fixture_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "elo_global_team_ratings"
+      },
+      {
+        "columns": [
+          {
+            "name": "model_version",
+            "type": "text"
+          },
+          {
+            "name": "league_id",
+            "type": "bigint"
+          },
+          {
+            "name": "league_key",
+            "type": "text"
+          },
+          {
+            "name": "league_name",
+            "type": "text"
+          },
+          {
+            "name": "country_code",
+            "type": "text"
+          },
+          {
+            "name": "region",
+            "type": "text"
+          },
+          {
+            "name": "division_level",
+            "type": "integer"
+          },
+          {
+            "name": "focus_role",
+            "type": "text"
+          },
+          {
+            "name": "prior_rating",
+            "type": "numeric"
+          },
+          {
+            "name": "rating",
+            "type": "numeric"
+          },
+          {
+            "name": "evidence_adjustment",
+            "type": "numeric"
+          },
+          {
+            "name": "evidence_matches",
+            "type": "integer"
+          },
+          {
+            "name": "hierarchy_constrained",
+            "type": "boolean"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "elo_league_ratings"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "text"
+          },
+          {
+            "name": "source",
+            "type": "text"
+          },
+          {
+            "name": "model_version",
+            "type": "text"
+          },
+          {
+            "name": "last_started_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "last_completed_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "last_status",
+            "type": "text"
+          },
+          {
+            "name": "leagues_processed",
+            "type": "integer"
+          },
+          {
+            "name": "fixtures_fetched",
+            "type": "integer"
+          },
+          {
+            "name": "api_requests",
+            "type": "integer"
+          },
+          {
+            "name": "error_message",
+            "type": "text"
+          },
+          {
+            "name": "details",
+            "type": "jsonb"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "elo_sync_state"
+      },
+      {
+        "columns": [
+          {
+            "name": "model_version",
+            "type": "text"
+          },
+          {
+            "name": "league_id",
+            "type": "bigint"
+          },
+          {
+            "name": "league_key",
+            "type": "text"
+          },
+          {
+            "name": "league_name",
+            "type": "text"
+          },
+          {
+            "name": "team_id",
+            "type": "bigint"
+          },
+          {
+            "name": "team_name",
+            "type": "text"
+          },
+          {
+            "name": "rating",
+            "type": "numeric"
+          },
+          {
+            "name": "matches_processed",
+            "type": "integer"
+          },
+          {
+            "name": "first_fixture_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "last_fixture_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "elo_team_ratings"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "briefing_id",
+            "type": "uuid"
+          },
+          {
+            "name": "fixture_id",
+            "type": "uuid"
+          },
+          {
+            "name": "item_kind",
+            "type": "text"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "body",
+            "type": "text"
+          },
+          {
+            "name": "priority",
+            "type": "integer"
+          },
+          {
+            "name": "facts",
+            "type": "jsonb"
+          },
+          {
+            "name": "provenance",
+            "type": "jsonb"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_briefing_items"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "fixture_id",
+            "type": "uuid"
+          },
+          {
+            "name": "broadcaster",
+            "type": "text"
+          },
+          {
+            "name": "platform",
+            "type": "text"
+          },
+          {
+            "name": "source_kind",
+            "type": "text"
+          },
+          {
+            "name": "source_name",
+            "type": "text"
+          },
+          {
+            "name": "source_url",
+            "type": "text"
+          },
+          {
+            "name": "checked_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "confidence",
+            "type": "numeric"
+          },
+          {
+            "name": "is_primary",
+            "type": "boolean"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_broadcast_evidence"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "canonical_key",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "country_code",
+            "type": "text"
+          },
+          {
+            "name": "region",
+            "type": "text"
+          },
+          {
+            "name": "competition_kind",
+            "type": "text"
+          },
+          {
+            "name": "division_level",
+            "type": "integer"
+          },
+          {
+            "name": "season",
+            "type": "text"
+          },
+          {
+            "name": "five_dollar_league_id",
+            "type": "bigint"
+          },
+          {
+            "name": "api_football_league_id",
+            "type": "bigint"
+          },
+          {
+            "name": "active",
+            "type": "boolean"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_competitions"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "briefing_date",
+            "type": "date"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "football_summary",
+            "type": "text"
+          },
+          {
+            "name": "other_sports_summary",
+            "type": "text"
+          },
+          {
+            "name": "facts_through",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "generated_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "editorial_payload",
+            "type": "jsonb"
+          }
+        ],
+        "table_name": "sports_daily_briefings"
+      },
+      {
+        "columns": [
+          {
+            "name": "fixture_id",
+            "type": "uuid"
+          },
+          {
+            "name": "team_id",
+            "type": "uuid"
+          },
+          {
+            "name": "player_id",
+            "type": "uuid"
+          },
+          {
+            "name": "provider",
+            "type": "text"
+          },
+          {
+            "name": "is_starting",
+            "type": "boolean"
+          },
+          {
+            "name": "is_substitute",
+            "type": "boolean"
+          },
+          {
+            "name": "position",
+            "type": "text"
+          },
+          {
+            "name": "grid_position",
+            "type": "text"
+          },
+          {
+            "name": "jersey_number",
+            "type": "integer"
+          },
+          {
+            "name": "formation",
+            "type": "text"
+          },
+          {
+            "name": "fetched_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          }
+        ],
+        "table_name": "sports_fixture_lineups"
+      },
+      {
+        "columns": [
+          {
+            "name": "fixture_id",
+            "type": "uuid"
+          },
+          {
+            "name": "team_id",
+            "type": "uuid"
+          },
+          {
+            "name": "player_id",
+            "type": "uuid"
+          },
+          {
+            "name": "provider",
+            "type": "text"
+          },
+          {
+            "name": "participation_state",
+            "type": "text"
+          },
+          {
+            "name": "minutes",
+            "type": "integer"
+          },
+          {
+            "name": "provider_rating",
+            "type": "numeric"
+          },
+          {
+            "name": "stats",
+            "type": "jsonb"
+          },
+          {
+            "name": "fetched_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_fixture_player_stats"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "canonical_key",
+            "type": "text"
+          },
+          {
+            "name": "primary_provider",
+            "type": "text"
+          },
+          {
+            "name": "primary_fixture_id",
+            "type": "text"
+          },
+          {
+            "name": "five_dollar_fixture_id",
+            "type": "bigint"
+          },
+          {
+            "name": "api_football_fixture_id",
+            "type": "bigint"
+          },
+          {
+            "name": "competition_id",
+            "type": "uuid"
+          },
+          {
+            "name": "season",
+            "type": "text"
+          },
+          {
+            "name": "kickoff_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "home_team_id",
+            "type": "uuid"
+          },
+          {
+            "name": "away_team_id",
+            "type": "uuid"
+          },
+          {
+            "name": "home_goals",
+            "type": "integer"
+          },
+          {
+            "name": "away_goals",
+            "type": "integer"
+          },
+          {
+            "name": "finished_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "source_fetched_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "source_payload_hash",
+            "type": "text"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_fixtures"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "idempotency_key",
+            "type": "text"
+          },
+          {
+            "name": "job_type",
+            "type": "text"
+          },
+          {
+            "name": "fixture_id",
+            "type": "uuid"
+          },
+          {
+            "name": "payload",
+            "type": "jsonb"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "attempts",
+            "type": "integer"
+          },
+          {
+            "name": "max_attempts",
+            "type": "integer"
+          },
+          {
+            "name": "available_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "lease_token",
+            "type": "uuid"
+          },
+          {
+            "name": "lease_expires_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "last_error",
+            "type": "text"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "completed_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_jobs"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "owner_id",
+            "type": "uuid"
+          },
+          {
+            "name": "fixture_id",
+            "type": "uuid"
+          },
+          {
+            "name": "watched",
+            "type": "boolean"
+          },
+          {
+            "name": "notes",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "auto_closed",
+            "type": "boolean"
+          },
+          {
+            "name": "finalized_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_match_reviews"
+      },
+      {
+        "columns": [
+          {
+            "name": "review_id",
+            "type": "uuid"
+          },
+          {
+            "name": "player_id",
+            "type": "uuid"
+          },
+          {
+            "name": "participation_state",
+            "type": "text"
+          },
+          {
+            "name": "rating",
+            "type": "numeric"
+          },
+          {
+            "name": "provider_rating_snapshot",
+            "type": "numeric"
+          },
+          {
+            "name": "notes",
+            "type": "text"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_player_personal_ratings"
+      },
+      {
+        "columns": [
+          {
+            "name": "player_id",
+            "type": "uuid"
+          },
+          {
+            "name": "team_id",
+            "type": "uuid"
+          },
+          {
+            "name": "competition_id",
+            "type": "uuid"
+          },
+          {
+            "name": "season",
+            "type": "text"
+          },
+          {
+            "name": "provider",
+            "type": "text"
+          },
+          {
+            "name": "appearances",
+            "type": "integer"
+          },
+          {
+            "name": "starts",
+            "type": "integer"
+          },
+          {
+            "name": "minutes",
+            "type": "integer"
+          },
+          {
+            "name": "provider_rating",
+            "type": "numeric"
+          },
+          {
+            "name": "stats",
+            "type": "jsonb"
+          },
+          {
+            "name": "fetched_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_player_season_stats"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "canonical_key",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "date_of_birth",
+            "type": "date"
+          },
+          {
+            "name": "nationality",
+            "type": "text"
+          },
+          {
+            "name": "five_dollar_player_id",
+            "type": "bigint"
+          },
+          {
+            "name": "api_football_player_id",
+            "type": "bigint"
+          },
+          {
+            "name": "photo_url",
+            "type": "text"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_players"
+      },
+      {
+        "columns": [
+          {
+            "name": "provider",
+            "type": "text"
+          },
+          {
+            "name": "domain",
+            "type": "text"
+          },
+          {
+            "name": "season",
+            "type": "text"
+          },
+          {
+            "name": "cursor_value",
+            "type": "text"
+          },
+          {
+            "name": "last_attempt_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "last_success_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "last_error",
+            "type": "text"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_sync_state"
+      },
+      {
+        "columns": [
+          {
+            "name": "team_id",
+            "type": "uuid"
+          },
+          {
+            "name": "player_id",
+            "type": "uuid"
+          },
+          {
+            "name": "season",
+            "type": "text"
+          },
+          {
+            "name": "provider",
+            "type": "text"
+          },
+          {
+            "name": "jersey_number",
+            "type": "integer"
+          },
+          {
+            "name": "position",
+            "type": "text"
+          },
+          {
+            "name": "active",
+            "type": "boolean"
+          },
+          {
+            "name": "fetched_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          }
+        ],
+        "table_name": "sports_team_squads"
+      },
+      {
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid"
+          },
+          {
+            "name": "canonical_key",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "short_name",
+            "type": "text"
+          },
+          {
+            "name": "country_code",
+            "type": "text"
+          },
+          {
+            "name": "region",
+            "type": "text"
+          },
+          {
+            "name": "five_dollar_team_id",
+            "type": "bigint"
+          },
+          {
+            "name": "api_football_team_id",
+            "type": "bigint"
+          },
+          {
+            "name": "logo_url",
+            "type": "text"
+          },
+          {
+            "name": "metadata",
+            "type": "jsonb"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp with time zone"
+          }
+        ],
+        "table_name": "sports_teams"
+      }
+    ]
+  },
+  "queries": [
+    {
+      "key": "overview",
+      "sql": "SELECT clock_timestamp() AS observed_at_utc, (CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo') AS observed_at_local,\n(SELECT count(*) FROM public.sports_competitions) AS competitions,\n(SELECT count(*) FROM public.sports_competitions WHERE active) AS active_competitions,\n(SELECT count(*) FROM public.sports_teams) AS teams,\n(SELECT count(*) FROM public.sports_fixtures) AS fixtures,\n(SELECT count(*) FROM public.sports_fixtures WHERE kickoff_at >= (CURRENT_DATE AT TIME ZONE 'America/Sao_Paulo') AND kickoff_at < ((CURRENT_DATE+1) AT TIME ZONE 'America/Sao_Paulo')) AS fixtures_local_today,\n(SELECT max(source_fetched_at) FROM public.sports_fixtures) AS latest_fixture_fetch,\n(SELECT count(*) FROM public.sports_players) AS players,\n(SELECT count(*) FROM public.sports_team_squads WHERE active) AS active_squad_rows,\n(SELECT count(DISTINCT team_id) FROM public.sports_team_squads WHERE active) AS teams_with_active_squad_rows,\n(SELECT max(fetched_at) FROM public.sports_team_squads) AS latest_squad_fetch,\n(SELECT count(*) FROM public.sports_fixture_player_stats) AS fixture_player_stats,\n(SELECT count(DISTINCT fixture_id) FROM public.sports_fixture_player_stats) AS fixtures_with_player_stats,\n(SELECT max(fetched_at) FROM public.sports_fixture_player_stats) AS latest_fixture_player_fetch,\n(SELECT count(*) FROM public.sports_fixture_lineups) AS lineup_rows,\n(SELECT count(*) FROM public.sports_player_season_stats) AS player_season_rows,\n(SELECT count(*) FROM public.sports_match_reviews) AS review_rows,\n(SELECT count(*) FROM public.sports_player_personal_ratings) AS personal_rating_rows,\n(SELECT count(*) FROM public.elo_global_team_ratings) AS global_elo_rows,\n(SELECT count(DISTINCT team_id) FROM public.elo_global_team_ratings) AS global_elo_unique_teams,\n(SELECT max(updated_at) FROM public.elo_global_team_ratings) AS latest_elo_update,\n(SELECT max(kickoff_at) FROM public.elo_fixture_history) AS last_elo_fixture;",
+      "rows": [
+        {
+          "active_competitions": 94,
+          "active_squad_rows": 2776,
+          "competitions": 94,
+          "fixture_player_stats": 247,
+          "fixtures": 584,
+          "fixtures_local_today": 0,
+          "fixtures_with_player_stats": 6,
+          "global_elo_rows": 676,
+          "global_elo_unique_teams": 676,
+          "last_elo_fixture": "2026-10-12 19:00:00+00",
+          "latest_elo_update": "2026-10-15 06:08:00.041514+00",
+          "latest_fixture_fetch": "2026-10-08 18:00:04.386+00",
+          "latest_fixture_player_fetch": "2026-10-08 03:36:01.288+00",
+          "latest_squad_fetch": "2026-10-06 14:21:01.099+00",
+          "lineup_rows": 249,
+          "observed_at_local": "2026-10-15 20:58:25.270343",
+          "observed_at_utc": "2026-10-15 23:58:25.357713+00",
+          "personal_rating_rows": 0,
+          "player_season_rows": 0,
+          "players": 2868,
+          "review_rows": 170,
+          "teams": 939,
+          "teams_with_active_squad_rows": 86
+        }
+      ]
+    },
+    {
+      "key": "editions",
+      "sql": "SELECT b.id, b.briefing_date, b.status, b.generated_at, b.facts_through, b.updated_at,\nb.metadata->>'aiEditorialStatus' AS ai_status,\nb.metadata->>'aiEditorialCandidates' AS ai_candidates,\nb.metadata->>'aiEditorialItems' AS ai_updated_items,\nb.metadata->>'aiEditorialBatchErrors' AS ai_batch_errors,\nlength(b.football_summary) AS opening_characters,\ncount(i.id) AS item_count,\ncount(i.id) FILTER (WHERE i.item_kind='FOOTBALL_MATCH') AS football_match_items,\ncount(i.id) FILTER (WHERE i.item_kind='FOOTBALL_MATCH' AND length(coalesce(i.body,''))>0) AS football_items_with_text,\ncount(i.id) FILTER (WHERE i.facts->'editorialStats'->>'source'='SofaScore') AS items_with_sofascore_stats\nFROM public.sports_daily_briefings b LEFT JOIN public.sports_briefing_items i ON i.briefing_id=b.id\nGROUP BY b.id ORDER BY b.briefing_date DESC, b.updated_at DESC LIMIT 8;",
+      "rows": [
+        {
+          "ai_batch_errors": null,
+          "ai_candidates": null,
+          "ai_status": null,
+          "ai_updated_items": null,
+          "briefing_date": "2026-10-14",
+          "facts_through": null,
+          "football_items_with_text": 0,
+          "football_match_items": 0,
+          "generated_at": "2026-10-15 07:57:00.04793+00",
+          "id": "6e0de8e4-629d-4c5e-9f40-2188b35d4ac6",
+          "item_count": 0,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": null,
+          "status": "FAILED",
+          "updated_at": "2026-10-15 08:05:00.139396+00"
+        },
+        {
+          "ai_batch_errors": null,
+          "ai_candidates": null,
+          "ai_status": null,
+          "ai_updated_items": null,
+          "briefing_date": "2026-10-13",
+          "facts_through": null,
+          "football_items_with_text": 0,
+          "football_match_items": 0,
+          "generated_at": "2026-10-14 07:57:00.038652+00",
+          "id": "7709aa83-a335-4287-a30f-635eb630397e",
+          "item_count": 0,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": null,
+          "status": "FAILED",
+          "updated_at": "2026-10-14 08:05:00.066674+00"
+        },
+        {
+          "ai_batch_errors": null,
+          "ai_candidates": null,
+          "ai_status": null,
+          "ai_updated_items": null,
+          "briefing_date": "2026-10-12",
+          "facts_through": null,
+          "football_items_with_text": 0,
+          "football_match_items": 0,
+          "generated_at": "2026-10-13 07:57:00.046172+00",
+          "id": "37406063-3ac9-4bcf-aada-eeb5bca254b8",
+          "item_count": 0,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": null,
+          "status": "FAILED",
+          "updated_at": "2026-10-13 08:05:00.063832+00"
+        },
+        {
+          "ai_batch_errors": null,
+          "ai_candidates": null,
+          "ai_status": null,
+          "ai_updated_items": null,
+          "briefing_date": "2026-10-11",
+          "facts_through": null,
+          "football_items_with_text": 0,
+          "football_match_items": 0,
+          "generated_at": "2026-10-12 07:57:00.048666+00",
+          "id": "fd6b4b3f-04dc-4c42-b0e5-9524739643fb",
+          "item_count": 0,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": null,
+          "status": "FAILED",
+          "updated_at": "2026-10-12 08:05:00.047064+00"
+        },
+        {
+          "ai_batch_errors": null,
+          "ai_candidates": null,
+          "ai_status": null,
+          "ai_updated_items": null,
+          "briefing_date": "2026-10-10",
+          "facts_through": null,
+          "football_items_with_text": 0,
+          "football_match_items": 0,
+          "generated_at": "2026-10-11 07:57:00.036509+00",
+          "id": "9a3516ad-ed0e-4c24-827d-f19b0aca6409",
+          "item_count": 0,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": null,
+          "status": "FAILED",
+          "updated_at": "2026-10-11 08:05:00.05371+00"
+        },
+        {
+          "ai_batch_errors": null,
+          "ai_candidates": null,
+          "ai_status": null,
+          "ai_updated_items": null,
+          "briefing_date": "2026-10-09",
+          "facts_through": null,
+          "football_items_with_text": 0,
+          "football_match_items": 0,
+          "generated_at": "2026-10-10 07:57:00.040566+00",
+          "id": "ea27e9d4-2205-44a2-ada2-de944a7408d2",
+          "item_count": 0,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": null,
+          "status": "FAILED",
+          "updated_at": "2026-10-10 08:05:00.188516+00"
+        },
+        {
+          "ai_batch_errors": null,
+          "ai_candidates": null,
+          "ai_status": null,
+          "ai_updated_items": null,
+          "briefing_date": "2026-10-08",
+          "facts_through": null,
+          "football_items_with_text": 0,
+          "football_match_items": 0,
+          "generated_at": "2026-10-09 08:05:00.045234+00",
+          "id": "af212bb8-3815-46f5-bb38-5f9e25d4c9a3",
+          "item_count": 1,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": null,
+          "status": "PUBLISHED",
+          "updated_at": "2026-10-09 08:05:00.045234+00"
+        },
+        {
+          "ai_batch_errors": "0",
+          "ai_candidates": "17",
+          "ai_status": "REFINED",
+          "ai_updated_items": "17",
+          "briefing_date": "2026-10-07",
+          "facts_through": "2026-10-08 07:20:10.426+00",
+          "football_items_with_text": 11,
+          "football_match_items": 11,
+          "generated_at": "2026-10-08 08:05:00.0474+00",
+          "id": "8f553f1e-c057-4d88-b4ea-d4d373c6df18",
+          "item_count": 17,
+          "items_with_sofascore_stats": 0,
+          "opening_characters": 674,
+          "status": "PUBLISHED",
+          "updated_at": "2026-10-08 08:05:00.0474+00"
+        }
+      ]
+    },
+    {
+      "key": "catalog",
+      "sql": "SELECT table_schema, table_name FROM information_schema.tables\nWHERE (table_schema='public' AND (table_name LIKE 'sports_%' OR table_name LIKE '%app_user%' OR table_name LIKE '%allow%' OR table_name LIKE '%elo%target%'))\nOR (table_schema IN ('cron','auth') AND table_name IN ('job','job_run_details','users','sessions'))\nORDER BY table_schema,table_name;",
+      "rows": [
+        {
+          "table_name": "sessions",
+          "table_schema": "auth"
+        },
+        {
+          "table_name": "users",
+          "table_schema": "auth"
+        },
+        {
+          "table_name": "job",
+          "table_schema": "cron"
+        },
+        {
+          "table_name": "job_run_details",
+          "table_schema": "cron"
+        },
+        {
+          "table_name": "elo_target_leagues",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_briefing_items",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_broadcast_evidence",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_competitions",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_daily_briefings",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_editorial_source_evidence",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_fixture_events",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_fixture_lineups",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_fixture_player_stats",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_fixture_team_stats",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_fixtures",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_injuries",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_jobs",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_league_elo_current",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_match_fact_packs",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_match_reviews",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_player_period_aggregates",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_player_personal_ratings",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_player_season_stats",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_players",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_prospective_collection_state",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_review_field_marks",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_standings",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_sync_state",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_team_competitions",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_team_elo_current",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_team_squads",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_teams",
+          "table_schema": "public"
+        },
+        {
+          "table_name": "sports_tracking_rules",
+          "table_schema": "public"
+        }
+      ]
+    },
+    {
+      "key": "jobs",
+      "sql": "SELECT job_type,status,count(*) AS jobs, min(available_at) AS oldest_available_at,\nmax(updated_at) AS latest_update, max(completed_at) AS latest_completed_at,\ncount(*) FILTER (WHERE last_error IS NOT NULL) AS with_error\nFROM public.sports_jobs GROUP BY job_type,status ORDER BY job_type,status;",
+      "rows": [
+        {
+          "job_type": "API_FOOTBALL_FIXTURE_DATA",
+          "jobs": 5,
+          "latest_completed_at": null,
+          "latest_update": "2026-10-08 09:50:00.707275+00",
+          "oldest_available_at": "2026-10-09 01:30:00+00",
+          "status": "PENDING",
+          "with_error": 0
+        },
+        {
+          "job_type": "API_FOOTBALL_FIXTURE_DATA",
+          "jobs": 6,
+          "latest_completed_at": "2026-10-08 03:36:06.710033+00",
+          "latest_update": "2026-10-08 03:36:06.710033+00",
+          "oldest_available_at": "2026-10-08 01:41:01.383792+00",
+          "status": "SUCCEEDED",
+          "with_error": 0
+        },
+        {
+          "job_type": "API_FOOTBALL_LEAGUE_TEAMS",
+          "jobs": 6,
+          "latest_completed_at": "2026-10-06 06:07:08.203131+00",
+          "latest_update": "2026-10-06 06:07:08.203131+00",
+          "oldest_available_at": "2026-10-04 18:09:49.396757+00",
+          "status": "SUCCEEDED",
+          "with_error": 0
+        },
+        {
+          "job_type": "API_FOOTBALL_LINK",
+          "jobs": 3,
+          "latest_completed_at": "2026-10-07 12:31:01.270162+00",
+          "latest_update": "2026-10-07 12:31:01.270162+00",
+          "oldest_available_at": "2026-10-05 03:49:02.120926+00",
+          "status": "DEAD",
+          "with_error": 3
+        },
+        {
+          "job_type": "API_FOOTBALL_LINK",
+          "jobs": 11,
+          "latest_completed_at": "2026-10-08 09:50:00.772068+00",
+          "latest_update": "2026-10-08 09:50:00.772068+00",
+          "oldest_available_at": "2026-10-06 07:50:08.059843+00",
+          "status": "SUCCEEDED",
+          "with_error": 0
+        },
+        {
+          "job_type": "API_FOOTBALL_TEAM_SQUAD",
+          "jobs": 86,
+          "latest_completed_at": "2026-10-06 14:21:04.211783+00",
+          "latest_update": "2026-10-06 14:21:04.211783+00",
+          "oldest_available_at": "2026-10-04 18:10:05.072504+00",
+          "status": "SUCCEEDED",
+          "with_error": 0
+        },
+        {
+          "job_type": "BROADCAST_SYNC",
+          "jobs": 84,
+          "latest_completed_at": null,
+          "latest_update": "2026-10-15 22:17:00.024602+00",
+          "oldest_available_at": "2026-10-09 00:17:00.044684+00",
+          "status": "PENDING",
+          "with_error": 0
+        },
+        {
+          "job_type": "BROADCAST_SYNC",
+          "jobs": 51,
+          "latest_completed_at": "2026-10-08 22:17:02.364004+00",
+          "latest_update": "2026-10-08 22:17:02.364004+00",
+          "oldest_available_at": "2026-10-04 18:17:00.075871+00",
+          "status": "SUCCEEDED",
+          "with_error": 0
+        },
+        {
+          "job_type": "FIVE_DOLLAR_RECENT_FORM_LEAGUE",
+          "jobs": 7,
+          "latest_completed_at": null,
+          "latest_update": "2026-10-09 07:40:00.048184+00",
+          "oldest_available_at": "2026-10-09 07:40:00.048184+00",
+          "status": "PENDING",
+          "with_error": 0
+        },
+        {
+          "job_type": "FIVE_DOLLAR_RECENT_FORM_LEAGUE",
+          "jobs": 6,
+          "latest_completed_at": "2026-10-08 07:41:07.087462+00",
+          "latest_update": "2026-10-08 07:41:07.087462+00",
+          "oldest_available_at": "2026-10-05 07:40:00.058043+00",
+          "status": "SUCCEEDED",
+          "with_error": 0
+        }
+      ]
+    },
+    {
+      "key": "runtime_schema",
+      "sql": "SELECT table_schema, table_name, jsonb_agg(jsonb_build_object('name',column_name,'type',data_type) ORDER BY ordinal_position) AS columns\nFROM information_schema.columns\nWHERE (table_schema='public' AND table_name IN ('sports_editorial_source_evidence','sports_match_fact_packs','sports_review_field_marks','sports_prospective_collection_state','sports_team_competitions','sports_tracking_rules','automation_runs','elo_target_leagues','sports_player_period_aggregates'))\nOR (table_schema='net' AND table_name='_http_response')\nGROUP BY table_schema,table_name ORDER BY table_schema,table_name;",
+      "rows": [
+        {
+          "columns": [
+            {
+              "name": "id",
+              "type": "bigint"
+            },
+            {
+              "name": "status_code",
+              "type": "integer"
+            },
+            {
+              "name": "content_type",
+              "type": "text"
+            },
+            {
+              "name": "headers",
+              "type": "jsonb"
+            },
+            {
+              "name": "content",
+              "type": "text"
+            },
+            {
+              "name": "timed_out",
+              "type": "boolean"
+            },
+            {
+              "name": "error_msg",
+              "type": "text"
+            },
+            {
+              "name": "created",
+              "type": "timestamp with time zone"
+            }
+          ],
+          "table_name": "_http_response",
+          "table_schema": "net"
+        },
+        {
+          "columns": [
+            {
+              "name": "id",
+              "type": "bigint"
+            },
+            {
+              "name": "job_name",
+              "type": "text"
+            },
+            {
+              "name": "request_id",
+              "type": "bigint"
+            },
+            {
+              "name": "started_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "finished_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "status",
+              "type": "text"
+            },
+            {
+              "name": "http_status",
+              "type": "integer"
+            },
+            {
+              "name": "error_message",
+              "type": "text"
+            },
+            {
+              "name": "metadata",
+              "type": "jsonb"
+            }
+          ],
+          "table_name": "automation_runs",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "league_id",
+              "type": "bigint"
+            },
+            {
+              "name": "league_key",
+              "type": "text"
+            },
+            {
+              "name": "league_name",
+              "type": "text"
+            },
+            {
+              "name": "country_code",
+              "type": "text"
+            },
+            {
+              "name": "region",
+              "type": "text"
+            },
+            {
+              "name": "division_level",
+              "type": "integer"
+            },
+            {
+              "name": "focus_role",
+              "type": "text"
+            },
+            {
+              "name": "prior_rating",
+              "type": "numeric"
+            },
+            {
+              "name": "parent_league_key",
+              "type": "text"
+            },
+            {
+              "name": "active",
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "last_synced_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "last_sync_status",
+              "type": "text"
+            },
+            {
+              "name": "last_sync_error",
+              "type": "text"
+            }
+          ],
+          "table_name": "elo_target_leagues",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "id",
+              "type": "uuid"
+            },
+            {
+              "name": "fixture_id",
+              "type": "uuid"
+            },
+            {
+              "name": "briefing_date",
+              "type": "date"
+            },
+            {
+              "name": "source_kind",
+              "type": "text"
+            },
+            {
+              "name": "source_name",
+              "type": "text"
+            },
+            {
+              "name": "source_url",
+              "type": "text"
+            },
+            {
+              "name": "source_event_id",
+              "type": "text"
+            },
+            {
+              "name": "evidence_type",
+              "type": "text"
+            },
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "body",
+              "type": "text"
+            },
+            {
+              "name": "payload",
+              "type": "jsonb"
+            },
+            {
+              "name": "published_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "fetched_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "confidence",
+              "type": "numeric"
+            },
+            {
+              "name": "metadata",
+              "type": "jsonb"
+            },
+            {
+              "name": "created_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "type": "timestamp with time zone"
+            }
+          ],
+          "table_name": "sports_editorial_source_evidence",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "fixture_id",
+              "type": "uuid"
+            },
+            {
+              "name": "definition_version",
+              "type": "text"
+            },
+            {
+              "name": "payload",
+              "type": "jsonb"
+            },
+            {
+              "name": "checksum",
+              "type": "text"
+            },
+            {
+              "name": "source_fetched_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "generated_at",
+              "type": "timestamp with time zone"
+            }
+          ],
+          "table_name": "sports_match_fact_packs",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "player_id",
+              "type": "uuid"
+            },
+            {
+              "name": "team_id",
+              "type": "uuid"
+            },
+            {
+              "name": "competition_id",
+              "type": "uuid"
+            },
+            {
+              "name": "season",
+              "type": "text"
+            },
+            {
+              "name": "provider",
+              "type": "text"
+            },
+            {
+              "name": "period_start",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "period_end",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "appearances",
+              "type": "integer"
+            },
+            {
+              "name": "starts",
+              "type": "integer"
+            },
+            {
+              "name": "minutes",
+              "type": "integer"
+            },
+            {
+              "name": "provider_rating",
+              "type": "numeric"
+            },
+            {
+              "name": "fixture_rows",
+              "type": "integer"
+            },
+            {
+              "name": "fetched_at",
+              "type": "timestamp with time zone"
+            }
+          ],
+          "table_name": "sports_player_period_aggregates",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "singleton",
+              "type": "boolean"
+            },
+            {
+              "name": "day_zero_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "activated_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "definition_version",
+              "type": "text"
+            },
+            {
+              "name": "metadata",
+              "type": "jsonb"
+            }
+          ],
+          "table_name": "sports_prospective_collection_state",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "id",
+              "type": "uuid"
+            },
+            {
+              "name": "review_id",
+              "type": "uuid"
+            },
+            {
+              "name": "player_id",
+              "type": "uuid"
+            },
+            {
+              "name": "x_percent",
+              "type": "numeric"
+            },
+            {
+              "name": "y_percent",
+              "type": "numeric"
+            },
+            {
+              "name": "note",
+              "type": "text"
+            },
+            {
+              "name": "created_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "type": "timestamp with time zone"
+            }
+          ],
+          "table_name": "sports_review_field_marks",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "competition_id",
+              "type": "uuid"
+            },
+            {
+              "name": "team_id",
+              "type": "uuid"
+            },
+            {
+              "name": "season",
+              "type": "text"
+            },
+            {
+              "name": "provider",
+              "type": "text"
+            },
+            {
+              "name": "active",
+              "type": "boolean"
+            },
+            {
+              "name": "fetched_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "metadata",
+              "type": "jsonb"
+            }
+          ],
+          "table_name": "sports_team_competitions",
+          "table_schema": "public"
+        },
+        {
+          "columns": [
+            {
+              "name": "id",
+              "type": "uuid"
+            },
+            {
+              "name": "rule_key",
+              "type": "text"
+            },
+            {
+              "name": "competition_id",
+              "type": "uuid"
+            },
+            {
+              "name": "country_code",
+              "type": "text"
+            },
+            {
+              "name": "region",
+              "type": "text"
+            },
+            {
+              "name": "competition_kind",
+              "type": "text"
+            },
+            {
+              "name": "division_level",
+              "type": "integer"
+            },
+            {
+              "name": "always_track",
+              "type": "boolean"
+            },
+            {
+              "name": "enabled",
+              "type": "boolean"
+            },
+            {
+              "name": "priority",
+              "type": "integer"
+            },
+            {
+              "name": "metadata",
+              "type": "jsonb"
+            },
+            {
+              "name": "created_at",
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "type": "timestamp with time zone"
+            }
+          ],
+          "table_name": "sports_tracking_rules",
+          "table_schema": "public"
+        }
+      ]
+    },
+    {
+      "key": "cron",
+      "sql": "SELECT jobid,jobname,schedule,active FROM cron.job ORDER BY jobid;",
+      "rows": [
+        {
+          "active": true,
+          "jobid": 1,
+          "jobname": "elo-daily-incremental",
+          "schedule": "*/2 6-7 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 2,
+          "jobname": "elo-daily-finalize",
+          "schedule": "5 8 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 3,
+          "jobname": "privacy-retention-daily",
+          "schedule": "20 3 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 4,
+          "jobname": "performance-retention-daily",
+          "schedule": "15 4 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 5,
+          "jobname": "push-delivery-dispatch",
+          "schedule": "* * * * *"
+        },
+        {
+          "active": true,
+          "jobid": 6,
+          "jobname": "automation-http-reconcile",
+          "schedule": "* * * * *"
+        },
+        {
+          "active": true,
+          "jobid": 7,
+          "jobname": "sports-intelligence-maintenance",
+          "schedule": "*/15 * * * *"
+        },
+        {
+          "active": true,
+          "jobid": 8,
+          "jobname": "sports-job-worker-kick",
+          "schedule": "* * * * *"
+        },
+        {
+          "active": true,
+          "jobid": 9,
+          "jobname": "sports-api-maintenance",
+          "schedule": "12 */6 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 10,
+          "jobname": "sports-broadcast-sync-today",
+          "schedule": "17 */2 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 11,
+          "jobname": "sports-daily-sync-yesterday",
+          "schedule": "20 7 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 12,
+          "jobname": "sports-daily-sync-today",
+          "schedule": "35 7 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 13,
+          "jobname": "sports-daily-sync-tomorrow",
+          "schedule": "50 7 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 14,
+          "jobname": "sports-recent-form-history-today",
+          "schedule": "40 7 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 15,
+          "jobname": "sports-editorial-source-sync-yesterday",
+          "schedule": "50 7 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 16,
+          "jobname": "sports-daily-briefing-prepare-yesterday",
+          "schedule": "57 7 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 17,
+          "jobname": "sports-editorial-ai-refine-yesterday",
+          "schedule": "0 8 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 18,
+          "jobname": "sports-daily-briefing-release-yesterday",
+          "schedule": "5 8 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 19,
+          "jobname": "sports-today-refresh-day",
+          "schedule": "*/15 9-23 * * *"
+        },
+        {
+          "active": true,
+          "jobid": 20,
+          "jobname": "sports-today-refresh-late",
+          "schedule": "*/15 0-2 * * *"
+        }
+      ]
+    },
+    {
+      "key": "sync",
+      "sql": "SELECT provider,domain,season,last_attempt_at,last_success_at,updated_at,\nlast_error IS NOT NULL AS has_error,\nCASE WHEN last_error IS NULL THEN NULL\nWHEN last_error ILIKE '%404%' THEN 'HTTP_404'\nWHEN last_error ILIKE '%401%' OR last_error ILIKE '%unauthorized%' THEN 'AUTH_401'\nWHEN last_error ILIKE '%403%' THEN 'HTTP_403'\nWHEN last_error ILIKE '%429%' OR last_error ILIKE '%rate limit%' THEN 'RATE_LIMIT'\nWHEN last_error ILIKE '%timeout%' THEN 'TIMEOUT'\nWHEN last_error ILIKE '%key%ausente%' OR last_error ILIKE '%not configured%' THEN 'MISSING_CONFIGURATION'\nELSE 'OTHER_REDACTED' END AS error_class\nFROM public.sports_sync_state ORDER BY provider,domain,season;",
+      "rows": [
+        {
+          "domain": "fixture_data",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-08 03:36:06.611+00",
+          "last_success_at": "2026-10-08 03:36:06.611+00",
+          "provider": "api_football",
+          "season": "2026/27",
+          "updated_at": "2026-10-08 03:36:06.669863+00"
+        },
+        {
+          "domain": "fixture_link",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-08 09:50:00.695+00",
+          "last_success_at": "2026-10-08 09:50:00.695+00",
+          "provider": "api_football",
+          "season": "2026/27",
+          "updated_at": "2026-10-08 09:50:00.742553+00"
+        },
+        {
+          "domain": "league_teams",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-06 06:07:08.069+00",
+          "last_success_at": "2026-10-06 06:07:08.069+00",
+          "provider": "api_football",
+          "season": "2026/27",
+          "updated_at": "2026-10-06 06:07:08.159858+00"
+        },
+        {
+          "domain": "team_squad",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-06 14:21:04.123+00",
+          "last_success_at": "2026-10-06 14:21:04.123+00",
+          "provider": "api_football",
+          "season": "2026/27",
+          "updated_at": "2026-10-06 14:21:04.173266+00"
+        },
+        {
+          "domain": "previous_day_review",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-08 07:50:28.984+00",
+          "last_success_at": "2026-10-08 07:50:28.984+00",
+          "provider": "editorial_rss",
+          "season": "2026/27",
+          "updated_at": "2026-10-08 07:50:38.409437+00"
+        },
+        {
+          "domain": "fixtures_daily",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-08 22:30:02.744+00",
+          "last_success_at": "2026-10-08 22:30:02.744+00",
+          "provider": "five_dollar",
+          "season": "2026/27",
+          "updated_at": "2026-10-08 22:30:02.787438+00"
+        },
+        {
+          "domain": "recent_form_history",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-08 07:41:07.007+00",
+          "last_success_at": "2026-10-08 07:41:07.007+00",
+          "provider": "five_dollar",
+          "season": "2026/27",
+          "updated_at": "2026-10-08 07:41:07.058189+00"
+        },
+        {
+          "domain": "broadcasts",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-08 22:17:02.24+00",
+          "last_success_at": "2026-10-08 22:17:02.24+00",
+          "provider": "futnatv",
+          "season": "2026/27",
+          "updated_at": "2026-10-08 22:17:02.31892+00"
+        },
+        {
+          "domain": "api_maintenance",
+          "error_class": null,
+          "has_error": false,
+          "last_attempt_at": "2026-10-08 18:12:00.72+00",
+          "last_success_at": "2026-10-08 18:12:00.72+00",
+          "provider": "system",
+          "season": "2026/27",
+          "updated_at": "2026-10-08 18:12:01.588872+00"
+        }
+      ]
+    },
+    {
+      "key": "edition_diagnostics",
+      "sql": "SELECT b.briefing_date,b.status,jsonb_object_keys(b.metadata) AS metadata_key\nFROM public.sports_daily_briefings b WHERE b.briefing_date>='2026-10-07'\nORDER BY b.briefing_date DESC,metadata_key;",
+      "rows": [
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "backendScheduleVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "broadcastInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "definitionVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "editorialAxes",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "externalEditorialContext",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "factualItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "futureFixtureInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "generation",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "journalismMatchItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "journalismPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "lifecycle",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "otherSportsItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "otherSportsSelection",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "preparedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "publishTargetLocal",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "releaseAttemptedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "releaseFailure",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "reviewScope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "scheduleInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "scope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "sofascoreMode",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "statsPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "timezone",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-14",
+          "metadata_key": "xgPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "backendScheduleVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "broadcastInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "definitionVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "editorialAxes",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "externalEditorialContext",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "factualItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "futureFixtureInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "generation",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "journalismMatchItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "journalismPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "lifecycle",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "otherSportsItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "otherSportsSelection",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "preparedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "publishTargetLocal",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "releaseAttemptedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "releaseFailure",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "reviewScope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "scheduleInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "scope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "sofascoreMode",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "statsPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "timezone",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "metadata_key": "xgPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "backendScheduleVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "broadcastInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "definitionVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "editorialAxes",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "externalEditorialContext",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "factualItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "futureFixtureInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "generation",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "journalismMatchItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "journalismPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "lifecycle",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "otherSportsItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "otherSportsSelection",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "preparedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "publishTargetLocal",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "releaseAttemptedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "releaseFailure",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "reviewScope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "scheduleInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "scope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "sofascoreMode",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "statsPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "timezone",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "metadata_key": "xgPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "backendScheduleVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "broadcastInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "definitionVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "editorialAxes",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "externalEditorialContext",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "factualItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "futureFixtureInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "generation",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "journalismMatchItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "journalismPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "lifecycle",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "otherSportsItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "otherSportsSelection",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "preparedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "publishTargetLocal",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "releaseAttemptedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "releaseFailure",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "reviewScope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "scheduleInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "scope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "sofascoreMode",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "statsPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "timezone",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "metadata_key": "xgPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "backendScheduleVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "broadcastInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "definitionVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "editorialAxes",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "externalEditorialContext",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "factualItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "futureFixtureInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "generation",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "journalismMatchItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "journalismPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "lifecycle",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "otherSportsItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "otherSportsSelection",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "preparedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "publishTargetLocal",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "releaseAttemptedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "releaseFailure",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "reviewScope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "scheduleInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "scope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "sofascoreMode",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "statsPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "timezone",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "metadata_key": "xgPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "backendScheduleVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "broadcastInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "definitionVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "editorialAxes",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "externalEditorialContext",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "factualItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "futureFixtureInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "generation",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "journalismMatchItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "journalismPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "lifecycle",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "otherSportsItems",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "otherSportsSelection",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "preparedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "publishTargetLocal",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "releaseAttemptedAt",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "releaseFailure",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "reviewScope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "scheduleInReview",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "scope",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "sofascoreMode",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "statsPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "timezone",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "metadata_key": "xgPolicy",
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "backendScheduleVersion",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "broadcastInReview",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "definitionVersion",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "editorialAxes",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "externalEditorialContext",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "factualItems",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "futureFixtureInReview",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "generation",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "journalismMatchItems",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "journalismPolicy",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "lifecycle",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "otherSportsItems",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "otherSportsSelection",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "preparedAt",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "publishTargetLocal",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "releasedAt",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "releaseItemCount",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "releaseMode",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "reviewScope",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "scheduleInReview",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "scope",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "sofascoreMode",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "statsPolicy",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "timezone",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "metadata_key": "xgPolicy",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialBatchErrors",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialBatches",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialCandidates",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialGeneratedAt",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialItems",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialModel",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialSourceBound",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialStatus",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "aiEditorialVersion",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "backendScheduleVersion",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "broadcastInReview",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "definitionVersion",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "editorialAxes",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "editorialPolicyVersion",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "externalEditorialContext",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "factualItems",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "futureFixtureInReview",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "generation",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "journalismMatchItems",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "journalismPolicy",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "lifecycle",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "otherSportsItems",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "otherSportsSelection",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "preparedAt",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "publishTargetLocal",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "releasedAt",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "releaseItemCount",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "releaseMode",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "reviewScope",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "scheduleInReview",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "scope",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "sofascoreMode",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "statsPolicy",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "statsPrimaryProvider",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "statsSecondaryProvider",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "timezone",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "metadata_key": "xgPolicy",
+          "status": "PUBLISHED"
+        }
+      ]
+    },
+    {
+      "key": "cron_runs",
+      "sql": "SELECT j.jobname,d.status,count(*) AS runs,max(d.start_time) AS last_start,max(d.end_time) AS last_end,\nCASE WHEN d.return_message ILIKE '%404%' THEN 'HTTP_404'\nWHEN d.return_message ILIKE '%401%' OR d.return_message ILIKE '%unauthorized%' THEN 'AUTH_401'\nWHEN d.return_message ILIKE '%403%' THEN 'HTTP_403'\nWHEN d.return_message ILIKE '%timeout%' THEN 'TIMEOUT'\nWHEN d.return_message ILIKE '%could not connect%' THEN 'CONNECTION_ERROR'\nWHEN d.return_message ILIKE '%succeeded%' THEN 'SUCCESS_MESSAGE'\nELSE 'OTHER_REDACTED' END AS message_class\nFROM cron.job_run_details d JOIN cron.job j ON j.jobid=d.jobid\nWHERE d.start_time >= CURRENT_TIMESTAMP-INTERVAL '24 hours'\nGROUP BY j.jobname,d.status,message_class ORDER BY j.jobname,d.status,message_class;",
+      "rows": [
+        {
+          "jobname": "automation-http-reconcile",
+          "last_end": "2026-10-16 00:00:00.056458+00",
+          "last_start": "2026-10-16 00:00:00.044634+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1440,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "elo-daily-finalize",
+          "last_end": "2026-10-15 08:05:06.71742+00",
+          "last_start": "2026-10-15 08:05:00.130746+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "elo-daily-incremental",
+          "last_end": "2026-10-15 07:58:06.615621+00",
+          "last_start": "2026-10-15 07:58:00.065643+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 60,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "performance-retention-daily",
+          "last_end": "2026-10-15 04:15:00.052976+00",
+          "last_start": "2026-10-15 04:15:00.047715+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "failed"
+        },
+        {
+          "jobname": "privacy-retention-daily",
+          "last_end": "2026-10-15 03:20:00.075026+00",
+          "last_start": "2026-10-15 03:20:00.038282+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "push-delivery-dispatch",
+          "last_end": "2026-10-16 00:00:00.049698+00",
+          "last_start": "2026-10-16 00:00:00.046335+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1440,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-api-maintenance",
+          "last_end": "2026-10-15 18:12:00.047529+00",
+          "last_start": "2026-10-15 18:12:00.040666+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 4,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-broadcast-sync-today",
+          "last_end": "2026-10-15 22:17:00.051216+00",
+          "last_start": "2026-10-15 22:17:00.024434+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 12,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-daily-briefing-prepare-yesterday",
+          "last_end": "2026-10-15 07:57:00.268876+00",
+          "last_start": "2026-10-15 07:57:00.047888+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-daily-briefing-release-yesterday",
+          "last_end": "2026-10-15 08:05:00.15878+00",
+          "last_start": "2026-10-15 08:05:00.13917+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-daily-sync-today",
+          "last_end": "2026-10-15 07:35:00.049263+00",
+          "last_start": "2026-10-15 07:35:00.041633+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-daily-sync-tomorrow",
+          "last_end": "2026-10-15 07:50:00.074641+00",
+          "last_start": "2026-10-15 07:50:00.056563+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-daily-sync-yesterday",
+          "last_end": "2026-10-15 07:20:00.069796+00",
+          "last_start": "2026-10-15 07:20:00.050719+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-editorial-ai-refine-yesterday",
+          "last_end": "2026-10-15 08:00:00.063838+00",
+          "last_start": "2026-10-15 08:00:00.055521+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-editorial-source-sync-yesterday",
+          "last_end": "2026-10-15 07:50:00.075756+00",
+          "last_start": "2026-10-15 07:50:00.062776+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-intelligence-maintenance",
+          "last_end": "2026-10-16 00:00:00.250426+00",
+          "last_start": "2026-10-16 00:00:00.054639+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 96,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-job-worker-kick",
+          "last_end": "2026-10-16 00:00:00.055457+00",
+          "last_start": "2026-10-16 00:00:00.041755+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1440,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-recent-form-history-today",
+          "last_end": "2026-10-15 07:40:00.107482+00",
+          "last_start": "2026-10-15 07:40:00.047702+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 1,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-today-refresh-day",
+          "last_end": "2026-10-15 23:45:00.069985+00",
+          "last_start": "2026-10-15 23:45:00.059155+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 60,
+          "status": "succeeded"
+        },
+        {
+          "jobname": "sports-today-refresh-late",
+          "last_end": "2026-10-16 00:00:00.066671+00",
+          "last_start": "2026-10-16 00:00:00.061655+00",
+          "message_class": "OTHER_REDACTED",
+          "runs": 12,
+          "status": "succeeded"
+        }
+      ]
+    },
+    {
+      "key": "http",
+      "sql": "SELECT job_name,status,http_status,count(*) AS runs,max(started_at) AS last_start,max(finished_at) AS last_finish,\ncount(*) FILTER (WHERE error_message IS NOT NULL) AS with_error\nFROM public.automation_runs\nWHERE started_at >= CURRENT_TIMESTAMP-INTERVAL '24 hours'\nGROUP BY job_name,status,http_status ORDER BY job_name,status,http_status;",
+      "rows": []
+    },
+    {
+      "key": "responses",
+      "sql": "SELECT status_code,timed_out,count(*) AS responses,min(created) AS first_at,max(created) AS last_at\nFROM net._http_response WHERE created >= CURRENT_TIMESTAMP-INTERVAL '6 hours'\nGROUP BY status_code,timed_out ORDER BY status_code,timed_out;",
+      "rows": [
+        {
+          "first_at": "2026-10-15 18:01:00.056665+00",
+          "last_at": "2026-10-16 00:00:00.308188+00",
+          "responses": 385,
+          "status_code": 404,
+          "timed_out": false
+        }
+      ]
+    },
+    {
+      "key": "release",
+      "sql": "SELECT briefing_date,status,metadata->>'releaseFailure' AS release_failure,\nmetadata->>'factualItems' AS factual_items,metadata->>'journalismMatchItems' AS journalism_matches,\nmetadata->>'otherSportsItems' AS other_sports_items,metadata->>'releaseItemCount' AS released_items\nFROM public.sports_daily_briefings WHERE briefing_date>='2026-10-07' ORDER BY briefing_date DESC;",
+      "rows": [
+        {
+          "briefing_date": "2026-10-14",
+          "factual_items": "0",
+          "journalism_matches": "0",
+          "other_sports_items": "0",
+          "release_failure": "no_editorial_items",
+          "released_items": null,
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-13",
+          "factual_items": "0",
+          "journalism_matches": "0",
+          "other_sports_items": "0",
+          "release_failure": "no_editorial_items",
+          "released_items": null,
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-12",
+          "factual_items": "0",
+          "journalism_matches": "0",
+          "other_sports_items": "0",
+          "release_failure": "no_editorial_items",
+          "released_items": null,
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-11",
+          "factual_items": "0",
+          "journalism_matches": "0",
+          "other_sports_items": "0",
+          "release_failure": "no_editorial_items",
+          "released_items": null,
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-10",
+          "factual_items": "0",
+          "journalism_matches": "0",
+          "other_sports_items": "0",
+          "release_failure": "no_editorial_items",
+          "released_items": null,
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-09",
+          "factual_items": "0",
+          "journalism_matches": "0",
+          "other_sports_items": "0",
+          "release_failure": "no_editorial_items",
+          "released_items": null,
+          "status": "FAILED"
+        },
+        {
+          "briefing_date": "2026-10-08",
+          "factual_items": "0",
+          "journalism_matches": "0",
+          "other_sports_items": "0",
+          "release_failure": null,
+          "released_items": "1",
+          "status": "PUBLISHED"
+        },
+        {
+          "briefing_date": "2026-10-07",
+          "factual_items": "11",
+          "journalism_matches": "5",
+          "other_sports_items": "6",
+          "release_failure": null,
+          "released_items": "17",
+          "status": "PUBLISHED"
+        }
+      ]
+    },
+    {
+      "key": "worker_url",
+      "sql": "SELECT name, decrypted_secret='https://value-bet-engine.lovable.app' AS points_to_previous_recorded_url\nFROM vault.decrypted_secrets WHERE name='sports_worker_base_url';",
+      "rows": [
+        {
+          "name": "sports_worker_base_url",
+          "points_to_previous_recorded_url": true
+        }
+      ]
+    },
+    {
+      "key": "surface_data",
+      "sql": "SELECT\nclock_timestamp() AS observed_at_utc,(CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo') AS observed_at_local,\n(SELECT count(*) FROM public.sports_fixtures WHERE kickoff_at >= (((CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date) AT TIME ZONE 'America/Sao_Paulo')\nAND kickoff_at < ((((CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date)+1) AT TIME ZONE 'America/Sao_Paulo')) AS fixtures_local_today,\n(SELECT count(*) FROM public.sports_fixtures WHERE kickoff_at >= ((((CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date)-1) AT TIME ZONE 'America/Sao_Paulo')\nAND kickoff_at < (((CURRENT_TIMESTAMP AT TIME ZONE 'America/Sao_Paulo')::date) AT TIME ZONE 'America/Sao_Paulo')) AS fixtures_local_yesterday,\n(SELECT count(*) FROM public.sports_broadcast_evidence) AS broadcast_rows,\n(SELECT max(checked_at) FROM public.sports_broadcast_evidence) AS latest_broadcast_check,\n(SELECT count(*) FROM public.sports_editorial_source_evidence) AS editorial_evidence_rows,\n(SELECT max(fetched_at) FROM public.sports_editorial_source_evidence) AS latest_editorial_fetch,\n(SELECT count(*) FROM public.sports_match_fact_packs) AS fact_pack_rows,\n(SELECT max(generated_at) FROM public.sports_match_fact_packs) AS latest_fact_pack,\n(SELECT count(*) FROM public.sports_standings) AS standings_rows,\n(SELECT count(*) FROM public.sports_player_period_aggregates) AS player_period_rows,\n(SELECT count(*) FROM public.sports_review_field_marks) AS field_marks,\n(SELECT count(*) FROM auth.users) AS auth_users,\n(SELECT count(*) FROM public.sports_match_reviews WHERE notes IS NOT NULL AND length(notes)>0) AS reviews_with_notes,\n(SELECT count(*) FROM public.sports_match_reviews WHERE watched IS TRUE) AS watched_reviews;",
+      "rows": [
+        {
+          "auth_users": 1,
+          "broadcast_rows": 40,
+          "editorial_evidence_rows": 289,
+          "fact_pack_rows": 315,
+          "field_marks": 0,
+          "fixtures_local_today": 0,
+          "fixtures_local_yesterday": 0,
+          "latest_broadcast_check": "2026-10-08 22:17:02.068+00",
+          "latest_editorial_fetch": "2026-10-08 07:50:28.984+00",
+          "latest_fact_pack": "2026-10-08 18:00:08.675+00",
+          "observed_at_local": "2026-10-15 21:01:22.874574",
+          "observed_at_utc": "2026-10-16 00:01:22.938105+00",
+          "player_period_rows": 247,
+          "reviews_with_notes": 0,
+          "standings_rows": 0,
+          "watched_reviews": 0
+        }
+      ]
+    },
+    {
+      "key": "elo",
+      "sql": "SELECT id,model_version,last_started_at,last_completed_at,last_status,leagues_processed,fixtures_fetched,api_requests,updated_at,\nerror_message IS NOT NULL AS has_error FROM public.elo_sync_state ORDER BY id;\n",
+      "rows": [
+        {
+          "api_requests": 0,
+          "fixtures_fetched": 11075,
+          "has_error": true,
+          "id": "main",
+          "last_completed_at": "2026-10-15 08:05:00.131+00",
+          "last_started_at": null,
+          "last_status": "PARTIAL",
+          "leagues_processed": 5,
+          "model_version": "hierarchical-elo-v1",
+          "updated_at": "2026-10-15 08:05:00.131+00"
+        }
+      ]
+    },
+    {
+      "key": "http_classification",
+      "sql": "SELECT status_code,count(*) AS responses,\ncount(*) FILTER (WHERE content ILIKE '%Project not found%') AS project_not_found,\ncount(*) FILTER (WHERE content ILIKE '%Unauthorized%') AS unauthorized_body,\ncount(*) FILTER (WHERE error_msg IS NOT NULL) AS transport_error\nFROM net._http_response WHERE created>=CURRENT_TIMESTAMP-INTERVAL '6 hours'\nGROUP BY status_code ORDER BY status_code;",
+      "rows": [
+        {
+          "project_not_found": 385,
+          "responses": 385,
+          "status_code": 404,
+          "transport_error": 0,
+          "unauthorized_body": 0
+        }
+      ]
+    },
+    {
+      "key": "capabilities",
+      "sql": "SELECT\n(SELECT count(*) FROM public.sports_match_reviews WHERE status='PENDING') AS pending_reviews,\n(SELECT count(*) FROM public.sports_match_reviews WHERE status='COMPLETED') AS completed_reviews,\n(SELECT count(*) FROM public.sports_match_reviews WHERE status='AUTO_CLOSED') AS auto_closed_reviews,\n(SELECT count(*) FROM auth.users WHERE raw_app_meta_data->>'provider'='google') AS google_accounts,\n(SELECT count(*) FROM public.sports_jobs WHERE status IN ('PENDING','FAILED') AND available_at<CURRENT_TIMESTAMP) AS overdue_jobs,\n(SELECT count(*) FROM public.automation_runs) AS all_automation_runs,\n(SELECT jsonb_agg(jsonb_build_object('day_zero_at',day_zero_at,'activated_at',activated_at,'definition_version',definition_version)) FROM public.sports_prospective_collection_state) AS prospective_state;",
+      "rows": [
+        {
+          "all_automation_runs": 0,
+          "auto_closed_reviews": 170,
+          "completed_reviews": 0,
+          "google_accounts": 1,
+          "overdue_jobs": 96,
+          "pending_reviews": 0,
+          "prospective_state": [
+            {
+              "activated_at": "2026-10-04T17:51:23.901344+00:00",
+              "day_zero_at": "2026-10-04T17:51:23.901344+00:00",
+              "definition_version": "prospective-fixture-v1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "access_structure",
+      "sql": "SELECT n.nspname AS schema,c.relname,c.relrowsecurity AS rls_enabled\nFROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace\nWHERE n.nspname='public' AND c.relname IN ('sports_match_reviews','sports_player_personal_ratings','sports_review_field_marks','push_subscriptions')\nORDER BY c.relname;",
+      "rows": [
+        {
+          "relname": "push_subscriptions",
+          "rls_enabled": true,
+          "schema": "public"
+        },
+        {
+          "relname": "sports_match_reviews",
+          "rls_enabled": true,
+          "schema": "public"
+        },
+        {
+          "relname": "sports_player_personal_ratings",
+          "rls_enabled": true,
+          "schema": "public"
+        },
+        {
+          "relname": "sports_review_field_marks",
+          "rls_enabled": true,
+          "schema": "public"
+        }
+      ]
+    },
+    {
+      "key": "runtime_functions",
+      "sql": "SELECT p.proname,\nposition('sports_worker_base_url' IN pg_get_functiondef(p.oid))>0 AS references_worker_base_url,\nposition('net.http_post' IN pg_get_functiondef(p.oid))>0 AS direct_http_post,\nposition('kick_sports_job_worker' IN pg_get_functiondef(p.oid))>0 AS calls_worker_kick\nFROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace\nWHERE n.nspname='public' AND p.proname IN ('kick_sports_job_worker','kick_sports_daily_sync','kick_editorial_source_sync','kick_editorial_ai_refinement','kick_sports_api_maintenance','is_approved_app_user','erase_user_application_data')\nORDER BY p.proname;",
+      "rows": [
+        {
+          "calls_worker_kick": false,
+          "direct_http_post": false,
+          "proname": "erase_user_application_data",
+          "references_worker_base_url": false
+        },
+        {
+          "calls_worker_kick": false,
+          "direct_http_post": false,
+          "proname": "is_approved_app_user",
+          "references_worker_base_url": false
+        },
+        {
+          "calls_worker_kick": false,
+          "direct_http_post": true,
+          "proname": "kick_editorial_ai_refinement",
+          "references_worker_base_url": true
+        },
+        {
+          "calls_worker_kick": false,
+          "direct_http_post": true,
+          "proname": "kick_editorial_source_sync",
+          "references_worker_base_url": true
+        },
+        {
+          "calls_worker_kick": false,
+          "direct_http_post": true,
+          "proname": "kick_sports_api_maintenance",
+          "references_worker_base_url": true
+        },
+        {
+          "calls_worker_kick": false,
+          "direct_http_post": true,
+          "proname": "kick_sports_daily_sync",
+          "references_worker_base_url": true
+        },
+        {
+          "calls_worker_kick": true,
+          "direct_http_post": true,
+          "proname": "kick_sports_job_worker",
+          "references_worker_base_url": true
+        }
+      ]
+    },
+    {
+      "key": "six_league_rosters",
+      "sql": "SELECT c.name,c.country_code,c.season,c.api_football_league_id,\ncount(DISTINCT tc.team_id) FILTER (WHERE tc.active) AS active_team_memberships,\ncount(DISTINCT tc.team_id) FILTER (WHERE tc.active AND EXISTS(SELECT 1 FROM public.sports_team_squads s WHERE s.team_id=tc.team_id AND s.active)) AS memberships_with_active_squad_rows\nFROM public.sports_competitions c LEFT JOIN public.sports_team_competitions tc ON tc.competition_id=c.id\nWHERE c.competition_kind='LEAGUE' AND c.division_level=1 AND c.country_code IN ('DE','ES','FR','IT','GB-ENG','BR') AND c.api_football_league_id IS NOT NULL\nGROUP BY c.id,c.name,c.country_code,c.season,c.api_football_league_id ORDER BY c.country_code,c.name;",
+      "rows": [
+        {
+          "active_team_memberships": 20,
+          "api_football_league_id": 71,
+          "country_code": "BR",
+          "memberships_with_active_squad_rows": 13,
+          "name": "Brazil Serie A",
+          "season": "2026/27"
+        },
+        {
+          "active_team_memberships": 18,
+          "api_football_league_id": 78,
+          "country_code": "DE",
+          "memberships_with_active_squad_rows": 9,
+          "name": "Germany Bundesliga",
+          "season": "2026/27"
+        },
+        {
+          "active_team_memberships": 20,
+          "api_football_league_id": 140,
+          "country_code": "ES",
+          "memberships_with_active_squad_rows": 17,
+          "name": "Spain La Liga",
+          "season": "2026/27"
+        },
+        {
+          "active_team_memberships": 18,
+          "api_football_league_id": 61,
+          "country_code": "FR",
+          "memberships_with_active_squad_rows": 14,
+          "name": "France Ligue 1",
+          "season": "2026/27"
+        },
+        {
+          "active_team_memberships": 20,
+          "api_football_league_id": 39,
+          "country_code": "GB-ENG",
+          "memberships_with_active_squad_rows": 14,
+          "name": "English Premier League",
+          "season": "2026/27"
+        },
+        {
+          "active_team_memberships": 20,
+          "api_football_league_id": 135,
+          "country_code": "IT",
+          "memberships_with_active_squad_rows": 19,
+          "name": "Italy Serie A",
+          "season": "2026/27"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Snapshots from separate SELECTs; not a single atomic transaction.",
+    "HTTP response samples cannot be individually attributed to dispatches because automation_runs has zero rows.",
+    "RLS flags and Google account existence do not prove authorization or login.",
+    "Rows in squads do not prove complete/fresh rosters.",
+    "Zero stored fixtures is not proof of no official matches.",
+    "UTC rolled to 2026-10-16 while local date remained 2026-10-15."
+  ]
+}

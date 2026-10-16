@@ -1,6 +1,6 @@
 # Motor de Inteligência Esportiva — estado canônico
 
-> Revisão: 15/10/2026, IE-00.03. Baseline consultada: main `77cb71654a2b5f755630b5f6a8089220480e0225`.
+> Revisão: 15/10/2026, IE-00.04. Baseline consultada: main `6d78f07f9689b4c31ca1bd76189c970e6c30c949`.
 > Fase definida por Kauê: desenvolvimento por commits, sem endereço público nesta preparação.
 
 ## Identidade e fontes de verdade
@@ -8,8 +8,8 @@
 | Item | Referência | Evidência e limite |
 | --- | --- | --- |
 | Código canônico | `kauefsantos12-creator/intelig-ncia-esportiva`, main | Consultado em 15/10/2026 |
-| Projeto Lovable | `428fa571-e363-4bbf-ab2c-058451eba7dc`; workspace `a6f6ab0ce77b5538cbf7` | Registrado na IE-00.01 em 11/10; sincronização de hoje não consultada |
-| PRIMARY configurado | Lovable Cloud `hefuvmocohhpmnhwpkac` | Conectividade SQL observada em 11/10; sem nova consulta nesta revisão |
+| Projeto Lovable | `428fa571-e363-4bbf-ab2c-058451eba7dc`; workspace `a6f6ab0ce77b5538cbf7` | Consultado em 15/10; latest_commit_sha igual à main da baseline |
+| PRIMARY configurado | Lovable Cloud `hefuvmocohhpmnhwpkac` | Configuração confirmada no projeto conectado e consultas SELECT atuais em 15/10 |
 | Publicação | Não se aplica à preparação atual | Decisão de Kauê em 11/10; homologação/publicação pertencem à entrega correspondente |
 | Tempo | `America/Sao_Paulo` | Referência operacional |
 
@@ -23,41 +23,43 @@ GitHub governa código, contratos, testes, migrations e documentação. Lovable 
 
 ## Produto e implementação observada
 
-Central pessoal de inteligência esportiva, sem jornada ativa de apostas, odds, banca, picks ou execução financeira. Reescopo de setembro e remix de outubro são eventos distintos; implementação anterior não comprova os dados do PRIMARY novo.
+Central pessoal de inteligência esportiva, com Resenha como prioridade. Levantamento somente leitura em 15/10/2026, aproximadamente 20:58–21:04 BRT; data UTC passou a 16/10. Código e dados foram confrontados, mas nenhuma jornada autenticada foi homologada.
 
-| Superfície | Referência no código | Ambiente atual |
+| Superfície | Referência no código | Baseline atual e limite |
 | --- | --- | --- |
-| Noticiário | `src/routes/index.tsx`, `src/lib/news-overview.functions.ts`; `editorial-explanatory-v3` | Edição completa e cobertura não revalidadas |
-| Hoje | `src/routes/hoje.tsx`, `src/lib/today-overview.functions.ts`; programação também na Home | Completude e confirmação oficial de transmissão não revalidadas |
-| Elo | `src/routes/elo.tsx`, `src/lib/elo-explorer.functions.ts` | Cobertura, freshness e histórico não revalidados |
-| Anotações | `src/routes/anotacoes.tsx`, `src/lib/notes-overview.functions.ts` | Ownership, continuidade e restore não revalidados |
-| Analytics | `src/routes/analytics.tsx`, `src/lib/analytics-overview.functions.ts`; consulta a player-season | Reconciliação com coleta por fixture e temporada por competição pendentes |
-| Conta/Privacidade | Rotas próprias e middleware Google/allowlist/prazo de sessão | Acesso por recurso não ensaiado nesta ação |
+| Noticiário | `src/routes/index.tsx`, `src/lib/news-overview.functions.ts` | Seis edições de 09 a 14/10 FAILED por ausência de itens; última PUBLISHED em 08/10 com um item |
+| Hoje | `src/routes/hoje.tsx`, `src/lib/today-overview.functions.ts` | Zero fixtures registradas para 14/10 e 15/10 locais; catálogo defasado não prova ausência de jogos |
+| Elo | `src/routes/elo.tsx`, `src/lib/elo-explorer.functions.ts` | 676 clubes únicos; sync PARTIAL em 15/10; completude e jornadas não homologadas |
+| Anotações | `src/routes/anotacoes.tsx`, `src/lib/notes-overview.functions.ts` | 170 reviews AUTO_CLOSED; zero preenchimento pessoal nas contagens consultadas; persistência/restore não exercitados |
+| Analytics | `src/routes/analytics.tsx`, `src/lib/analytics-overview.functions.ts` | 247 linhas individuais em seis fixtures e 247 agregados por período, mas player-season e standings vazios; detalhe ainda lê player-season |
+| Conta/Privacidade | Rotas próprias e middleware | Uma conta Google, funções de controle e RLS observados; login e isolamento por recurso não testados |
 
-Esta leitura não conclui IE-00.04 nem auditorias funcionais. Ver [arquitetura](ARCHITECTURE.md) e [governança](GOVERNANCE.md).
-
+A [baseline completa](governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md) registra consultas, contagens, fontes, horários e lacunas. A ação IE-00.04 registra a situação; não conclui auditorias funcionais.
 ## Roadmap
 
 - **IE-00.01 — CONCLUÍDA no escopo de identidade:** PR #19 integrada na main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`. [Evidência datada](governance/IE_00_01_PROJECT_IDENTITY_2026-10-11.md). Ajustes de dependências necessários ao CI integram essa entrega histórica.
 - **IE-00.02 — CONCLUÍDA no escopo documental desta revisão:** documentos vigentes separados dos snapshots históricos e verificações locais aprovadas. [Evidências e limites](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md). Vigência na main exige gates aprovados e merge confirmado na PR correspondente.
 - **IE-00.03 — CONCLUÍDA no escopo da decisão desta revisão:** Kauê escolheu **Resenha diária** em 15/10/2026. Primeiro foco funcional: Noticiário/IE-05, após a base comum. [Evidência da escolha](governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md). Integração por PR com gates verdes.
-- **Próxima após integração: IE-00.04 — registrar a baseline das superfícies**, destacando as lacunas que afetam a Resenha. O ciclo completo Resenha → Hoje → Anotações continua proposta de composição da candidata, não um escopo automaticamente aprovado.
+- **IE-00.04 — CONCLUÍDA no escopo de inventário desta revisão:** [baseline das superfícies](governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md), com evidência atual, falhas e limites. Integração por PR com gates verdes.
+- **Próxima após integração: IE-00.05 — confirmar o PROJECT_PROFILE.** A prioridade Resenha orienta os próximos controles e a recuperação futura do worker.
 
 O [roadmap EBSA 1.7](roadmap/INTELIGENCIA_ESPORTIVA_ROADMAP_EBSA_v1_7.md) mantém códigos e dependências. Esta revisão não fecha IE-00, o perfil ou gates de liberação.
 
 ## Dados e coleta: desenho não equivale a cobertura atual
 
-| Fluxo | Desenho versionado/documentado | Prova atual pendente |
+Os dados abaixo são snapshots do PRIMARY em 15/10/2026, não percentuais de homologação.
+
+| Fluxo | Medição atual | Limite |
 | --- | --- | --- |
-| Catálogo | 5Dollar para fixtures/dados gerais; agenda independente de completar elencos | Competições, temporadas, conjunto esperado e cobertura |
-| Elencos | API-Football; piloto documentado de seis primeiras divisões | Clubes/jogadores completos e atualizados hoje |
-| Prospectivo | Dia Zero, reconciliação, lineups e dados individuais por fixture; sem backfill individual automático | Dia Zero persistido, escopo, quota e execução completa |
-| Editorial | 14 veículos aprovados, números SofaScore e três eixos explicativos | Fontes recebidas, edição completa e qualidade factual |
-| Transmissão | FutNaTV e fallback agregador no código; confirmação oficial no roadmap | Política do fallback e confirmação nominal |
-| Elo | Rating local, liga, global e histórico separados | Contagem, finalize, auditoria, lag e corte atuais |
+| Catálogo | 94 competições ativas, 939 equipes, 584 fixtures; última coleta efetiva de fixture em 08/10 às 15:00 BRT | Conjunto oficial externo não confrontado |
+| Elencos | 86/116 clubes do piloto com linhas ativas; 2.776 linhas, última coleta em 06/10 | Linhas não provam elenco completo ou atualizado |
+| Prospectivo | Dia Zero em 04/10 às 14:51 BRT; seis fixtures com estatísticas individuais | Coleta recente parada desde 08/10; escopo/temporada ainda exigem validação |
+| Editorial | 289 evidências e 315 fact packs; últimas coletas em 08/10; seis edições recentes FAILED | Qualidade e completude da edição atual indisponíveis |
+| Transmissão | 40 evidências, última checagem em 08/10 às 19:17 BRT | Desatualizado; confirmação nominal continua pendente |
+| Automação | 20 crons ativos, 96 jobs vencidos; 385 respostas retidas com 404 “Project not found”; configuração do worker no endereço antigo | Cron succeeded não prova sucesso HTTP; automation_runs vazio impede atribuição por requisição |
+| Elo | 676 clubes únicos e sync PARTIAL em 15/10 | Timestamp e unicidade não homologam ranking ou histórico |
 
-Etapas 3/4/4.5/5 dos registros antigos descrevem coleta; Fases 1–7 descrevem reescopo; códigos IE descrevem o roadmap atual. A ordem e as dependências vigentes são as do roadmap. Gargalo de elenco não bloqueia automaticamente Resenha/Hoje.
-
+A principal hipótese de bloqueio é o destino antigo do worker. Recuperação e prova ponta a ponta pertencem a IE-01.01/04, IE-02.06 e IE-05.01; nada foi reconfigurado nesta baseline. A ordem e as dependências vigentes continuam as do roadmap; elencos incompletos não bloqueiam automaticamente uma resenha útil.
 ### Contagens históricas
 
 | Registro | Data e origem | Limite |

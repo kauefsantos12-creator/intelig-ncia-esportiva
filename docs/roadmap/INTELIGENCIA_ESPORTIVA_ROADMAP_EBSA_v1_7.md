@@ -6,7 +6,7 @@
 **Projeto:** [kauefsantos12-creator/intelig-ncia-esportiva](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva)  
 **Baseline do código:** main, commit [4696c8eb400a088b226dce0653eb775b64383490](https://github.com/kauefsantos12-creator/intelig-ncia-esportiva/commit/4696c8eb400a088b226dce0653eb775b64383490), de 05/10/2026.  
 **Modelo da agenda consultado:** main, commit 111b66dbd84da2cdfe224183f4457d81161482fd.  
-**Estado deste documento:** IE-00.01 e IE-00.02 integradas. IE-00.03 registra a decisão de Kauê em 15/10/2026: **Resenha diária como prioridade**. Decisão concluída no escopo desta revisão; integração por PR exige gates verdes. Próxima: IE-00.04 — baseline das superfícies. Desenvolvimento por commits, sem endereço público nesta fase.
+**Estado deste documento:** IE-00.01, IE-00.02 e IE-00.03 integradas. IE-00.04 registra a baseline atual das seis superfícies em 15/10/2026, com prioridade Resenha; concluída no escopo de inventário desta revisão, sujeita à integração por PR com gates verdes. Próxima: IE-00.05 — PROJECT_PROFILE. Desenvolvimento por commits, sem endereço público nesta fase.
 
 ## 1. Propósito e forma de trabalhar
 
@@ -190,7 +190,7 @@ O fechamento de IE-LP3 é preparação da auditoria. G10.5 definitivo ocorre em 
 | CONCLUÍDO | Critério de saída atendido e evidência válida registrada |
 | NÃO SE APLICA | Condição inativa comprovada; não é atalho para UNKNOWN |
 
-Na baseline de planejamento, os checkboxes estavam abertos porque eram compromissos de validação/entrega deste novo roadmap. Os registros datados abaixo distinguem IE-00.01 (identidade), IE-00.02 (documentação) e IE-00.03 (prioridade Resenha); as demais ações continuam abertas. Isso **não significa que o projeto atual está 0% implementado**. Reaproveitar a baseline e os testes existentes em vez de reconstruir o que já funciona.
+Na baseline de planejamento, os checkboxes estavam abertos porque eram compromissos de validação/entrega deste novo roadmap. Os registros datados abaixo distinguem IE-00.01 (identidade), IE-00.02 (documentação), IE-00.03 (prioridade Resenha) e IE-00.04 (baseline); as demais ações continuam abertas. Isso **não significa que o projeto atual está 0% implementado**. Reaproveitar a baseline e os testes existentes em vez de reconstruir o que já funciona.
 
 Progresso da candidata = ações concluídas / ações aplicáveis no escopo fechado da candidata. NÃO VERIFICADO e AGUARDANDO DECISÃO não contam como concluídos. N/A justificado sai do denominador, mas fica no histórico. Mostrar quantidade e escopo junto do percentual; progresso de tarefas não substitui cobertura de dados.
 
@@ -223,8 +223,8 @@ Cada capítulo apresenta finalidade, dependências, referências EBSA e condiç�
 
 ### IE-00.04 — Registrar a baseline de cada superfície
 
-- [ ] Listar Noticiário, Hoje, Elo, Anotações, Analytics e Conta: existe no código, funciona no ambiente atual, lacunas e última evidência. Toda contagem de clubes/jogos precisa de data e banco de origem.
-- **Estado inicial:** NÃO VERIFICADO. **Depende de:** IE-00.03.
+- [x] Listar Noticiário, Hoje, Elo, Anotações, Analytics e Conta: existe no código, funciona no ambiente atual, lacunas e última evidência. Toda contagem de clubes/jogos precisa de data e banco de origem.
+- **Estado inicial:** NÃO VERIFICADO. **Estado atual (15/10/2026):** CONCLUÍDO no escopo de inventário desta revisão; código, dados atuais, falhas e validação funcional não realizada registrados na [baseline](../governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md), com consultas somente leitura. Não homologa as jornadas. Integração por PR com gates verdes. **Depende de:** IE-00.03.
 
 ### IE-00.05 — Confirmar o PROJECT_PROFILE
 
@@ -935,7 +935,7 @@ As páginas abaixo foram lidas na baseline indicada, exceto a API de checks, con
 
 ## 11. Ordem inicial e próximo passo
 
-IE-00.01 e IE-00.02 estão integradas. Kauê escolheu **Resenha diária** em IE-00.03. Após integrar esse registro, seguir para **IE-00.04**: mapear o que existe, o que funciona no ambiente atual e as lacunas de cada superfície, destacando as que afetam a resenha. Presença no código e registro histórico não substituem verificação atual.
+IE-00.01/02/03 estão integradas e a baseline IE-00.04 foi levantada nesta revisão, com Resenha como prioridade. Após integrar o diagnóstico, seguir para **IE-00.05 — confirmar o PROJECT_PROFILE**. A baseline identificou edições recentes FAILED, coleta defasada e falha de alcance HTTP do worker; sua recuperação deve respeitar as ações técnicas e os controles aplicáveis, sem publicar ou executar carga por inferência.
 
 O primeiro avanço técnico observável será uma baseline coerente: endereço certo, banco certo, escopo certo e lista honesta do que já funciona. A partir dela, corrigir a programação que confunde falha com vazio e validar uma edição editorial completa, mantendo as suas anotações protegidas.
 
@@ -982,3 +982,13 @@ Kauê respondeu **“Resenha”** à pergunta sobre qual rotina melhorar primeir
 A decisão orienta a baseline e as melhorias: cobertura dos acontecimentos elegíveis, explicação nos três eixos aprovados, fatos rastreáveis e leitura clara. São objetivos de validação, não qualidades já comprovadas. O ciclo R1 completo segue como proposta; o escopo concreto da candidata será fechado em IE-LP3.01. Mantidas a base comum, as dependências, as fontes e a proteção das anotações.
 
 Evidência: [IE_00_03_REVIEW_PRIORITY_2026-10-15.md](../governance/IE_00_03_REVIEW_PRIORITY_2026-10-15.md). Mudança documental; CI e integração registrados na PR correspondente. **Três de 104 ações de origem no escopo desta revisão**, sem homologar capítulo, edição, candidata ou runtime. **Próxima: IE-00.04 — baseline de cada superfície**, com atenção às lacunas da Resenha.
+
+## Execução — IE-00.04 — 15/10/2026
+
+Baseline das seis superfícies confrontada com a main `6d78f07f9689b4c31ca1bd76189c970e6c30c949`, projeto Lovable sincronizado e PRIMARY `hefuvmocohhpmnhwpkac`. Consultas somente leitura entre 20:58 e 21:04 de São Paulo; parte das respostas tem data UTC 16/10. O inventário registra expressamente que a interface autenticada, ownership, escrita pessoal e restore não foram homologados.
+
+**Resenha:** seis edições de 09 a 14/10 FAILED com `no_editorial_items`; última PUBLISHED em 08/10, com um item. **Execução:** 385 respostas HTTP retidas/385 com 404 “Project not found”, destino do worker ainda no endereço antigo, 20 crons ativos e 96 jobs vencidos pendentes. A ausência de linhas em automation_runs impede atribuição por requisição; a configuração antiga é a principal hipótese operacional, não causa única homologada.
+
+**Dados atuais:** 584 fixtures e zero registros para 14 e 15/10 locais; 86/116 clubes do catálogo piloto com alguma linha ativa de elenco; 676 clubes Elo únicos, sync PARTIAL; seis fixtures com dados individuais e zero linhas de player-season/classificação; 170 reviews AUTO_CLOSED e nenhum preenchimento pessoal nas métricas consultadas. Presença de linhas não comprova completude ou atualização.
+
+Matriz, evidências e limites: [IE_00_04_SURFACE_BASELINE_2026-10-15.md](../governance/IE_00_04_SURFACE_BASELINE_2026-10-15.md). A ação registra o diagnóstico e não corrige runtime, muda fontes, publica, reabre fila ou libera carga. CI e integração ficam na PR correspondente. **Quatro de 104 ações de origem no escopo desta revisão. Próxima: IE-00.05 — PROJECT_PROFILE.**
