@@ -1,4 +1,8 @@
 // Fixture de teste com transporte simulado; nenhum bypass de auth na aplicação.
+import { MyGamesShell } from "@/components/MyGamesShell";
+import { MyGamesLayout } from "@/components/MyGamesLayout";
+import { PrivacyNotice } from "@/components/PrivacyNotice";
+import { SurfaceCard } from "@/components/ProductSurface";
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { MyGameLineupView } from "@/components/MyGameLineup";
@@ -39,34 +43,77 @@ function Fixture() {
   );
   const [unavailable, setUnavailable] = useState(false);
   return (
-    <main className="space-y-5 p-3 sm:p-6">
-      <h1 className="type-page-title">Meus Jogos</h1>
-      <button type="button" className="min-h-11 border p-3" onClick={() => setUnavailable(true)}>
-        Simular escalação indisponível
-      </button>
-      {unavailable ? (
-        <p role="alert">
-          Não foi possível carregar a escalação. Você pode continuar escrevendo seu relato.
-        </p>
-      ) : (
-        <MyGameLineupView detail={detail} />
-      )}
-      <PersonalMatchReportsView
-        fixtures={[game]}
-        reports={reports}
-        onSave={async (input) => {
-          const report = {
-            ...input,
-            version: input.version + 1,
-            updatedAt: new Date().toISOString(),
-          };
-          const next = [report, ...reports.filter((item) => item.id !== report.id)];
-          sessionStorage.setItem("test-my-games", JSON.stringify(next));
-          setReports(next);
-          return { ok: true, report };
-        }}
+    <MyGamesShell onSignOut={() => undefined}>
+      <MyGamesLayout
+        games={
+          <SurfaceCard title="Escolha seu jogo">
+            <label className="block type-meta">
+              Data das partidas
+              <input
+                aria-label="Data das partidas"
+                type="date"
+                value="2026-10-16"
+                readOnly
+                className="block min-h-11 w-full rounded-xl border border-input p-2"
+              />
+            </label>
+            <button
+              className="touch-target mt-3 min-h-11 w-full rounded-xl border border-border p-3 text-left"
+              type="button"
+              aria-pressed="true"
+            >
+              Clube Casa × Clube Fora
+            </button>
+            <button
+              type="button"
+              className="touch-target mt-3 min-h-11 border p-3"
+              onClick={() => setUnavailable(true)}
+            >
+              Simular escalação indisponível
+            </button>
+          </SurfaceCard>
+        }
+        lineup={
+          unavailable ? (
+            <p role="alert">
+              Não foi possível carregar a escalação. Você pode continuar escrevendo seu relato.
+            </p>
+          ) : (
+            <MyGameLineupView detail={detail} />
+          )
+        }
+        reports={
+          <PersonalMatchReportsView
+            fixtures={[game]}
+            reports={reports}
+            onSave={async (input) => {
+              const report = {
+                ...input,
+                version: input.version + 1,
+                updatedAt: new Date().toISOString(),
+              };
+              const next = [report, ...reports.filter((item) => item.id !== report.id)];
+              sessionStorage.setItem("test-my-games", JSON.stringify(next));
+              setReports(next);
+              return { ok: true, report };
+            }}
+          />
+        }
+        history={
+          <label className="block type-meta">
+            Nota no arquivo
+            <input className="block min-h-11 rounded-xl border border-input p-2" />
+          </label>
+        }
+        account={
+          <div>
+            <h2 className="type-section-title">Conta e privacidade</h2>
+            <p>Controles simulados apenas neste fixture de navegador.</p>
+          </div>
+        }
+        privacy={<PrivacyNotice embedded />}
       />
-    </main>
+    </MyGamesShell>
   );
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

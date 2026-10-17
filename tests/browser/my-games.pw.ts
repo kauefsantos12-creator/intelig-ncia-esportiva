@@ -21,7 +21,10 @@ test("Meus Jogos shows starters and bench, prefills a report and reopens the sav
   await page.getByRole("button", { name: "Salvar relato", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Relato salvo");
   await page.reload();
-  await page.getByRole("button", { name: /Clube Casa × Clube Fora/ }).click();
+  await page
+    .getByRole("group", { name: "Relatos salvos" })
+    .getByRole("button", { name: /Clube Casa × Clube Fora/ })
+    .click();
   await expect(page.getByLabel("Seu relato", { exact: true })).toHaveValue(
     "Minha leitura do primeiro tempo.",
   );
@@ -46,4 +49,37 @@ test("a lineup failure and a cancelled fixture switch keep the current draft", a
   await expect(page.getByLabel("Seu relato", { exact: true })).toHaveValue(
     "Meu rascunho continua aqui.",
   );
+});
+
+test("the branded page keeps the draft and archive mounted when in-page sections close", async ({
+  page,
+}) => {
+  await page.goto(url);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Futebol visto\s*por você\./);
+  await expect(page.locator("main")).toHaveCount(1);
+  await expect(page.locator("nav")).toHaveCount(0);
+  await page.getByLabel("Seu relato", { exact: true }).fill("A página continua com meu texto.");
+  await page.getByRole("link", { name: "Conta e privacidade", exact: true }).click();
+  await expect(page.locator("#conta")).toHaveAttribute("open", "");
+  expect(new URL(page.url()).pathname).toBe("/my-games.html");
+  await page.locator("#conta > summary").click();
+  await page.locator("#historico > summary").click();
+  await page.getByLabel("Nota no arquivo").fill("Nota preservada no arquivo.");
+  await page.locator("#historico > summary").click();
+  await page.locator("#historico > summary").click();
+  await expect(page.getByLabel("Nota no arquivo")).toHaveValue("Nota preservada no arquivo.");
+  await expect(page.getByLabel("Seu relato", { exact: true })).toHaveValue(
+    "A página continua com meu texto.",
+  );
+  await page.getByRole("link", { name: "Privacidade", exact: true }).click();
+  await expect(page.locator("#privacidade")).toHaveAttribute("open", "");
+  const a11y = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(a11y.violations).toEqual([]);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    ),
+  ).toBeLessThanOrEqual(1);
 });

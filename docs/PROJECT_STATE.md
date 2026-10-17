@@ -1,4 +1,4 @@
-# Motor de Inteligência Esportiva — estado canônico
+# Meus Jogos — estado canônico
 
 > Revisão: 15/10/2026, IE-00.04. Baseline consultada: main `6d78f07f9689b4c31ca1bd76189c970e6c30c949`.
 > Fase definida por Kauê: desenvolvimento por commits, sem endereço público nesta preparação.
@@ -12,6 +12,12 @@
 **Meus Jogos apenas**, conforme a nova decisão de Kauê. Substitui a prioridade de Resenha abaixo, mantida como baseline histórica. A entrada e a navegação principal passam a reunir partida, titulares/reservas e relatos privados; o histórico anterior continua acessível. Evolução de Resenha, Hoje separado, Elo e Analytics pausada, sem desligamento de crons ou automações externas.
 
 A nova leitura usa sessão do usuário e RLS; não depende de editorial ou de nova coleta. O salvamento privado existente é preservado. A validação completa exige login e gravação/reabertura pela aplicação real; a implementação e testes de componentes não comprovam essa homologação. Ver [escopo e aceite](governance/MEUS_JOGOS_SCOPE_2026-10-16.md). IE-00.05 segue pendente.
+
+## Rebranding e página única — 16/10/2026
+
+Nome público da aplicação: **Meus Jogos**. Identidade de caderno pessoal, verde escuro e papel claro, marca vetorial própria e ícones instaláveis. Entrada, login, metadados e manifesto passam a refletir o novo foco. Repositório, projeto conectado, PRIMARY e códigos IE mantêm a identidade técnica existente.
+
+A página `/` reúne partida/escalação, relatos e seções recolhíveis de arquivo, conta e aviso de privacidade. Arquivo e controles só montam na primeira abertura e permanecem montados ao recolher. `/anotacoes` e `/conta` redirecionam às respectivas seções; `/hoje`, `/elo` e `/analytics` redirecionam para `/`. A rota pública `/privacidade` compartilha o mesmo aviso, sem exigir login. Não há outra página de produto ativa. [Escopo, validação e limites](governance/MEUS_JOGOS_REBRAND_2026-10-16.md). Sem schema, fonte, ingestão ou mudança de autorização.
 
 ## Identidade e fontes de verdade
 

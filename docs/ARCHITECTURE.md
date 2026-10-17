@@ -1,4 +1,4 @@
-# Arquitetura — Motor de Inteligência Esportiva
+# Arquitetura — Meus Jogos
 
 > Revisão documental: 15/10/2026, IE-00.02. Referência: main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`.
 > A estrutura observada no código não certifica dados, acesso, jobs ou disponibilidade do ambiente vivo.
@@ -10,6 +10,12 @@ A entrada ativa é **Meus Jogos**, com Conta/Privacidade e histórico preservado
 GitHub main de `kauefsantos12-creator/intelig-ncia-esportiva` governa código, contratos, testes e documentação. Lovable Cloud é a autoridade sobre dados e operação vivos. O PRIMARY configurado é `hefuvmocohhpmnhwpkac`; o projeto conectado registrado na IE-00.01 é `428fa571-e363-4bbf-ab2c-058451eba7dc`. A fase definida por Kauê é desenvolvimento por commits, sem endereço público nesta preparação. Configuração, sincronização e disponibilidade são evidências distintas.
 
 Ver [estado canônico](PROJECT_STATE.md), [governança](GOVERNANCE.md) e [arquitetura anterior preservada](history/ie-00-02-2026-10-15/ARCHITECTURE.md).
+
+## Página única — revisão de 16/10/2026
+
+`MyGamesPage` mantém o carregamento autenticado e a persistência anteriores. `MyGamesLayout` reúne a experiência e `MyGamesShell` apresenta a marca e os links internos; `AppShell` só conecta o logout existente. Sem navegação de produtos nem barra fixa inferior.
+
+`JournalSection` adia a montagem de arquivo/conta/aviso até a primeira abertura, revela a seção por hash e preserva o conteúdo montado ao recolher. `LegacyNotesPanel` mantém reviews, notas e campinho; `AccountPrivacyPanel` mantém notificações/exclusão sem mudar o transporte; `PrivacyNotice` compartilha o conteúdo entre a seção interna e o acesso público antes do login. Rotas antigas são aliases por redirect para a página única (detalhes no [registro](governance/MEUS_JOGOS_REBRAND_2026-10-16.md)). Componentes históricos de Hoje/Elo/Analytics permanecem versionados e inacessíveis como páginas de produto nesta candidata. Endpoints de dados/worker não foram alterados.
 
 ## Camadas observadas no código
 

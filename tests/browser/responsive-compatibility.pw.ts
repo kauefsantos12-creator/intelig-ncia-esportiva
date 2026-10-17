@@ -36,4 +36,26 @@ test("installed app is not locked to portrait", async ({ request }) => {
   expect(response.ok()).toBeTruthy();
   const manifest = await response.json();
   expect(manifest.orientation).toBe("any");
+  expect(manifest.name).toBe("Meus Jogos");
+  for (const icon of manifest.icons) {
+    const asset = await request.get(icon.src);
+    expect(asset.ok()).toBeTruthy();
+    expect(asset.headers()["content-type"]).toContain("image/png");
+  }
+});
+
+test("former product routes return to the single Meus Jogos page", async ({ page }) => {
+  for (const [path, hash] of [
+    ["/hoje", ""],
+    ["/elo", ""],
+    ["/analytics", ""],
+    ["/anotacoes", "#historico"],
+    ["/conta", "#conta"],
+  ]) {
+    await page.goto(path!);
+    await expect(page.getByRole("button", { name: "Entrar com Google" })).toBeVisible();
+    await expect.poll(() => new URL(page.url()).pathname).toBe("/");
+    await expect.poll(() => new URL(page.url()).hash).toBe(hash);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Futebol visto por você.");
+  }
 });

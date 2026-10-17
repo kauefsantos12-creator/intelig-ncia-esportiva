@@ -5,7 +5,7 @@ function source(path: string) {
   return readFileSync(new URL(path, import.meta.url), "utf8");
 }
 
-describe("Anotações sports intelligence contract", () => {
+describe("Anotações preserved inside the single-page journal", () => {
   it("loads and mutates personal reviews only through authenticated server functions", () => {
     const server = source("./lib/notes-overview.functions.ts");
     expect(server).toContain("requireSupabaseAuth");
@@ -30,7 +30,7 @@ describe("Anotações sports intelligence contract", () => {
   });
 
   it("renders the complete post-match workflow instead of a placeholder", () => {
-    const route = source("./routes/anotacoes.tsx");
+    const route = source("./components/LegacyNotesPanel.tsx");
     expect(route).toContain("getNotesOverview");
     expect(route).toContain("Você assistiu à partida?");
     expect(route).toContain("Notas pessoais");
@@ -40,7 +40,7 @@ describe("Anotações sports intelligence contract", () => {
   });
 
   it("keeps loading, error, retry and empty states explicit", () => {
-    const route = source("./routes/anotacoes.tsx");
+    const route = source("./components/LegacyNotesPanel.tsx");
     expect(route).toContain("<LoadingState");
     expect(route).toContain("<ErrorState");
     expect(route).toContain("<EmptyState");

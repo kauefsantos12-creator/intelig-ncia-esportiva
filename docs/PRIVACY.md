@@ -6,7 +6,7 @@ Este documento é a fonte técnica canônica do Aviso de Privacidade exibido em 
 
 ## Princípios aplicados
 
-- finalidade e necessidade: coletar apenas o necessário para autenticação, segurança e funcionamento do Motor de Inteligência Esportiva;
+- finalidade e necessidade: coletar apenas o necessário para autenticação, segurança e funcionamento do Meus Jogos;
 - transparência: aviso público disponível antes do login;
 - minimização: OAuth solicita apenas os dados necessários à autenticação Google; nome/avatar/picture são removidos do metadata persistido;
 - segurança: ownership, RLS, sessão absoluta de 30 dias e telemetria sanitizada;
@@ -17,7 +17,7 @@ Este documento é a fonte técnica canônica do Aviso de Privacidade exibido em 
 
 O login Google é iniciado pelo **broker OAuth gerenciado pelo Lovable**. As credenciais OAuth do Google não ficam embutidas no cliente da aplicação. Após a conclusão do fluxo gerenciado, os tokens retornados são usados para estabelecer a sessão de autenticação no **Lovable Cloud**.
 
-A allowlist do usuário aprovado, a validação server-side e o prazo absoluto de sessão de 30 dias permanecem obrigatórios para o Motor de Inteligência Esportiva.
+A allowlist do usuário aprovado, a validação server-side e o prazo absoluto de sessão de 30 dias permanecem obrigatórios para o Meus Jogos.
 
 A tela de autenticação apresenta apenas a identidade atual do produto e as superfícies esportivas disponíveis ao usuário autorizado. Essa camada visual não altera o broker OAuth, provider Google obrigatório, allowlist, política de sessão, validação server-side ou o acesso público ao Aviso de Privacidade.
 
@@ -73,3 +73,7 @@ Esses itens não devem ser presumidos como conformes em uma futura oferta a terc
 ## Relatos pessoais antes e durante o jogo
 
 A área Anotações permite informar uma partida e guardar um relato na própria conta mesmo quando a agenda não estiver disponível. Times, competição e horário informados pelo usuário não se tornam dados oficiais nem alimentam Elo ou Analytics. Somente a conta Google aprovada acessa seus relatos. Eles são mantidos em `sports_personal_match_reports`, com controle de versão para detectar gravações concorrentes, e incluídos na exclusão da aplicação e da conta. Este fluxo não envia o texto para IA ou provedores esportivos, nem o persiste no armazenamento do navegador. Use Salvar relato; confirmação visual só ocorre após resposta do banco. Sem confirmação, mantenha o formulário aberto e tente novamente.
+
+## Apresentação em página única — 16/10/2026
+
+O rebranding não altera autenticação, allowlist, prazo de sessão, RPCs, RLS, retenção ou exclusão. Os controles existentes foram movidos para `AccountPrivacyPanel`, em `/#conta`; `/conta` redireciona a essa seção. O aviso é compartilhado entre `/#privacidade` e a rota pública `/privacidade`, que permanece disponível antes do login. Seções são recolhíveis sem desmontar seu conteúdo após a primeira abertura. Nenhum texto do relato é enviado a fonte esportiva ou incluído em telemetria por esta mudança.

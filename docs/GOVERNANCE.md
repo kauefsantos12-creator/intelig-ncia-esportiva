@@ -1,11 +1,11 @@
-# Governança — Motor de Inteligência Esportiva
+# Governança — Meus Jogos
 
 > Revisão documental: 15/10/2026, IE-00.02. Referência: main `868c13ac99c92bfdf202c6ace64f3ebe85e5b1b1`.
 > Medições e auditorias anteriores conservam sua data e seu ambiente.
 
 ## Escopo e autoridade
 
-O foco vigente em 16/10/2026 é **Meus Jogos apenas**, com Conta/Privacidade e histórico preservados. A evolução de Noticiário/Resenha, Hoje separado, Elo e Analytics fica pausada, sem desativar crons ou automações externas. A decisão substitui a prioridade de 15/10; ver [escopo e aceite](governance/MEUS_JOGOS_SCOPE_2026-10-16.md). Apostas, odds, banca, picks e execução financeira pertencem ao produto descomissionado. Sua presença em código, tabelas ou documentos não autoriza reativação.
+O nome e o foco vigente em 16/10/2026 são **Meus Jogos**, em uma única página de produto, com conta/privacidade e histórico preservados em seções internas. Acesso público ao aviso antes do login mantido. [Rebranding e aliases](governance/MEUS_JOGOS_REBRAND_2026-10-16.md). A evolução de Noticiário/Resenha, Hoje separado, Elo e Analytics fica pausada, sem desativar crons ou automações externas. A decisão substitui a prioridade de 15/10; ver [escopo e aceite](governance/MEUS_JOGOS_SCOPE_2026-10-16.md). Apostas, odds, banca, picks e execução financeira pertencem ao produto descomissionado. Sua presença em código, tabelas ou documentos não autoriza reativação.
 
 - **GitHub main:** código, migrations, testes, contratos e documentação versionada.
 - **Lovable Cloud:** dados e operação vivos; PRIMARY configurado `hefuvmocohhpmnhwpkac`.

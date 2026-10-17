@@ -1,16 +1,26 @@
 {
-  "name": "Motor de Inteligência Esportiva",
-  "short_name": "Inteligência Esportiva",
-  "description": "Aplicação privada para futebol, Elo, analytics e anotações esportivas.",
+  "name": "Meus Jogos",
+  "short_name": "Meus Jogos",
+  "description": "Seu caderno privado de futebol: partidas, escalações e relatos pessoais.",
   "start_url": "/",
   "scope": "/",
   "id": "/",
   "display": "standalone",
-  "background_color": "#08110f",
-  "theme_color": "#08110f",
+  "background_color": "#f4f1e9",
+  "theme_color": "#f4f1e9",
   "orientation": "any",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }

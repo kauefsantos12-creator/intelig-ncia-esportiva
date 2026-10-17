@@ -4,10 +4,15 @@ import { CalendarDays } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { MyGameLineupView } from "@/components/MyGameLineup";
 import { PersonalMatchReports } from "@/components/PersonalMatchReports";
-import { ProductPageHeader, SurfaceCard } from "@/components/ProductSurface";
+import { SurfaceCard } from "@/components/ProductSurface";
 import { ErrorState, LoadingState } from "@/components/SurfaceState";
 import { getMyGameLineup, getMyGamesForDate } from "@/lib/my-games.functions";
 import type { MyGame, MyGameLineup } from "@/lib/my-games";
+
+import { MyGamesLayout } from "@/components/MyGamesLayout";
+import { LegacyNotesPanel } from "@/components/LegacyNotesPanel";
+import { AccountPrivacyPanel } from "@/components/AccountPrivacyPanel";
+import { PrivacyNotice } from "@/components/PrivacyNotice";
 
 const localDate = () =>
   new Intl.DateTimeFormat("en-CA", {
@@ -78,87 +83,94 @@ export function MyGamesPage() {
   );
   return (
     <AppShell stage="notes">
-      <ProductPageHeader
-        eyebrow="Seu caderno de futebol"
-        title="Meus Jogos"
-        description="Escolha uma partida, consulte a escalação e registre sua leitura antes, durante ou depois do jogo."
-      />
-      <div className="mt-6 space-y-6">
-        <SurfaceCard
-          icon={CalendarDays}
-          title="Partidas para acompanhar"
-          description="Horários de Brasília. Você também pode informar uma partida diretamente no seu relato."
-        >
-          <label className="block max-w-xs type-meta font-medium">
-            Data das partidas
-            <input
-              type="date"
-              value={date}
-              onChange={(event) => {
-                if (event.target.value) setDate(event.target.value);
-              }}
-              className="mt-1 min-h-11 w-full rounded-xl border border-input bg-background px-3"
-            />
-          </label>
-          <div className="mt-4">
-            {loading ? (
-              <LoadingState label="Carregando partidas" rows={2} />
-            ) : error ? (
-              <ErrorState
-                description="Não foi possível consultar as partidas. Seu editor de relatos continua disponível abaixo."
-                onRetry={() => setRefresh((value) => value + 1)}
+      <MyGamesLayout
+        games={
+          <SurfaceCard
+            icon={CalendarDays}
+            title="Escolha seu jogo"
+            className="journal-games-card"
+            description="Partidas carregadas para a data. Horários de Brasília."
+          >
+            <label className="block max-w-xs type-meta font-medium">
+              Data das partidas
+              <input
+                type="date"
+                value={date}
+                onChange={(event) => {
+                  if (event.target.value) setDate(event.target.value);
+                }}
+                className="mt-1 min-h-11 w-full rounded-xl border border-input bg-background px-3"
               />
-            ) : games.length ? (
-              <ul className="space-y-2">
-                {games.map((game) => (
-                  <li key={game.id}>
-                    <button
-                      type="button"
-                      aria-pressed={selectedId === game.id}
-                      onClick={() => void select(game.id)}
-                      className="touch-target w-full rounded-xl border border-border/70 bg-secondary/20 p-4 text-left aria-pressed:border-primary"
-                    >
-                      <span className="block break-words type-label">
-                        {game.homeTeam} × {game.awayTeam}
-                      </span>
-                      <span className="mt-1 block type-meta text-muted-foreground">
-                        {localTime.format(new Date(game.kickoffAt))} · {game.competition} · Ver
-                        escalação
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="type-meta text-muted-foreground">
-                Não há partidas carregadas para esta data. Você pode começar preenchendo os times no
-                seu relato.
+            </label>
+            <div className="mt-4">
+              {loading ? (
+                <LoadingState label="Carregando partidas" rows={2} />
+              ) : error ? (
+                <ErrorState
+                  description="Não foi possível consultar as partidas. Seu editor de relatos continua disponível abaixo."
+                  onRetry={() => setRefresh((value) => value + 1)}
+                />
+              ) : games.length ? (
+                <ul className="max-h-96 space-y-2 overflow-y-auto pr-1">
+                  {games.map((game) => (
+                    <li key={game.id}>
+                      <button
+                        type="button"
+                        aria-pressed={selectedId === game.id}
+                        onClick={() => void select(game.id)}
+                        className="touch-target w-full rounded-xl border border-border/70 bg-secondary/20 p-4 text-left aria-pressed:border-primary"
+                      >
+                        <span className="block break-words type-label">
+                          {game.homeTeam} × {game.awayTeam}
+                        </span>
+                        <span className="mt-1 block type-meta text-muted-foreground">
+                          {localTime.format(new Date(game.kickoffAt))} · {game.competition} · Ver
+                          escalação
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="type-meta text-muted-foreground">
+                  Não há partidas carregadas para esta data. Você pode começar preenchendo os times
+                  no seu relato.
+                </p>
+              )}
+            </div>
+          </SurfaceCard>
+        }
+        lineup={
+          detailLoading ? (
+            <LoadingState label="Carregando escalação" rows={4} />
+          ) : detailError ? (
+            <ErrorState
+              description="Não foi possível carregar a escalação. Você pode continuar escrevendo seu relato."
+              onRetry={() => {
+                if (selectedId) void select(selectedId);
+              }}
+            />
+          ) : detail ? (
+            <MyGameLineupView detail={detail} />
+          ) : (
+            <div className="journal-lineup-empty">
+              <img src="/brand/meus-jogos.svg" alt="" width="64" height="64" aria-hidden />
+              <h2>A próxima história começa em campo.</h2>
+              <p>
+                Escolha uma partida para consultar a escalação.
+                <br />
+                Você também pode escrever seu relato informando os times.
               </p>
-            )}
-          </div>
-        </SurfaceCard>
-        {detailLoading ? (
-          <LoadingState label="Carregando escalação" rows={4} />
-        ) : detailError ? (
-          <ErrorState
-            description="Não foi possível carregar a escalação. Você pode continuar escrevendo seu relato."
-            onRetry={() => {
-              if (selectedId) void select(selectedId);
-            }}
-          />
-        ) : detail ? (
-          <MyGameLineupView detail={detail} />
-        ) : null}
-        <PersonalMatchReports fixtures={games} onFixtureChosen={(id) => void select(id)} />
-        <details className="rounded-xl border border-border/60 p-4">
-          <summary className="touch-target min-h-11 cursor-pointer type-meta">
-            Registros anteriores
-          </summary>
-          <a href="/anotacoes" className="inline-flex min-h-11 items-center type-meta underline">
-            Abrir anotações e avaliações do histórico anterior
-          </a>
-        </details>
-      </div>
+            </div>
+          )
+        }
+        reports={
+          <PersonalMatchReports fixtures={games} onFixtureChosen={(id) => void select(id)} />
+        }
+        history={<LegacyNotesPanel />}
+        account={<AccountPrivacyPanel />}
+        privacy={<PrivacyNotice embedded />}
+      />
     </AppShell>
   );
 }

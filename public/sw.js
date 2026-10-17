@@ -8,8 +8,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification("Atualização esportiva", {
       body: "Há uma nova atualização disponível no Motor de Inteligência Esportiva.",
-      icon: "/icons/icon-192.png",
-      badge: "/icons/favicon-32.png",
+      icon: "/brand/icon-192.png",
+      badge: "/brand/favicon-32.png",
       tag: "sports-intelligence-update",
       renotify: true,
       data: { url: "/" },
