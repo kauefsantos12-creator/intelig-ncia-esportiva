@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { Loader2, ShieldCheck, NotebookPen } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -124,14 +124,14 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 pt-[calc(2.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+    <div className="journal-auth relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 pt-[calc(2.5rem+env(safe-area-inset-top))] pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,color-mix(in_oklab,var(--color-primary)_14%,transparent),transparent_32rem)]" />
       <main className="panel relative z-10 w-full max-w-md overflow-hidden p-6 sm:p-8">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" aria-hidden />
 
         <div className="flex items-center justify-between gap-4">
           <img
-            src="/icons/icon-192.png"
+            src="/brand/icon-192.png"
             alt=""
             className="size-14 rounded-2xl border border-primary/20 shadow-lg shadow-primary/10"
             aria-hidden
@@ -142,18 +142,18 @@ export function AuthGate({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        <p className="label-eyebrow mt-6">Motor de Inteligência Esportiva</p>
+        <p className="label-eyebrow mt-6">Meus Jogos</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Seu painel de futebol, Elo e análise
+          Futebol visto por você.
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Entre com a conta Google autorizada para acessar Noticiário, jogos de hoje, rankings Elo, Analytics e suas Anotações.
+          Suas partidas, suas impressões. Entre para consultar escalações e guardar o que você viu em campo.
         </p>
 
         <div className="mt-5 flex items-start gap-3 rounded-xl border border-border/70 bg-secondary/30 p-3.5">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <NotebookPen className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
           <p className="text-xs leading-relaxed text-muted-foreground">
-            A sessão tem prazo máximo de 30 dias e continua sendo validada no servidor antes de operações com os dados.
+            Um caderno privado para escrever antes, durante ou depois de cada partida.
           </p>
         </div>
 

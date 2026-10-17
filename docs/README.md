@@ -71,3 +71,5 @@ Para estrutura implementada, confrontar código e migrations da main com os docu
 Uma auditoria datada não vence automaticamente evidência do ambiente novo. Registro de separação e limites: [IE-00.02](governance/IE_00_02_CURRENT_STATE_HISTORY_2026-10-15.md).
 
 - [Meus Jogos — foco vigente, implementação e aceite (16/10/2026)](governance/MEUS_JOGOS_SCOPE_2026-10-16.md).
+
+- [Meus Jogos — rebranding e página única (16/10/2026)](governance/MEUS_JOGOS_REBRAND_2026-10-16.md).

@@ -4,7 +4,7 @@ import { MyGamesPage } from "@/components/MyGamesPage";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Meus Jogos · Inteligência Esportiva" },
+      { title: "Meus Jogos — Seu caderno de futebol" },
       {
         name: "description",
         content: "Sua partida, escalações e relatos pessoais antes, durante e depois do jogo.",

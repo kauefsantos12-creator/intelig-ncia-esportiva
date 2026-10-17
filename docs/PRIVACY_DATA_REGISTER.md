@@ -40,3 +40,7 @@ Qualquer nova coluna ou integração que possa conter dado pessoal deve atualiza
 `sports_personal_match_reports` mantém relatos informados pelo próprio usuário, separados de fixtures oficiais, placares, métricas e perfis de jogadores. A gravação usa sessão autenticada aprovada, RLS por owner e RPC SECURITY INVOKER, sem cliente administrativo. O usuário pode salvar um rascunho pré-jogo e reabrir/editar posteriormente. Não há autosave ou persistência do texto no armazenamento do navegador; a confirmação depende da resposta do banco. Falhas e conflitos preservam o texto enquanto o formulário estiver aberto. A lista mostra os últimos 100 relatos e não aplica descarte automático.
 
 A exclusão de dados da aplicação agora inclui esses relatos, e a FK de owner para Auth usa ON DELETE CASCADE. A retenção da conta não representa backup comprovado: RPO/RTO escolhidos continuam sujeitos ao ensaio próprio. Este fluxo não coleta lesões nem cadastros/estatísticas individuais da base. Os caminhos antigos de ingestão e sua adequação seguem pendentes no roadmap.
+
+## Apresentação — Meus Jogos, 16/10/2026
+
+Mesmos armazenamentos e finalidades. O caderno, arquivo de anotações e controles de conta passam à página única; `/conta` e `/anotacoes` são aliases internos. Acesso público ao aviso mantido. Sem nova coleta, tratamento, migration ou mudança de retenção nesta reformulação visual.

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, CalendarDays, RefreshCw, Search } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -12,6 +12,7 @@ import { getBroadcastSyncStatus, type BroadcastSyncStatus } from "@/lib/broadcas
 import { getTodayOverview, type TodayOverview } from "@/lib/today-overview.functions";
 
 export const Route = createFileRoute("/hoje")({
+  beforeLoad: () => { throw redirect({ to: "/" }); },
   head: () => ({
     meta: [
       { title: "Hoje · Motor de Inteligência Esportiva" },

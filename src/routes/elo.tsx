@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { GitCompareArrows, ListOrdered, RefreshCw, Search, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -11,6 +11,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/SurfaceState"
 import { getEloDirectory } from "@/lib/elo-explorer.functions";
 
 export const Route = createFileRoute("/elo")({
+  beforeLoad: () => { throw redirect({ to: "/" }); },
   head: () => ({
     meta: [
       { title: "Elo · Motor de Inteligência Esportiva" },

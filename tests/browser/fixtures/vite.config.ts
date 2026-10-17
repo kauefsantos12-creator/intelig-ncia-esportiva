@@ -9,6 +9,7 @@ const appRoot = path.resolve(root, "../../..");
 
 export default defineConfig({
   root,
+  publicDir: path.join(appRoot, "public"),
   cacheDir: path.join(appRoot, "node_modules/.vite-personal-report-tests"),
   plugins: [react(), tailwindcss()],
   resolve: { alias: { "@": path.join(appRoot, "src") } },

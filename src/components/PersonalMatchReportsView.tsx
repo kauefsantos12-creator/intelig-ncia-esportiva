@@ -145,8 +145,8 @@ export function PersonalMatchReportsView({
   return (
     <SurfaceCard
       icon={NotebookPen}
-      title="Relatos pessoais"
-      description="Comece antes ou durante o jogo e continue depois. Os dados desta partida são informados por você."
+      title="Meu caderno"
+      description="O que você viu, sentiu e quer lembrar. Escolha uma partida carregada ou informe os times para começar."
     >
       {fixtures.length ? (
         <div className="mb-5 flex flex-col gap-3 rounded-xl border border-border/60 p-3 sm:flex-row sm:items-end">

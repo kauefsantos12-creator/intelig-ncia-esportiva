@@ -1,4 +1,4 @@
-# Motor de Inteligência Esportiva
+# Meus Jogos
 
 > Caderno pessoal de futebol: partidas acompanhadas, escalações disponíveis e seus relatos.
 
@@ -6,7 +6,7 @@ O produto atual não possui fluxo de apostas, odds, banca, picks ou execução f
 
 ## Produto atual
 
-**Meus Jogos é o único foco ativo**, por decisão de Kauê em 16/10/2026: escolher a partida, consultar titulares/reservas disponíveis e guardar seu relato antes, durante ou depois do jogo. A entrada `/` reúne escalação e relatos pessoais; o formulário manual continua disponível quando a leitura esportiva falha. Conta/Privacidade e o histórico anterior são preservados.
+**Meus Jogos é o nome e o único foco ativo**, por decisão de Kauê em 16/10/2026: escolher a partida, consultar titulares/reservas disponíveis e guardar seu relato antes, durante ou depois do jogo. A entrada `/` reúne escalação e relatos pessoais; o formulário manual continua disponível quando a leitura esportiva falha. Conta, privacidade e histórico anterior abrem em seções recolhíveis da mesma página. URLs antigas redirecionam para a entrada; o aviso de privacidade público permanece acessível antes do login. [Rebranding e página única](docs/governance/MEUS_JOGOS_REBRAND_2026-10-16.md).
 
 A evolução de Resenha/Noticiário, Hoje separado, Elo e Analytics fica pausada. A pausa não desativa jobs ou a automação externa do ChatGPT. [Decisão, implementação e aceite](docs/governance/MEUS_JOGOS_SCOPE_2026-10-16.md).
 

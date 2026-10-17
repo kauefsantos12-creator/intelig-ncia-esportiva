@@ -15,16 +15,16 @@ const PRODUCT_ROUTES = [
 
 describe("frontend product foundation", () => {
   it("keeps Meus Jogos as the only active product surface", () => {
-    const shell = source("./components/AppShell.tsx");
-    for (const label of ["Meus Jogos"]) {
-      expect(shell).toContain(`label: "${label}"`);
-    }
+    const shell = source("./components/MyGamesShell.tsx");
+    expect(shell).toContain('aria-label="Meus Jogos — início"');
+    expect(shell).toContain('href="#conta"');
+    expect(shell).toContain('href="#privacidade"');
+    expect(shell).not.toContain("<nav");
+    expect(shell).not.toContain("product-mobile-nav");
     for (const label of ["Noticiário", "Hoje", "Elo", "Analytics", "Anotações"]) {
       expect(shell).not.toContain(`label: "${label}"`);
     }
-    expect(shell).toContain('aria-label="Navegação principal"');
-    expect(shell).toContain("safe-area-inset-bottom");
-    expect(shell).toContain("window.visualViewport");
+    expect(source("./styles.css")).toContain("safe-area-inset-bottom");
   });
 
   it("provides accessible loading, empty and error states", () => {

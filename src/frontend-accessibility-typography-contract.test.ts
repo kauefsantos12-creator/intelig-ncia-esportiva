@@ -7,7 +7,9 @@ function source(path: string) {
 
 function luminance(hex: string) {
   const rgb = [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255);
-  const linear = rgb.map((value) => (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4));
+  const linear = rgb.map((value) =>
+    value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4,
+  );
   const [red = 0, green = 0, blue = 0] = linear;
   return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
 }
@@ -55,10 +57,10 @@ describe("WCAG 2.2 AA accessibility and typography contract", () => {
   });
 
   it("provides a keyboard bypass link and a focusable main landmark", () => {
-    const shell = source("./components/AppShell.tsx");
+    const shell = source("./components/MyGamesShell.tsx");
     const styles = source("./styles.css");
     expect(shell).toContain('href="#conteudo-principal"');
-    expect(shell).toContain('id="conteudo-principal" tabIndex={-1}');
+    expect(shell).toMatch(/id="conteudo-principal"\s+tabIndex=\{-1\}/);
     expect(styles).toContain(".skip-link");
     expect(styles).toContain(".skip-link:focus-visible");
   });

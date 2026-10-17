@@ -24,7 +24,7 @@ describe("responsive and browser compatibility contract", () => {
   it("keeps coarse-pointer controls at least 44px", () => {
     const styles = source("./styles.css");
     const button = source("./components/ui/button.tsx");
-    const shell = source("./components/AppShell.tsx");
+    const shell = source("./components/MyGamesShell.tsx");
     expect(styles).toContain("@media (pointer: coarse)");
     expect(styles).toContain(".touch-target");
     expect(styles).toContain("min-height: 44px !important");
@@ -83,11 +83,13 @@ describe("responsive and browser compatibility contract", () => {
     expect(push).not.toContain("Ajustes → Notificações no iPhone");
   });
 
-  it("tracks virtual-keyboard viewport changes without legacy bottom navigation", () => {
-    const shell = source("./components/AppShell.tsx");
-    expect(shell).toContain("window.visualViewport");
-    expect(shell).toContain("coveredHeight > 120");
-    expect(shell).toContain('data-keyboard-open={keyboardOpen ? "true" : "false"}');
-    expect(shell).not.toContain('keyboardOpen ? "hidden" : "fixed"');
+  it("keeps writing clear of fixed navigation while retaining safe areas", () => {
+    const shell = source("./components/MyGamesShell.tsx");
+    const styles = source("./styles.css");
+    expect(shell).not.toContain("product-mobile-nav");
+    expect(shell).not.toContain("fixed inset-x-0 bottom-0");
+    expect(shell).toContain('id="conteudo-principal"');
+    expect(styles).toContain(".journal-footer");
+    expect(styles).toContain("safe-area-inset-bottom");
   });
 });
