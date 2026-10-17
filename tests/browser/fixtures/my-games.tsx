@@ -41,9 +41,17 @@ function Fixture() {
   const [reports, setReports] = useState<PersonalMatchReport[]>(
     () => JSON.parse(sessionStorage.getItem("test-my-games") ?? "[]") as PersonalMatchReport[],
   );
+  const [allowFixture, setAllowFixture] = useState(true);
   const [unavailable, setUnavailable] = useState(false);
   return (
     <MyGamesShell onSignOut={() => undefined}>
+      <button
+        type="button"
+        className="touch-target min-h-11 border p-2"
+        onClick={() => setAllowFixture(false)}
+      >
+        Bloquear troca da partida
+      </button>
       <MyGamesLayout
         games={
           <SurfaceCard title="Escolha seu jogo">
@@ -85,6 +93,7 @@ function Fixture() {
         reports={
           <PersonalMatchReportsView
             fixtures={[game]}
+            onFixtureChosen={() => allowFixture}
             reports={reports}
             onSave={async (input) => {
               const report = {

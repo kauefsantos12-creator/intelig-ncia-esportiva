@@ -57,7 +57,7 @@ export function PersonalMatchReportsView({
 }: {
   reports: PersonalMatchReport[];
   fixtures?: MyGame[];
-  onFixtureChosen?: (id: string) => void;
+  onFixtureChosen?: (id: string) => boolean | void;
   onSave: (input: PersonalMatchReportInput) => Promise<PersonalReportSaveResult>;
   loading?: boolean;
   loadError?: boolean;
@@ -87,9 +87,10 @@ export function PersonalMatchReportsView({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  function choose(next: Draft) {
+  function choose(next: Draft, beforeChoose?: () => boolean | void) {
     if (dirty && !window.confirm("Há alterações ainda não salvas. Deseja sair deste rascunho?"))
       return false;
+    if (beforeChoose?.() === false) return false;
     baseline.current = JSON.stringify(next);
     setDraft(next);
     setError(null);
@@ -171,17 +172,17 @@ export function PersonalMatchReportsView({
             disabled={!selectedFixture || saving}
             className="touch-target min-h-11 rounded-xl border border-primary/60 px-4 py-2 type-meta font-medium disabled:opacity-50"
             onClick={() => {
-              if (
-                selectedFixture &&
-                choose({
-                  ...emptyDraft(),
-                  homeTeam: selectedFixture.homeTeam,
-                  awayTeam: selectedFixture.awayTeam,
-                  competition: selectedFixture.competition,
-                  localKickoff: toBrazilDateTimeInput(selectedFixture.kickoffAt),
-                })
-              )
-                onFixtureChosen?.(selectedFixture.id);
+              if (selectedFixture)
+                choose(
+                  {
+                    ...emptyDraft(),
+                    homeTeam: selectedFixture.homeTeam,
+                    awayTeam: selectedFixture.awayTeam,
+                    competition: selectedFixture.competition,
+                    localKickoff: toBrazilDateTimeInput(selectedFixture.kickoffAt),
+                  },
+                  () => onFixtureChosen?.(selectedFixture.id),
+                );
             }}
           >
             Usar partida selecionada

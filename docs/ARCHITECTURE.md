@@ -17,6 +17,12 @@ Ver [estado canônico](PROJECT_STATE.md), [governança](GOVERNANCE.md) e [arquit
 
 `JournalSection` adia a montagem de arquivo/conta/aviso até a primeira abertura, revela a seção por hash e preserva o conteúdo montado ao recolher. `LegacyNotesPanel` mantém reviews, notas e campinho; `AccountPrivacyPanel` mantém notificações/exclusão sem mudar o transporte; `PrivacyNotice` compartilha o conteúdo entre a seção interna e o acesso público antes do login. Rotas antigas são aliases por redirect para a página única (detalhes no [registro](governance/MEUS_JOGOS_REBRAND_2026-10-16.md)). Componentes históricos de Hoje/Elo/Analytics permanecem versionados e inacessíveis como páginas de produto nesta candidata. Endpoints de dados/worker não foram alterados.
 
+## Campinho e nota no jogador — 16/10/2026
+
+`MyGamePitch` conecta as funções autenticadas ao `MyGamePitchView`; `tactical-pitch.ts` calcula apenas a disposição ilustrativa pela formação/posição, sem produzir estatísticas. `pitch-ratings.functions.ts` usa o cliente da sessão/RLS. RPC invoker `save_pitch_player_rating` reutiliza reviews/ratings, serializa alterações na review e compara updated_at; não altera observação do provedor. A UI preserva seleções ao trocar jogadores, bloqueia troca de fixture durante gravação e permite cancelar descarte. A criação da review pessoal é sob observação explícita, independente de finalizar/coletar estatística da partida.
+
+A nova RPC precisa da migration preparada; aplicação no PRIMARY ainda requer aprovação. [Registro e limites](governance/MEUS_JOGOS_PITCH_2026-10-16.md). Não usar credencial administrativa como fallback para o endpoint.
+
 ## Camadas observadas no código
 
 | Camada | Responsabilidade | Referências |

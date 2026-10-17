@@ -41,3 +41,7 @@ A definição editorial é registrada por `INSERT ... ON CONFLICT`, permitindo a
 Os 14 veículos editoriais usam feeds RSS próprios. A descoberta pelo Google News foi substituída após retornar HTTP 503 no ambiente; o parser respeita a codificação declarada no XML, inclusive ISO-8859-1 do Record. A validação de domínio e atribuição continua obrigatória e falhas individuais mantêm o fechamento factual.
 
 A revisão editorial de relógio preserva minutos absolutos da partida (por exemplo, “aos 75 minutos”), sem tratá-los como minutos transcorridos do segundo tempo. Minuto 90 sem acréscimo informado não comprova gol nos acréscimos; a lista de eventos pode ser parcial. Um empate sem gols não autoriza interpretação de bloqueio defensivo sem evidência. Esses limites foram reforçados após a leitura do primeiro rascunho gerado em produção.
+
+## Meus Jogos — nota no campinho (16/10/2026)
+
+RPC invoker save_pitch_player_rating reutiliza sports_match_reviews e sports_player_personal_ratings. A participação confirmada é declaração pessoal, sem alterar sports_fixture_player_stats ou sports_fixture_lineups. Fonte, formação e posição são somente leitura; coordenadas não são fatos persistidos. Mesma escala 0–10/0,5 e nenhum contrato de provedor novo. Migration20261017003131 preparada, aplicação no PRIMARY pendente de aprovação.

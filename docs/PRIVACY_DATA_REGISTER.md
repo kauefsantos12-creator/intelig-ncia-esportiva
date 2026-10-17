@@ -44,3 +44,7 @@ A exclusão de dados da aplicação agora inclui esses relatos, e a FK de owner 
 ## Apresentação — Meus Jogos, 16/10/2026
 
 Mesmos armazenamentos e finalidades. O caderno, arquivo de anotações e controles de conta passam à página única; `/conta` e `/anotacoes` são aliases internos. Acesso público ao aviso mantido. Sem nova coleta, tratamento, migration ou mudança de retenção nesta reformulação visual.
+
+## Campinho pessoal — 16/10/2026
+
+Nota e declaração pessoal de participação reutilizam sports_player_personal_ratings ligada à review do usuário. Mesma finalidade, retenção, RLS e exclusão por cascade. Não há rastreamento espacial; a formação gera somente layout ilustrativo na interface. Migration acrescenta RPC invoker; ativação no PRIMARY aguarda aprovação.

@@ -18,7 +18,7 @@ export function PersonalMatchReports({
   onFixtureChosen,
 }: {
   fixtures?: MyGame[];
-  onFixtureChosen?: (id: string) => void;
+  onFixtureChosen?: (id: string) => boolean | void;
 }) {
   const load = useServerFn(getPersonalMatchReports);
   const save = useServerFn(savePersonalMatchReport);

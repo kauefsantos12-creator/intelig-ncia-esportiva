@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { MyGameLineupView } from "@/components/MyGameLineup";
+import { MyGamePitch } from "@/components/MyGamePitch";
 import { PersonalMatchReports } from "@/components/PersonalMatchReports";
 import { SurfaceCard } from "@/components/ProductSurface";
 import { ErrorState, LoadingState } from "@/components/SurfaceState";
@@ -38,6 +38,24 @@ export function MyGamesPage() {
   const [detail, setDetail] = useState<MyGameLineup | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState(false);
+  const pitchStatus = useRef({ dirty: false, busy: false });
+  const [pitchBusy, setPitchBusy] = useState(false);
+  const onPitchDirty = useCallback((dirty: boolean) => {
+    pitchStatus.current.dirty = dirty;
+  }, []);
+  const onPitchBusy = useCallback((busy: boolean) => {
+    pitchStatus.current.busy = busy;
+    setPitchBusy(busy);
+  }, []);
+  function allowPitchChange() {
+    return (
+      !pitchStatus.current.busy &&
+      (!pitchStatus.current.dirty ||
+        window.confirm(
+          "Há notas ainda não salvas. Deseja trocar de partida e descartar essas alterações?",
+        ))
+    );
+  }
   const request = useRef(0);
   useEffect(() => {
     let current = true;
@@ -63,7 +81,7 @@ export function MyGamesPage() {
       current = false;
     };
   }, [date, refresh, load]);
-  const select = useCallback(
+  const loadSelected = useCallback(
     async (fixtureId: string) => {
       const token = ++request.current;
       setSelectedId(fixtureId);
@@ -81,6 +99,11 @@ export function MyGamesPage() {
     },
     [loadLineup],
   );
+  function select(fixtureId: string) {
+    if (!allowPitchChange()) return false;
+    void loadSelected(fixtureId);
+    return true;
+  }
   return (
     <AppShell stage="notes">
       <MyGamesLayout
@@ -96,8 +119,10 @@ export function MyGamesPage() {
               <input
                 type="date"
                 value={date}
+                disabled={pitchBusy}
                 onChange={(event) => {
-                  if (event.target.value) setDate(event.target.value);
+                  if (event.target.value && event.target.value !== date && allowPitchChange())
+                    setDate(event.target.value);
                 }}
                 className="mt-1 min-h-11 w-full rounded-xl border border-input bg-background px-3"
               />
@@ -116,6 +141,7 @@ export function MyGamesPage() {
                     <li key={game.id}>
                       <button
                         type="button"
+                        disabled={pitchBusy}
                         aria-pressed={selectedId === game.id}
                         onClick={() => void select(game.id)}
                         className="touch-target w-full rounded-xl border border-border/70 bg-secondary/20 p-4 text-left aria-pressed:border-primary"
@@ -151,7 +177,12 @@ export function MyGamesPage() {
               }}
             />
           ) : detail ? (
-            <MyGameLineupView detail={detail} />
+            <MyGamePitch
+              key={detail.game.id}
+              detail={detail}
+              onDirtyChange={onPitchDirty}
+              onBusyChange={onPitchBusy}
+            />
           ) : (
             <div className="journal-lineup-empty">
               <img src="/brand/meus-jogos.svg" alt="" width="64" height="64" aria-hidden />
@@ -164,9 +195,7 @@ export function MyGamesPage() {
             </div>
           )
         }
-        reports={
-          <PersonalMatchReports fixtures={games} onFixtureChosen={(id) => void select(id)} />
-        }
+        reports={<PersonalMatchReports fixtures={games} onFixtureChosen={select} />}
         history={<LegacyNotesPanel />}
         account={<AccountPrivacyPanel />}
         privacy={<PrivacyNotice embedded />}
