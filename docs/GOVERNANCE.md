@@ -78,3 +78,7 @@ As políticas históricas de `raw_observations` (90 dias), `source_fetches`/`pip
 Fontes, modelos, Elo, Analytics e schema: revisão a cada 90 dias ou mudança material. Custos, capacidade, backup e objetivos de serviço dependem do perfil aprovado e da comprovação de IE-00/IE-01.
 
 O [índice histórico](history/README.md) preserva documentos e medições anteriores. Jornada de upload/odds, três picks e métricas financeiras não governam a navegação atual. Os controles gerais reaproveitados estão explicitados acima; regras quantitativas preservadas no legado continuam vinculadas à sua versão histórica.
+
+## Campinho — extensão de 16/10/2026
+
+A distribuição é ilustrativa e não redefine métricas. A nota preserva 0–10/0,5, ownership e confirmação de quem o usuário viu atuar; não gera participação oficial. Fonte/esquema do provedor são apenas leitura. A migration da RPC invoker passa pelos gates isolados e aguarda aprovação explícita antes de aplicar no PRIMARY, conforme bloqueio de revisão automática registrado no [escopo](governance/MEUS_JOGOS_PITCH_2026-10-16.md). Não contornar esse bloqueio nem gravar notas sintéticas no ativo.

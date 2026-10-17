@@ -77,3 +77,7 @@ A área Anotações permite informar uma partida e guardar um relato na própria
 ## Apresentação em página única — 16/10/2026
 
 O rebranding não altera autenticação, allowlist, prazo de sessão, RPCs, RLS, retenção ou exclusão. Os controles existentes foram movidos para `AccountPrivacyPanel`, em `/#conta`; `/conta` redireciona a essa seção. O aviso é compartilhado entre `/#privacidade` e a rota pública `/privacidade`, que permanece disponível antes do login. Seções são recolhíveis sem desmontar seu conteúdo após a primeira abertura. Nenhum texto do relato é enviado a fonte esportiva ou incluído em telemetria por esta mudança.
+
+## Avaliações no campinho — 16/10/2026
+
+Usa os mesmos registros pessoais de reviews/notas, sem tabela ou finalidade nova. A confirmação de participação é uma declaração do usuário sobre o que viu; não é estatística do provedor. Aplicam-se ownership/RLS, retenção e exclusão por cascade existentes. Não enviar nota ou observação pessoal às fontes esportivas. Nova RPC usa a sessão, sem credenciais privilegiadas. A apresentação esquemática não salva localização observada nem rastreamento. Ativação da migration no PRIMARY permanece pendente de autorização explícita.

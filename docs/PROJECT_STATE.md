@@ -19,6 +19,12 @@ Nome público da aplicação: **Meus Jogos**. Identidade de caderno pessoal, ver
 
 A página `/` reúne partida/escalação, relatos e seções recolhíveis de arquivo, conta e aviso de privacidade. Arquivo e controles só montam na primeira abertura e permanecem montados ao recolher. `/anotacoes` e `/conta` redirecionam às respectivas seções; `/hoje`, `/elo` e `/analytics` redirecionam para `/`. A rota pública `/privacidade` compartilha o mesmo aviso, sem exigir login. Não há outra página de produto ativa. [Escopo, validação e limites](governance/MEUS_JOGOS_REBRAND_2026-10-16.md). Sem schema, fonte, ingestão ou mudança de autorização.
 
+## Campinho e avaliações — 16/10/2026
+
+Campinho esquemático por formação, escolha de equipe e nota pessoal pelo jogador, com reservas separados. Reutiliza a escala 0–10/0,5 e os mesmos armazenamentos privados. Confirmação de observação pessoal obrigatória; nunca infere participação oficial. Token e lock protegem notas contra conflito e o editor preserva rascunhos em erro. [Escopo e validação](governance/MEUS_JOGOS_PITCH_2026-10-16.md).
+
+A migration `20261017003131_pitch_player_ratings.sql` está preparada; **aplicação no PRIMARY depende de autorização explícita**, após rejeição da revisão automática ao ensaio com DDL/escritas em produção. Código/testes isolados não comprovam ativação, escrita no banco ativo ou login real. Sem novo armazenamento, fonte ou alteração de cron.
+
 ## Identidade e fontes de verdade
 
 | Item | Referência | Evidência e limite |

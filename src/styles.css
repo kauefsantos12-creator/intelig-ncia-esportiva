@@ -782,3 +782,40 @@
 @media (prefers-reduced-motion: reduce) { .journal-fold-plus { transition: none; } }
 
 @media (max-width: 360px) { .journal-wordmark { font-size: 24px; } .journal-tagline { display: none; } }
+
+
+/* Campinho tático: esquema ilustrativo com controles de nota pessoais. */
+.pitch-team-switch { display: flex; gap: 8px; margin: 18px 0 14px; }
+.pitch-team-switch button { flex: 1; min-width: 0; min-height: 44px; border: 1px solid var(--border); border-radius: 10px; padding: 8px; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.pitch-team-switch button[aria-pressed="true"] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.pitch-team-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px; margin: 12px 0; }
+.pitch-team-heading h3 { font-size: 16px; font-weight: 600; }
+.pitch-team-heading p { font-size: 12px; color: var(--muted-foreground); }
+.tactical-pitch { position: relative; isolation: isolate; background: #204d38; border: 1px solid #365b43; border-radius: 14px; overflow: hidden; padding: 20px 6px; }
+.tactical-pitch::before { content: ""; position: absolute; inset: 0; z-index: -1; background: repeating-linear-gradient(to bottom, transparent 0, transparent 12.5%, #ffffff05 12.5%, #ffffff05 25%); }
+.pitch-markings { position: absolute; inset: 14px; border: 1px solid #f4f1e94d; pointer-events: none; z-index: -1; }
+.pitch-markings::before { content: ""; position: absolute; inset: 50% 0 auto; border-top: 1px solid #f4f1e94d; }
+.pitch-center { position: absolute; width: 28%; aspect-ratio: 1; border: 1px solid #f4f1e94d; border-radius: 50%; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.pitch-area { position: absolute; width: 58%; height: 14%; border: 1px solid #f4f1e94d; left: 21%; }
+.pitch-area-top { top: -1px; }
+.pitch-area-bottom { bottom: -1px; }
+.pitch-lineup { display: flex; flex-direction: column; justify-content: space-between; min-height: 455px; gap: 16px; }
+.pitch-line { display: grid; align-items: start; gap: 2px; }
+.pitch-player { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; min-height: 85px; width: 100%; padding: 4px 1px; border-radius: 10px; color: #fffefa; }
+.pitch-player:hover, .pitch-player[aria-pressed="true"] { background: #ffffff18; outline: 2px solid #e7bb79; outline-offset: -2px; }
+.pitch-shirt { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: #f4f1e9; color: #203c30; font: 600 13px var(--font-mono); }
+.pitch-player-name { min-width: 0; width: 100%; max-width: 100%; font-size: 11px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.pitch-score { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; min-height: 18px; padding: 1px 4px; border-radius: 5px; background: #efc783; color: #203c30; font: 600 11px var(--font-mono); }
+.pitch-bench { margin-top: 14px; border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
+.pitch-bench > summary { min-height: 44px; padding: 10px 0; cursor: pointer; font-size: 13px; font-weight: 600; }
+.pitch-related-list { display: grid; gap: 6px; margin-top: 10px; }
+.pitch-bench-player { display: grid; grid-template-columns: 32px minmax(0, 1fr) 34px; align-items: center; gap: 8px; min-height: 48px; width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 6px; }
+.pitch-bench-player .pitch-player-name { text-align: left; font-size: 13px; }
+.pitch-bench-player[aria-pressed="true"] { border-color: var(--primary); background: var(--accent); }
+.pitch-editor { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 18px; scroll-margin-top: 16px; }
+.pitch-editor h3 { font-size: 16px; font-weight: 600; }
+.pitch-rating-select { display: block; min-height: 44px; width: 100%; margin-top: 6px; padding: 8px 12px; border: 1px solid var(--input); border-radius: 10px; background: var(--background); color: var(--foreground); }
+.pitch-confirm { display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 10px; font-size: 13px; line-height: 1.5; }
+.pitch-confirm input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--primary); }
+.pitch-save { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 10px; background: var(--primary); color: var(--primary-foreground); font-size: 13px; margin-top: 8px; }
+.pitch-save:disabled, .pitch-rating-select:disabled { opacity: 0.6; }

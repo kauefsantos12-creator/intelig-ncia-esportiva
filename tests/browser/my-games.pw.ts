@@ -83,3 +83,21 @@ test("the branded page keeps the draft and archive mounted when in-page sections
     ),
   ).toBeLessThanOrEqual(1);
 });
+
+test("a pending pitch change can block report prefilling without discarding its text", async ({
+  page,
+}) => {
+  await page.goto(url);
+  await page.getByLabel("Mandante", { exact: true }).fill("Meu clube");
+  await page
+    .getByLabel("Seu relato", { exact: true })
+    .fill("Texto que deve continuar no formulário.");
+  await page.getByRole("button", { name: "Bloquear troca da partida" }).click();
+  await page.getByLabel("Preencher com uma partida carregada").selectOption("fixture-test");
+  page.once("dialog", (dialog) => void dialog.accept());
+  await page.getByRole("button", { name: "Usar partida selecionada" }).click();
+  await expect(page.getByLabel("Mandante", { exact: true })).toHaveValue("Meu clube");
+  await expect(page.getByLabel("Seu relato", { exact: true })).toHaveValue(
+    "Texto que deve continuar no formulário.",
+  );
+});
